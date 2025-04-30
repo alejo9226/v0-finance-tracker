@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/auth-context"
 
 type Category = {
   id: string
@@ -37,6 +38,7 @@ type Asset = {
 export default function NewTransactionPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [transactionType, setTransactionType] = useState<"income" | "expense">("expense")
   const [categories, setCategories] = useState<Category[]>([])
@@ -124,6 +126,7 @@ export default function NewTransactionPage() {
           asset_id: formData.assetId,
           description: formData.description,
           date,
+          user_id: user?.id
         })
         .select()
 

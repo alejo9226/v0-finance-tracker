@@ -24,6 +24,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/contexts/auth-context"
 
 type Category = {
   id: string
@@ -36,6 +37,7 @@ type Category = {
 export default function CategoriesPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { user } = useAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("expense")
@@ -101,6 +103,8 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     fetchCategories()
+
+    console.log('user', user)
   }, [activeTab])
 
   const fetchCategories = async () => {
@@ -140,7 +144,7 @@ export default function CategoriesPage() {
         type: formData.type,
         icon: formData.icon,
         color: formData.color,
-        user_id: '4e7815f0-d5be-477c-9360-529a0baa2849'
+        user_id: user?.id
       })
 
       console.log('error', error)

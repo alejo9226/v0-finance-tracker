@@ -86,7 +86,7 @@ export default function DashboardPage() {
           .from("liabilities")
           .select("*")
           .order("name")
-
+          .eq("user_id", user.id)
         if (liabilitiesError) throw liabilitiesError
 
         // Fetch recent transactions
