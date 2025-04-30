@@ -18,6 +18,11 @@ export default function Home() {
                 Test Supabase
               </Button>
             </Link>
+            <Link href="/admin/create-user">
+              <Button variant="outline" size="sm">
+                Admin
+              </Button>
+            </Link>
             <Link href="/login">
               <Button variant="ghost">Login</Button>
             </Link>

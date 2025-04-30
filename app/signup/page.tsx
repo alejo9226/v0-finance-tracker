@@ -24,6 +24,7 @@ export default function SignupPage() {
     password: "",
   })
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
+  const [useServerRoute, setUseServerRoute] = useState(true)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -35,46 +36,27 @@ export default function SignupPage() {
     setIsLoading(true)
     setDebugInfo(null)
 
-    try {
-      const supabase = getSupabaseBrowserClient()
-
-      // Log Supabase initialization
-      console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
-      console.log("Supabase client initialized:", !!supabase)
-
-      // Attempt to sign up
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            name: formData.name,
+    if (useServerRoute) {
+      // Use server-side route for signup
+      try {
+        const response = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
           },
-        },
-      })
-
-      console.log("Signup response:", { data, error })
-
-      if (error) {
-        setDebugInfo(`Error: ${error.message}`)
-        toast({
-          title: "Signup failed",
-          description: error.message,
-          variant: "destructive",
+          body: JSON.stringify(formData),
         })
-        return
-      }
 
-      if (data.user) {
-        // Create profile entry
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert([{ id: data.user.id, name: formData.name, is_onboarded: false }])
-          .select()
+        const data = await response.json()
 
-        if (profileError) {
-          setDebugInfo(`Profile creation error: ${profileError.message}`)
-          console.error("Profile creation error:", profileError)
+        if (!response.ok) {
+          setDebugInfo(`Server error: ${data.error}`)
+          toast({
+            title: "Signup failed",
+            description: data.error,
+            variant: "destructive",
+          })
+          return
         }
 
         toast({
@@ -83,23 +65,84 @@ export default function SignupPage() {
         })
 
         router.push("/login")
-      } else {
-        setDebugInfo("No user returned from signup. Check email confirmation requirements.")
+      } catch (error: any) {
+        console.error("Signup error:", error)
+        setDebugInfo(`Exception: ${error.message}`)
         toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your signup",
+          title: "Error",
+          description: error.message || "Something went wrong",
+          variant: "destructive",
         })
+      } finally {
+        setIsLoading(false)
       }
-    } catch (error: any) {
-      console.error("Signup error:", error)
-      setDebugInfo(`Exception: ${error.message}`)
-      toast({
-        title: "Error",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
+    } else {
+      // Use client-side Supabase signup
+      try {
+        const supabase = getSupabaseBrowserClient()
+
+        console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
+        console.log("Supabase client initialized:", !!supabase)
+
+        // Attempt to sign up
+        const { data, error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            data: {
+              name: formData.name,
+            },
+          },
+        })
+
+        console.log("Signup response:", { data, error })
+
+        if (error) {
+          setDebugInfo(`Error: ${error.message}`)
+          toast({
+            title: "Signup failed",
+            description: error.message,
+            variant: "destructive",
+          })
+          return
+        }
+
+        if (data.user) {
+          // Create profile entry
+          const { error: profileError } = await supabase
+            .from("profiles")
+            .insert([{ id: data.user.id, name: formData.name, is_onboarded: false }])
+            .select()
+
+          if (profileError) {
+            setDebugInfo(`Profile creation error: ${profileError.message}`)
+            console.error("Profile creation error:", profileError)
+          }
+
+          toast({
+            title: "Account created",
+            description: "You can now sign in with your credentials",
+          })
+
+          router.push("/login")
+        } else {
+          setDebugInfo("No user returned from signup. Check email confirmation requirements.")
+          toast({
+            title: "Check your email",
+            description: "We've sent you a confirmation link to complete your signup",
+          })
+        }
+      } catch (error: any) {
+        console.error("Signup error:", error)
+        setDebugInfo(`Exception: ${error.message}`)
+        toast({
+          title: "Error",
+          description: error.message || "Something went wrong",
+          variant: "destructive",
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -149,10 +192,24 @@ export default function SignupPage() {
                 name="password"
                 type="password"
                 required
+                minLength={6}
                 value={formData.password}
                 onChange={handleChange}
               />
               <p className="text-xs text-muted-foreground">Password must be at least 6 characters</p>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="use-server-route"
+                checked={useServerRoute}
+                onChange={() => setUseServerRoute(!useServerRoute)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <Label htmlFor="use-server-route" className="text-sm font-normal">
+                Use server-side signup (recommended)
+              </Label>
             </div>
 
             {debugInfo && (

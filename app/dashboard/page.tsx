@@ -1,12 +1,14 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, Wallet } from "lucide-react"
+import { format } from "date-fns"
+import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet } from "lucide-react"
 
-import { useAuth } from "@/contexts/auth-context"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { AuthCheck } from "@/components/auth-check"
+import { AppHeader } from "@/components/app-header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -26,12 +28,31 @@ type Liability = {
   value: number
 }
 
+type Transaction = {
+  id: string
+  amount: number
+  type: "income" | "expense"
+  description: string
+  date: string
+  category: {
+    id: string
+    name: string
+    icon: string
+    color: string
+  }
+  asset: {
+    id: string
+    name: string
+  }
+}
+
 export default function DashboardPage() {
   const router = useRouter()
-  const { user, signOut } = useAuth()
   const { toast } = useToast()
+  const [user, setUser] = useState<any>(null)
   const [assets, setAssets] = useState<Asset[]>([])
   const [liabilities, setLiabilities] = useState<Liability[]>([])
+  const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [totalAssets, setTotalAssets] = useState(0)
   const [totalLiabilities, setTotalLiabilities] = useState(0)
@@ -40,14 +61,23 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) return
-
       try {
+        // Get current user
+        const {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser()
+
+        if (userError) throw userError
+        if (!user) {
+          router.push("/login")
+          return
+        }
+
+        setUser(user)
+
         // Fetch assets
-        const { data: assetsData, error: assetsError } = await supabase
-          .from("assets")
-          .select("*")
-          .eq("user_id", user.id)
+        const { data: assetsData, error: assetsError } = await supabase.from("assets").select("*").order("name")
 
         if (assetsError) throw assetsError
 
@@ -55,13 +85,31 @@ export default function DashboardPage() {
         const { data: liabilitiesData, error: liabilitiesError } = await supabase
           .from("liabilities")
           .select("*")
-          .eq("user_id", user.id)
+          .order("name")
 
         if (liabilitiesError) throw liabilitiesError
+
+        // Fetch recent transactions
+        const { data: transactionsData, error: transactionsError } = await supabase
+          .from("transactions")
+          .select(`
+            id,
+            amount,
+            type,
+            description,
+            date,
+            category:category_id(id, name, icon, color),
+            asset:asset_id(id, name)
+          `)
+          .order("date", { ascending: false })
+          .limit(5)
+
+        if (transactionsError) throw transactionsError
 
         // Set state
         setAssets(assetsData || [])
         setLiabilities(liabilitiesData || [])
+        setRecentTransactions(transactionsData || [])
 
         // Calculate totals
         const assetsTotal = assetsData ? assetsData.reduce((sum, asset) => sum + Number(asset.value), 0) : 0
@@ -84,7 +132,7 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, [user, supabase, toast])
+  }, [router, supabase, toast])
 
   const getAssetIcon = (type: string) => {
     switch (type) {
@@ -124,25 +172,25 @@ export default function DashboardPage() {
   return (
     <AuthCheck>
       <div className="min-h-screen bg-gray-50">
-        <header className="bg-white border-b">
-          <div className="container flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2 font-bold text-xl">
-              <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white">F</div>
-              FinanceTrack
-            </div>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground">Welcome, {user?.user_metadata?.name || "User"}</span>
-              <Button variant="outline" size="sm" onClick={signOut}>
-                Logout
-              </Button>
-            </div>
-          </div>
-        </header>
+        <AppHeader user={user} />
 
         <main className="container py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">Financial Dashboard</h1>
-            <p className="text-muted-foreground">Your financial overview at a glance</p>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold">Financial Dashboard</h1>
+              <p className="text-muted-foreground">Your financial overview at a glance</p>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/transactions">
+                <Button variant="outline">View All Transactions</Button>
+              </Link>
+              <Link href="/transactions/new">
+                <Button>
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  New Transaction
+                </Button>
+              </Link>
+            </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-3">
@@ -271,38 +319,70 @@ export default function DashboardPage() {
 
           <div className="mt-8">
             <Card>
-              <CardHeader>
-                <CardTitle>Financial Health</CardTitle>
-                <CardDescription>Key financial ratios and metrics</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Recent Transactions</CardTitle>
+                  <CardDescription>Your latest financial activities</CardDescription>
+                </div>
+                <Link href="/transactions">
+                  <Button variant="outline" size="sm">
+                    View All
+                  </Button>
+                </Link>
               </CardHeader>
               <CardContent>
-                <div className="grid gap-6 md:grid-cols-3">
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">Debt-to-Asset Ratio</h3>
-                    <div className="text-2xl font-bold">
-                      {totalAssets > 0 ? (totalLiabilities / totalAssets).toFixed(2) : "N/A"}
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {totalAssets > 0 && totalLiabilities / totalAssets < 0.5
-                        ? "Good: Your debt is less than 50% of your assets"
-                        : "Consider reducing your debt to improve this ratio"}
-                    </p>
+                {recentTransactions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <p className="text-muted-foreground mb-4">No transactions yet</p>
+                    <Link href="/transactions/new">
+                      <Button>Add Your First Transaction</Button>
+                    </Link>
                   </div>
-
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">Net Worth Growth</h3>
-                    <div className="text-2xl font-bold">--</div>
-                    <p className="text-xs text-muted-foreground">Track your net worth over time to see growth</p>
+                ) : (
+                  <div className="space-y-4">
+                    {recentTransactions.map((transaction) => (
+                      <div
+                        key={transaction.id}
+                        className="flex items-center justify-between p-4 rounded-lg border"
+                        onClick={() => router.push(`/transactions/${transaction.id}`)}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        <div className="flex items-center gap-4">
+                          <div
+                            className="flex h-10 w-10 items-center justify-center rounded-full"
+                            style={{
+                              backgroundColor: transaction.category?.color
+                                ? `${transaction.category.color}20`
+                                : "#e2e8f0",
+                              color: transaction.category?.color || "#64748b",
+                            }}
+                          >
+                            <span className="text-lg">
+                              {transaction.category?.icon || (transaction.type === "income" ? "💰" : "💸")}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="font-medium">
+                              {transaction.description || (transaction.type === "income" ? "Income" : "Expense")}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {transaction.category?.name || "Uncategorized"} •{" "}
+                              {transaction.asset?.name || "No account"} •{" "}
+                              {format(new Date(transaction.date), "MMM d, yyyy")}
+                            </p>
+                          </div>
+                        </div>
+                        <div
+                          className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
+                        >
+                          {transaction.type === "income" ? "+" : "-"}$
+                          {Math.abs(Number(transaction.amount)).toLocaleString()}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">Financial Freedom</h3>
-                    <div className="text-2xl font-bold">
-                      {totalAssets > 0 ? Math.round((equity / totalAssets) * 100) + "%" : "N/A"}
-                    </div>
-                    <p className="text-xs text-muted-foreground">Percentage of your assets that are truly yours</p>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </div>

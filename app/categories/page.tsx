@@ -1,0 +1,533 @@
+"use client"
+
+import type React from "react"
+
+import { useEffect, useState } from "react"
+import { ArrowLeft, PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { AuthCheck } from "@/components/auth-check"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useToast } from "@/hooks/use-toast"
+
+type Category = {
+  id: string
+  name: string
+  type: "income" | "expense"
+  icon: string
+  color: string
+}
+
+export default function CategoriesPage() {
+  const router = useRouter()
+  const { toast } = useToast()
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState("expense")
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
+  const [formData, setFormData] = useState({
+    name: "",
+    type: "expense" as "income" | "expense",
+    icon: "💰",
+    color: "#4CAF50",
+  })
+  const supabase = getSupabaseBrowserClient()
+
+  // Common emoji options
+  const emojiOptions = [
+    "💰",
+    "💵",
+    "💸",
+    "🏦",
+    "💳",
+    "🛒",
+    "🍔",
+    "🏠",
+    "🚗",
+    "⛽",
+    "🛍️",
+    "🎮",
+    "📱",
+    "💻",
+    "👕",
+    "👖",
+    "👟",
+    "🎬",
+    "🎭",
+    "🎟️",
+    "🏥",
+    "💊",
+    "🚑",
+    "📚",
+    "🎓",
+    "✈️",
+    "🏨",
+    "🚕",
+    "🚇",
+    "🚌",
+  ]
+
+  // Color options
+  const colorOptions = [
+    "#4CAF50",
+    "#F44336",
+    "#2196F3",
+    "#FF9800",
+    "#9C27B0",
+    "#607D8B",
+    "#E91E63",
+    "#00BCD4",
+    "#FFC107",
+    "#795548",
+  ]
+
+  useEffect(() => {
+    fetchCategories()
+  }, [activeTab])
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true)
+
+      const { data, error } = await supabase.from("categories").select("*").eq("type", activeTab).order("name")
+
+      if (error) throw error
+
+      setCategories(data || [])
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load categories",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleAddCategory = async () => {
+    try {
+      console.log('entering', formData)
+      if (!formData.name) {
+        throw new Error("Category name is required")
+      }
+
+      const { error } = await supabase.from("categories").insert({
+        name: formData.name,
+        type: formData.type,
+        icon: formData.icon,
+        color: formData.color,
+        user_id: '4e7815f0-d5be-477c-9360-529a0baa2849'
+      })
+
+      console.log('error', error)
+
+      if (error) throw error
+
+      toast({
+        title: "Category added",
+        description: "Your category has been added successfully",
+      })
+
+      setIsAddDialogOpen(false)
+      setFormData({
+        name: "",
+        type: activeTab as "income" | "expense",
+        icon: "💰",
+        color: "#4CAF50",
+      })
+      fetchCategories()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add category",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEditCategory = async () => {
+    try {
+      if (!selectedCategory || !formData.name) {
+        throw new Error("Category name is required")
+      }
+
+      const { error } = await supabase
+        .from("categories")
+        .update({
+          name: formData.name,
+          icon: formData.icon,
+          color: formData.color,
+        })
+        .eq("id", selectedCategory.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Category updated",
+        description: "Your category has been updated successfully",
+      })
+
+      setIsEditDialogOpen(false)
+      setSelectedCategory(null)
+      fetchCategories()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update category",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDeleteCategory = async () => {
+    try {
+      if (!selectedCategory) {
+        throw new Error("No category selected")
+      }
+
+      // Check if category is used in transactions
+      const { count, error: countError } = await supabase
+        .from("transactions")
+        .select("id", { count: "exact" })
+        .eq("category_id", selectedCategory.id)
+
+      if (countError) throw countError
+
+      if (count && count > 0) {
+        // If category is used, update transactions to remove category reference
+        const { error: updateError } = await supabase
+          .from("transactions")
+          .update({ category_id: null })
+          .eq("category_id", selectedCategory.id)
+
+        if (updateError) throw updateError
+      }
+
+      // Delete the category
+      const { error } = await supabase.from("categories").delete().eq("id", selectedCategory.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Category deleted",
+        description: "Your category has been deleted successfully",
+      })
+
+      setIsDeleteDialogOpen(false)
+      setSelectedCategory(null)
+      fetchCategories()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete category",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const openEditDialog = (category: Category) => {
+    setSelectedCategory(category)
+    setFormData({
+      name: category.name,
+      type: category.type,
+      icon: category.icon,
+      color: category.color,
+    })
+    setIsEditDialogOpen(true)
+  }
+
+  const openDeleteDialog = (category: Category) => {
+    setSelectedCategory(category)
+    setIsDeleteDialogOpen(true)
+  }
+
+  return (
+    <AuthCheck>
+      <div className="container max-w-3xl py-10">
+        <Button variant="ghost" className="mb-6" onClick={() => router.push("/transactions")}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Transactions
+        </Button>
+
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">Categories</h1>
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <PlusIcon className="mr-2 h-4 w-4" />
+                New Category
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Category</DialogTitle>
+                <DialogDescription>Create a new category for your transactions</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label>Category Type</Label>
+                  <RadioGroup
+                    value={formData.type}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, type: value as "income" | "expense" }))}
+                    className="flex"
+                  >
+                    <div className="flex items-center space-x-2 mr-6">
+                      <RadioGroupItem value="expense" id="add-expense" />
+                      <Label htmlFor="add-expense" className="cursor-pointer">
+                        Expense
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="income" id="add-income" />
+                      <Label htmlFor="add-income" className="cursor-pointer">
+                        Income
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="name">Category Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    placeholder="e.g., Groceries"
+                    value={formData.name}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Icon</Label>
+                  <div className="grid grid-cols-10 gap-2">
+                    {emojiOptions.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        className={`h-8 w-8 flex items-center justify-center rounded-md text-lg ${
+                          formData.icon === emoji ? "bg-primary text-primary-foreground" : "bg-secondary"
+                        }`}
+                        onClick={() => setFormData((prev) => ({ ...prev, icon: emoji }))}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Color</Label>
+                  <div className="grid grid-cols-10 gap-2">
+                    {colorOptions.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        className={`h-8 w-8 rounded-md ${
+                          formData.color === color ? "ring-2 ring-offset-2 ring-primary" : ""
+                        }`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => setFormData((prev) => ({ ...prev, color }))}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleAddCategory}>Add Category</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <Tabs defaultValue="expense" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="expense">Expense Categories</TabsTrigger>
+            <TabsTrigger value="income">Income Categories</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value={activeTab}>
+            <Card>
+              <CardHeader>
+                <CardTitle>{activeTab === "expense" ? "Expense Categories" : "Income Categories"}</CardTitle>
+                <CardDescription>
+                  Manage your {activeTab === "expense" ? "expense" : "income"} categories
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="text-center">
+                      <p className="text-muted-foreground">Loading categories...</p>
+                    </div>
+                  </div>
+                ) : categories.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-8">
+                    <p className="text-muted-foreground mb-4">No categories found</p>
+                    <Button onClick={() => setIsAddDialogOpen(true)}>Add your first category</Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {categories.map((category) => (
+                      <div key={category.id} className="flex items-center justify-between p-4 rounded-lg border">
+                        <div className="flex items-center gap-4">
+                          <div
+                            className="flex h-10 w-10 items-center justify-center rounded-full"
+                            style={{
+                              backgroundColor: `${category.color}20`,
+                              color: category.color,
+                            }}
+                          >
+                            <span className="text-lg">{category.icon}</span>
+                          </div>
+                          <div>
+                            <p className="font-medium">{category.name}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => openEditDialog(category)}>
+                            <PencilIcon className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(category)}>
+                            <Trash2Icon className="h-4 w-4" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Edit Category Dialog */}
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Category</DialogTitle>
+              <DialogDescription>Update your category details</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-name">Category Name</Label>
+                <Input
+                  id="edit-name"
+                  name="name"
+                  placeholder="e.g., Groceries"
+                  value={formData.name}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Icon</Label>
+                <div className="grid grid-cols-10 gap-2">
+                  {emojiOptions.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      className={`h-8 w-8 flex items-center justify-center rounded-md text-lg ${
+                        formData.icon === emoji ? "bg-primary text-primary-foreground" : "bg-secondary"
+                      }`}
+                      onClick={() => setFormData((prev) => ({ ...prev, icon: emoji }))}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Color</Label>
+                <div className="grid grid-cols-10 gap-2">
+                  {colorOptions.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      className={`h-8 w-8 rounded-md ${
+                        formData.color === color ? "ring-2 ring-offset-2 ring-primary" : ""
+                      }`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setFormData((prev) => ({ ...prev, color }))}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleEditCategory}>Save Changes</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Category Dialog */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Delete Category</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to delete this category? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              {selectedCategory && (
+                <div className="flex items-center gap-4">
+                  <div
+                    className="flex h-10 w-10 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: `${selectedCategory.color}20`,
+                      color: selectedCategory.color,
+                    }}
+                  >
+                    <span className="text-lg">{selectedCategory.icon}</span>
+                  </div>
+                  <p className="font-medium">{selectedCategory.name}</p>
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteCategory}>
+                Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </AuthCheck>
+  )
+}
