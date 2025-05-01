@@ -59,13 +59,14 @@ export default function TransactionsPage() {
           category:category_id(id, name, icon, color),
           asset:asset_id(id, name)
         `)
-        .order("date", { ascending: false })
 
       if (activeTab !== "all") {
         query = query.eq("type", activeTab)
       }
 
       const { data, error } = await query
+        .order("date", { ascending: false })
+        .returns<Transaction[]>()
 
       if (error) throw error
 
@@ -115,7 +116,7 @@ export default function TransactionsPage() {
           </div>
         </div>
         <div>
-          <Link href="/categories">
+          <Link href="/dashboard/categories">
             <Button variant="outline">Manage Categories</Button>
           </Link>
         </div>
