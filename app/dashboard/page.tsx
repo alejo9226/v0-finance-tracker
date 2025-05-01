@@ -7,8 +7,7 @@ import { format } from "date-fns"
 import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet } from "lucide-react"
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { AuthCheck } from "@/components/auth-check"
-import { AppHeader } from "@/components/app-header"
+import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -48,8 +47,8 @@ type Transaction = {
 
 export default function DashboardPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const { toast } = useToast()
-  const [user, setUser] = useState<any>(null)
   const [assets, setAssets] = useState<Asset[]>([])
   const [liabilities, setLiabilities] = useState<Liability[]>([])
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([])
@@ -62,19 +61,10 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Get current user
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser()
-
-        if (userError) throw userError
         if (!user) {
           router.push("/login")
           return
         }
-
-        setUser(user)
 
         // Fetch assets
         const { data: assetsData, error: assetsError } = await supabase.from("assets").select("*").order("name")
@@ -106,10 +96,30 @@ export default function DashboardPage() {
 
         if (transactionsError) throw transactionsError
 
-        // Set state
-        setAssets(assetsData || [])
-        setLiabilities(liabilitiesData || [])
-        setRecentTransactions(transactionsData || [])
+        // Set state with type assertions and transformations
+        setAssets(assetsData as Asset[] || [])
+        setLiabilities(liabilitiesData as Liability[] || [])
+        
+        // Transform transactions data to ensure required fields
+        const transformedTransactions = (transactionsData || []).map((t: any) => ({
+          id: t.id,
+          amount: Number(t.amount),
+          type: t.type as "income" | "expense",
+          description: t.description || "",
+          date: t.date,
+          category: t.category || {
+            id: "uncategorized",
+            name: "Uncategorized",
+            icon: t.type === "income" ? "💰" : "💸",
+            color: "#64748b"
+          },
+          asset: t.asset || {
+            id: "no-account",
+            name: "No account"
+          }
+        }))
+        
+        setRecentTransactions(transformedTransactions)
 
         // Calculate totals
         const assetsTotal = assetsData ? assetsData.reduce((sum, asset) => sum + Number(asset.value), 0) : 0
@@ -132,7 +142,7 @@ export default function DashboardPage() {
     }
 
     fetchData()
-  }, [router, supabase, toast])
+  }, [router, supabase, toast, user])
 
   const getAssetIcon = (type: string) => {
     switch (type) {
@@ -170,224 +180,218 @@ export default function DashboardPage() {
   }
 
   return (
-    <AuthCheck>
-      <div className="min-h-screen bg-gray-50">
-        <AppHeader user={user} />
-
-        <main className="container py-8">
-          <div className="mb-8 flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">Financial Dashboard</h1>
-              <p className="text-muted-foreground">Your financial overview at a glance</p>
-            </div>
-            <div className="flex gap-2">
-              <Link href="/transactions">
-                <Button variant="outline">View All Transactions</Button>
-              </Link>
-              <Link href="/transactions/new">
-                <Button>
-                  <PlusIcon className="mr-2 h-4 w-4" />
-                  New Transaction
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Assets</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${totalAssets.toLocaleString()}</div>
-                <div className="mt-1 flex items-center text-xs text-green-500">
-                  <ArrowUp className="mr-1 h-3 w-3" />
-                  <span>What you own</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Liabilities</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${totalLiabilities.toLocaleString()}</div>
-                <div className="mt-1 flex items-center text-xs text-red-500">
-                  <ArrowDown className="mr-1 h-3 w-3" />
-                  <span>What you owe</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-green-50">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-green-800">Net Worth (Equity)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-800">${equity.toLocaleString()}</div>
-                <div className="mt-1 flex items-center text-xs text-green-700">
-                  <span>Assets - Liabilities</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8 grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <CardTitle>Assets</CardTitle>
-                <CardDescription>What you own</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {assets.length > 0 ? (
-                  <div className="space-y-4">
-                    {assets.map((asset) => (
-                      <div key={asset.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
-                            {getAssetIcon(asset.type)}
-                          </div>
-                          <div>
-                            <p className="font-medium">{asset.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="font-medium">${Number(asset.value).toLocaleString()}</p>
-                      </div>
-                    ))}
-                    <Separator />
-                    <div className="flex items-center justify-between font-bold">
-                      <span>Total</span>
-                      <span>${totalAssets.toLocaleString()}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <p className="text-muted-foreground">No assets added yet</p>
-                    <Button variant="outline" className="mt-4" onClick={() => router.push("/onboarding")}>
-                      Add Assets
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Liabilities</CardTitle>
-                <CardDescription>What you owe</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {liabilities.length > 0 ? (
-                  <div className="space-y-4">
-                    {liabilities.map((liability) => (
-                      <div key={liability.id} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                            {getLiabilityIcon(liability.type)}
-                          </div>
-                          <div>
-                            <p className="font-medium">{liability.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {liability.type.charAt(0).toUpperCase() + liability.type.slice(1)}
-                            </p>
-                          </div>
-                        </div>
-                        <p className="font-medium">${Number(liability.value).toLocaleString()}</p>
-                      </div>
-                    ))}
-                    <Separator />
-                    <div className="flex items-center justify-between font-bold">
-                      <span>Total</span>
-                      <span>${totalLiabilities.toLocaleString()}</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <p className="text-muted-foreground">No liabilities added yet</p>
-                    <Button variant="outline" className="mt-4" onClick={() => router.push("/onboarding")}>
-                      Add Liabilities
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Recent Transactions</CardTitle>
-                  <CardDescription>Your latest financial activities</CardDescription>
-                </div>
-                <Link href="/transactions">
-                  <Button variant="outline" size="sm">
-                    View All
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent>
-                {recentTransactions.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <p className="text-muted-foreground mb-4">No transactions yet</p>
-                    <Link href="/transactions/new">
-                      <Button>Add Your First Transaction</Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {recentTransactions.map((transaction) => (
-                      <div
-                        key={transaction.id}
-                        className="flex items-center justify-between p-4 rounded-lg border"
-                        onClick={() => router.push(`/transactions/${transaction.id}`)}
-                        role="button"
-                        tabIndex={0}
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className="flex h-10 w-10 items-center justify-center rounded-full"
-                            style={{
-                              backgroundColor: transaction.category?.color
-                                ? `${transaction.category.color}20`
-                                : "#e2e8f0",
-                              color: transaction.category?.color || "#64748b",
-                            }}
-                          >
-                            <span className="text-lg">
-                              {transaction.category?.icon || (transaction.type === "income" ? "💰" : "💸")}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="font-medium">
-                              {transaction.description || (transaction.type === "income" ? "Income" : "Expense")}
-                            </p>
-                            <p className="text-sm text-muted-foreground">
-                              {transaction.category?.name || "Uncategorized"} •{" "}
-                              {transaction.asset?.name || "No account"} •{" "}
-                              {format(new Date(transaction.date), "MMM d, yyyy")}
-                            </p>
-                          </div>
-                        </div>
-                        <div
-                          className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
-                        >
-                          {transaction.type === "income" ? "+" : "-"}$
-                          {Math.abs(Number(transaction.amount)).toLocaleString()}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </main>
+    <div>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Financial Dashboard</h1>
+          <p className="text-muted-foreground">Your financial overview at a glance</p>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/dashboard/transactions">
+            <Button variant="outline">View All Transactions</Button>
+          </Link>
+          <Link href="/dashboard/transactions/new">
+            <Button>
+              <PlusIcon className="mr-2 h-4 w-4" />
+              New Transaction
+            </Button>
+          </Link>
+        </div>
       </div>
-    </AuthCheck>
+
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Assets</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${totalAssets.toLocaleString()}</div>
+            <div className="mt-1 flex items-center text-xs text-green-500">
+              <ArrowUp className="mr-1 h-3 w-3" />
+              <span>What you own</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Liabilities</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${totalLiabilities.toLocaleString()}</div>
+            <div className="mt-1 flex items-center text-xs text-red-500">
+              <ArrowDown className="mr-1 h-3 w-3" />
+              <span>What you owe</span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-green-50">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-green-800">Net Worth (Equity)</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-800">${equity.toLocaleString()}</div>
+            <div className="mt-1 flex items-center text-xs text-green-700">
+              <span>Assets - Liabilities</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-8 grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Assets</CardTitle>
+            <CardDescription>What you own</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {assets.length > 0 ? (
+              <div className="space-y-4">
+                {assets.map((asset) => (
+                  <div key={asset.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
+                        {getAssetIcon(asset.type)}
+                      </div>
+                      <div>
+                        <p className="font-medium">{asset.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="font-medium">${Number(asset.value).toLocaleString()}</p>
+                  </div>
+                ))}
+                <Separator />
+                <div className="flex items-center justify-between font-bold">
+                  <span>Total</span>
+                  <span>${totalAssets.toLocaleString()}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-muted-foreground">No assets added yet</p>
+                <Button variant="outline" className="mt-4" onClick={() => router.push("/onboarding")}>
+                  Add Assets
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Liabilities</CardTitle>
+            <CardDescription>What you owe</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {liabilities.length > 0 ? (
+              <div className="space-y-4">
+                {liabilities.map((liability) => (
+                  <div key={liability.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+                        {getLiabilityIcon(liability.type)}
+                      </div>
+                      <div>
+                        <p className="font-medium">{liability.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {liability.type.charAt(0).toUpperCase() + liability.type.slice(1)}
+                        </p>
+                      </div>
+                    </div>
+                    <p className="font-medium">${Number(liability.value).toLocaleString()}</p>
+                  </div>
+                ))}
+                <Separator />
+                <div className="flex items-center justify-between font-bold">
+                  <span>Total</span>
+                  <span>${totalLiabilities.toLocaleString()}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-muted-foreground">No liabilities added yet</p>
+                <Button variant="outline" className="mt-4" onClick={() => router.push("/onboarding")}>
+                  Add Liabilities
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-8">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle>Recent Transactions</CardTitle>
+              <CardDescription>Your latest financial activities</CardDescription>
+            </div>
+            <Link href="/transactions">
+              <Button variant="outline" size="sm">
+                View All
+              </Button>
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {recentTransactions.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-muted-foreground mb-4">No transactions yet</p>
+                <Link href="/transactions/new">
+                  <Button>Add Your First Transaction</Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentTransactions.map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between p-4 rounded-lg border"
+                    onClick={() => router.push(`/transactions/${transaction.id}`)}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="flex h-10 w-10 items-center justify-center rounded-full"
+                        style={{
+                          backgroundColor: transaction.category?.color
+                            ? `${transaction.category.color}20`
+                            : "#e2e8f0",
+                          color: transaction.category?.color || "#64748b",
+                        }}
+                      >
+                        <span className="text-lg">
+                          {transaction.category?.icon || (transaction.type === "income" ? "💰" : "💸")}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {transaction.description || (transaction.type === "income" ? "Income" : "Expense")}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {transaction.category?.name || "Uncategorized"} •{" "}
+                          {transaction.asset?.name || "No account"} •{" "}
+                          {format(new Date(transaction.date), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {transaction.type === "income" ? "+" : "-"}$
+                      {Math.abs(Number(transaction.amount)).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   )
 }

@@ -14,12 +14,12 @@ const navItems = [
   },
   {
     name: "Transactions",
-    href: "/transactions",
+    href: "/dashboard/transactions",
     icon: CreditCard,
   },
   {
     name: "Categories",
-    href: "/categories",
+    href: "/dashboard/categories",
     icon: PieChart,
   },
 ]
