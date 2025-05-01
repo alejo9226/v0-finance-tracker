@@ -171,7 +171,7 @@ export default function NewTransactionPage() {
 
   return (
     <AuthCheck>
-      <div className="container max-w-2xl py-10">
+      <div className="container max-w-2xl py-10 mx-auto">
         <Button variant="ghost" className="mb-6" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
