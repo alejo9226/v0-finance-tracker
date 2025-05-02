@@ -361,6 +361,69 @@ export default function CategoriesPage() {
         </CardContent>
       </Card>
 
+      {/* Add Category Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Category</DialogTitle>
+            <DialogDescription>Add your category details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="add-name">Category Name</Label>
+              <Input
+                id="add-name"
+                name="name"
+                placeholder="e.g., Groceries"
+                value={formData.name}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Icon</Label>
+              <div className="grid grid-cols-10 gap-2">
+                {emojiOptions.map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    className={`h-8 w-8 flex items-center justify-center rounded-md text-lg ${
+                      formData.icon === emoji ? "bg-primary text-primary-foreground" : "bg-secondary"
+                    }`}
+                    onClick={() => setFormData((prev) => ({ ...prev, icon: emoji }))}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Color</Label>
+              <div className="grid grid-cols-10 gap-2">
+                {colorOptions.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`h-8 w-8 rounded-md ${
+                      formData.color === color ? "ring-2 ring-offset-2 ring-primary" : ""
+                    }`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => setFormData((prev) => ({ ...prev, color }))}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddCategory}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Edit Category Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
