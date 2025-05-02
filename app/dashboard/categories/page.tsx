@@ -273,168 +273,93 @@ export default function CategoriesPage() {
     setIsDeleteDialogOpen(true)
   }
 
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold">Loading...</h2>
+          <p className="text-muted-foreground">Please wait while we load your categories</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="container max-w-3xl py-10">
-      <Button variant="ghost" className="mb-6" onClick={() => router.push("/dashboard/transactions")}>
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        Back to Transactions
-      </Button>
-
-      <div className="flex items-center justify-between mb-6">
+    <div className="py-8 max-w-4xl mx-auto">
+      <div className="mb-8 space-y-4">
         <h1 className="text-3xl font-bold">Categories</h1>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <PlusIcon className="mr-2 h-4 w-4" />
-              New Category
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Category</DialogTitle>
-              <DialogDescription>Create a new category for your transactions</DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label>Category Type</Label>
-                <RadioGroup
-                  value={formData.type}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, type: value as "income" | "expense" }))}
-                  className="flex"
-                >
-                  <div className="flex items-center space-x-2 mr-6">
-                    <RadioGroupItem value="expense" id="add-expense" />
-                    <Label htmlFor="add-expense" className="cursor-pointer">
-                      Expense
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="income" id="add-income" />
-                    <Label htmlFor="add-income" className="cursor-pointer">
-                      Income
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="name">Category Name</Label>
-                <Input
-                  id="name"
-                  name="name"
-                  placeholder="e.g., Groceries"
-                  value={formData.name}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Icon</Label>
-                <div className="grid grid-cols-10 gap-2">
-                  {emojiOptions.map((emoji) => (
-                    <button
-                      key={emoji}
-                      type="button"
-                      className={`h-8 w-8 flex items-center justify-center rounded-md text-lg ${
-                        formData.icon === emoji ? "bg-primary text-primary-foreground" : "bg-secondary"
-                      }`}
-                      onClick={() => setFormData((prev) => ({ ...prev, icon: emoji }))}
-                    >
-                      {emoji}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Color</Label>
-                <div className="grid grid-cols-10 gap-2">
-                  {colorOptions.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      className={`h-8 w-8 rounded-md ${
-                        formData.color === color ? "ring-2 ring-offset-2 ring-primary" : ""
-                      }`}
-                      style={{ backgroundColor: color }}
-                      onClick={() => setFormData((prev) => ({ ...prev, color }))}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleAddCategory}>Add Category</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <p className="text-muted-foreground">Manage your income and expense categories</p>
       </div>
 
-      <Tabs defaultValue="expense" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="mb-6">
-          <TabsTrigger value="expense">Expense Categories</TabsTrigger>
-          <TabsTrigger value="income">Income Categories</TabsTrigger>
-        </TabsList>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Manage Categories</CardTitle>
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Add Category
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="mb-4">
+              <TabsTrigger value="expense">Expenses</TabsTrigger>
+              <TabsTrigger value="income">Income</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value={activeTab}>
-          <Card>
-            <CardHeader>
-              <CardTitle>{activeTab === "expense" ? "Expense Categories" : "Income Categories"}</CardTitle>
-              <CardDescription>
-                Manage your {activeTab === "expense" ? "expense" : "income"} categories
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex justify-center py-8">
-                  <div className="text-center">
-                    <p className="text-muted-foreground">Loading categories...</p>
-                  </div>
-                </div>
-              ) : categories.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8">
-                  <p className="text-muted-foreground mb-4">No categories found</p>
-                  <Button onClick={() => setIsAddDialogOpen(true)}>Add your first category</Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {categories.map((category) => (
-                    <div key={category.id} className="flex items-center justify-between p-4 rounded-lg border">
-                      <div className="flex items-center gap-4">
-                        <div
-                          className="flex h-10 w-10 items-center justify-center rounded-full"
-                          style={{
-                            backgroundColor: `${category.color}20`,
-                            color: category.color,
-                          }}
-                        >
-                          <span className="text-lg">{category.icon}</span>
-                        </div>
-                        <div>
-                          <p className="font-medium">{category.name}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => openEditDialog(category)}>
-                          <PencilIcon className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(category)}>
-                          <Trash2Icon className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
+            <TabsContent value={activeTab}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>{activeTab === "expense" ? "Expense Categories" : "Income Categories"}</CardTitle>
+                  <CardDescription>
+                    Manage your {activeTab === "expense" ? "expense" : "income"} categories
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {categories.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <p className="text-muted-foreground mb-4">No categories found</p>
+                      <Button onClick={() => setIsAddDialogOpen(true)}>Add your first category</Button>
                     </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                  ) : (
+                    <div className="space-y-4">
+                      {categories.map((category) => (
+                        <div key={category.id} className="flex items-center justify-between p-4 rounded-lg border">
+                          <div className="flex items-center gap-4">
+                            <div
+                              className="flex h-10 w-10 items-center justify-center rounded-full"
+                              style={{
+                                backgroundColor: `${category.color}20`,
+                                color: category.color,
+                              }}
+                            >
+                              <span className="text-lg">{category.icon}</span>
+                            </div>
+                            <div>
+                              <p className="font-medium">{category.name}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(category)}>
+                              <PencilIcon className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(category)}>
+                              <Trash2Icon className="h-4 w-4" />
+                              <span className="sr-only">Delete</span>
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
       {/* Edit Category Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
