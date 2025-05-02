@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
-import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon } from "lucide-react"
+import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon, Trash2Icon } from "lucide-react"
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
@@ -30,11 +30,27 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+const CURRENCIES = [
+  { code: "USD", symbol: "$", name: "US Dollar" },
+  { code: "EUR", symbol: "€", name: "Euro" },
+  { code: "GBP", symbol: "£", name: "British Pound" },
+  { code: "JPY", symbol: "¥", name: "Japanese Yen" },
+  { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
+  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
+  { code: "CHF", symbol: "CHF", name: "Swiss Franc" },
+  { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
+  { code: "MXN", symbol: "$", name: "Mexican Peso" },
+  { code: "COP", symbol: "$", name: "Colombian Peso" },
+] as const
+
+type CurrencyCode = typeof CURRENCIES[number]["code"]
+
 type Asset = {
   id: string
   type: string
   name: string
   value: number
+  currency: CurrencyCode
 }
 
 type Liability = {
@@ -81,7 +97,12 @@ export default function DashboardPage() {
     name: "",
     type: "",
     value: "",
+    currency: "USD" as CurrencyCode,
   })
+  const [isAddAssetOpen, setIsAddAssetOpen] = useState(false)
+  const [isAddLiabilityOpen, setIsAddLiabilityOpen] = useState(false)
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: "asset" | "liability" } | null>(null)
   const supabase = getSupabaseBrowserClient()
 
   const fetchData = useCallback(async () => {
@@ -94,7 +115,7 @@ export default function DashboardPage() {
       setLoading(true)
 
       // Fetch assets
-      const { data: assetsData, error: assetsError } = await supabase.from("assets").select("*").order("name")
+      const { data: assetsData, error: assetsError } = await supabase.from("assets").select("*").order("name").eq("user_id", user.id)
 
       if (assetsError) throw assetsError
 
@@ -196,9 +217,20 @@ export default function DashboardPage() {
     }
   }
 
+  const formatCurrency = (amount: number, currency: CurrencyCode) => {
+    const currencyInfo = CURRENCIES.find(c => c.code === currency)
+    if (!currencyInfo) return `${amount.toLocaleString()}`
+    
+    if (currency === "USD") {
+      return `$${amount.toLocaleString()}`
+    }
+    
+    return `${currencyInfo.symbol}${amount.toLocaleString()} ${currency}`
+  }
+
   const handleEditAsset = async () => {
     try {
-      if (!selectedAsset || !editForm.name || !editForm.value) {
+      if (!selectedAsset || !editForm.name || !editForm.value || !editForm.currency) {
         throw new Error("All fields are required")
       }
 
@@ -208,6 +240,7 @@ export default function DashboardPage() {
           name: editForm.name,
           type: editForm.type,
           value: Number(editForm.value),
+          currency: editForm.currency,
         })
         .eq("id", selectedAsset.id)
 
@@ -270,6 +303,7 @@ export default function DashboardPage() {
       name: asset.name,
       type: asset.type,
       value: asset.value.toString(),
+      currency: asset.currency,
     })
     setIsEditAssetOpen(true)
   }
@@ -282,6 +316,103 @@ export default function DashboardPage() {
       value: liability.value.toString(),
     })
     setIsEditLiabilityOpen(true)
+  }
+
+  const handleAddAsset = async () => {
+    try {
+      if (!editForm.name || !editForm.type || !editForm.value || !editForm.currency) {
+        throw new Error("All fields are required")
+      }
+
+      const { error } = await supabase
+        .from("assets")
+        .insert({
+          name: editForm.name,
+          type: editForm.type,
+          value: Number(editForm.value),
+          currency: editForm.currency,
+          user_id: user?.id,
+        })
+
+      if (error) throw error
+
+      toast({
+        title: "Asset added",
+        description: "Your asset has been added successfully",
+      })
+
+      setIsAddAssetOpen(false)
+      setEditForm({ name: "", type: "", value: "", currency: "USD" })
+      fetchData()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add asset",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleAddLiability = async () => {
+    try {
+      if (!editForm.name || !editForm.type || !editForm.value) {
+        throw new Error("All fields are required")
+      }
+
+      const { error } = await supabase
+        .from("liabilities")
+        .insert({
+          name: editForm.name,
+          type: editForm.type,
+          value: Number(editForm.value),
+          user_id: user?.id,
+        })
+
+      if (error) throw error
+
+      toast({
+        title: "Liability added",
+        description: "Your liability has been added successfully",
+      })
+
+      setIsAddLiabilityOpen(false)
+      setEditForm({ name: "", type: "", value: "" })
+      fetchData()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add liability",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleDelete = async () => {
+    try {
+      if (!itemToDelete) return
+
+      const { error } = await supabase
+        .from(itemToDelete.type === "asset" ? "assets" : "liabilities")
+        .delete()
+        .eq("id", itemToDelete.id)
+
+      if (error) throw error
+
+      toast({
+        title: `${itemToDelete.type === "asset" ? "Asset" : "Liability"} deleted`,
+        description: `Your ${itemToDelete.type} has been deleted successfully`,
+      })
+
+      setIsConfirmDeleteOpen(false)
+      setItemToDelete(null)
+      fetchData()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete item",
+        variant: "destructive",
+      })
+    }
   }
 
   if (loading) {
@@ -357,9 +488,26 @@ export default function DashboardPage() {
 
       <div className="mt-12 grid gap-8 md:grid-cols-2">
         <Card>
-          <CardHeader>
-            <CardTitle>Assets</CardTitle>
-            <CardDescription>What you own</CardDescription>
+          <CardHeader className="relative group">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Assets</CardTitle>
+                <CardDescription>What you own</CardDescription>
+              </div>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditForm({ name: "", type: "", value: "", currency: "USD" })
+                    setIsAddAssetOpen(true)
+                  }}
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span className="sr-only">Add Asset</span>
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {assets.length > 0 ? (
@@ -381,8 +529,10 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center">
-                      <p className="font-medium transition-transform group-hover:-translate-x-1">${Number(asset.value).toLocaleString()}</p>
-                      <div className="w-9 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <p className="font-medium transition-transform group-hover:-translate-x-1">
+                        {formatCurrency(asset.value, asset.currency)}
+                      </p>
+                      <div className="w-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -392,13 +542,25 @@ export default function DashboardPage() {
                           <PencilIcon className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="ml-1 text-red-600"
+                          onClick={() => {
+                            setItemToDelete({ id: asset.id, type: "asset" })
+                            setIsConfirmDeleteOpen(true)
+                          }}
+                        >
+                          <Trash2Icon className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
                       </div>
                     </div>
                   </div>
                 ))}
                 <Separator />
                 <div className="flex items-center justify-between font-bold">
-                  <span>Total</span>
+                  <span>Total (in COP)</span>
                   <span>${totalAssets.toLocaleString()}</span>
                 </div>
               </div>
@@ -414,9 +576,26 @@ export default function DashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Liabilities</CardTitle>
-            <CardDescription>What you owe</CardDescription>
+          <CardHeader className="relative group">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Liabilities</CardTitle>
+                <CardDescription>What you owe</CardDescription>
+              </div>
+              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    setEditForm({ name: "", type: "", value: "" })
+                    setIsAddLiabilityOpen(true)
+                  }}
+                >
+                  <PlusIcon className="h-4 w-4" />
+                  <span className="sr-only">Add Liability</span>
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             {liabilities.length > 0 ? (
@@ -438,8 +617,8 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center">
-                      <p className="font-medium transition-transform group-hover:-translate-x-2">${Number(liability.value).toLocaleString()}</p>
-                      <div className="w-9 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <p className="font-medium transition-transform group-hover:-translate-x-1">${Number(liability.value).toLocaleString()}</p>
+                      <div className="w-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -448,6 +627,18 @@ export default function DashboardPage() {
                         >
                           <PencilIcon className="h-4 w-4" />
                           <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="ml-1 text-red-600"
+                          onClick={() => {
+                            setItemToDelete({ id: liability.id, type: "liability" })
+                            setIsConfirmDeleteOpen(true)
+                          }}
+                        >
+                          <Trash2Icon className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
                         </Button>
                       </div>
                     </div>
@@ -573,14 +764,34 @@ export default function DashboardPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="asset-value">Value</Label>
-              <Input
-                id="asset-value"
-                type="number"
-                value={editForm.value}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
-              />
+            <div className="grid gap-4 grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="asset-value">Value</Label>
+                <Input
+                  id="asset-value"
+                  type="number"
+                  value={editForm.value}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="asset-currency">Currency</Label>
+                <Select
+                  value={editForm.currency}
+                  onValueChange={(value: CurrencyCode) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.symbol} {currency.code} - {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -638,6 +849,147 @@ export default function DashboardPage() {
               Cancel
             </Button>
             <Button onClick={handleEditLiability}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Asset Dialog */}
+      <Dialog open={isAddAssetOpen} onOpenChange={setIsAddAssetOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Asset</DialogTitle>
+            <DialogDescription>Add a new asset to track</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-asset-name">Asset Name</Label>
+              <Input
+                id="new-asset-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-asset-type">Type</Label>
+              <Select
+                value={editForm.type}
+                onValueChange={(value) => setEditForm((prev) => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bank">Bank Account</SelectItem>
+                  <SelectItem value="investment">Investment</SelectItem>
+                  <SelectItem value="cash">Cash</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-4 grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="new-asset-value">Value</Label>
+                <Input
+                  id="new-asset-value"
+                  type="number"
+                  value={editForm.value}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-asset-currency">Currency</Label>
+                <Select
+                  value={editForm.currency}
+                  onValueChange={(value: CurrencyCode) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.symbol} {currency.code} - {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddAssetOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddAsset}>Add Asset</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Liability Dialog */}
+      <Dialog open={isAddLiabilityOpen} onOpenChange={setIsAddLiabilityOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Liability</DialogTitle>
+            <DialogDescription>Add a new liability to track</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="liability-name">Liability Name</Label>
+              <Input
+                id="liability-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="liability-type">Type</Label>
+              <Select
+                value={editForm.type}
+                onValueChange={(value) => setEditForm((prev) => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="credit">Credit Card</SelectItem>
+                  <SelectItem value="loan">Loan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="liability-value">Value</Label>
+              <Input
+                id="liability-value"
+                type="number"
+                value={editForm.value}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddLiabilityOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddLiability}>Add Liability</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirm Delete Dialog */}
+      <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this {itemToDelete?.type}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
