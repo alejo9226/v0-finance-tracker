@@ -58,6 +58,7 @@ type Liability = {
   type: string
   name: string
   value: number
+  currency: CurrencyCode
 }
 
 type Transaction = {
@@ -221,11 +222,7 @@ export default function DashboardPage() {
     const currencyInfo = CURRENCIES.find(c => c.code === currency)
     if (!currencyInfo) return `${amount.toLocaleString()}`
     
-    if (currency === "USD") {
-      return `$${amount.toLocaleString()}`
-    }
-    
-    return `${currencyInfo.symbol}${amount.toLocaleString()} ${currency}`
+    return `${currency} ${amount.toLocaleString()}`
   }
 
   const handleEditAsset = async () => {
@@ -265,7 +262,7 @@ export default function DashboardPage() {
 
   const handleEditLiability = async () => {
     try {
-      if (!selectedLiability || !editForm.name || !editForm.value) {
+      if (!selectedLiability || !editForm.name || !editForm.value || !editForm.currency) {
         throw new Error("All fields are required")
       }
 
@@ -275,6 +272,7 @@ export default function DashboardPage() {
           name: editForm.name,
           type: editForm.type,
           value: Number(editForm.value),
+          currency: editForm.currency,
         })
         .eq("id", selectedLiability.id)
 
@@ -314,6 +312,7 @@ export default function DashboardPage() {
       name: liability.name,
       type: liability.type,
       value: liability.value.toString(),
+      currency: liability.currency,
     })
     setIsEditLiabilityOpen(true)
   }
@@ -355,7 +354,7 @@ export default function DashboardPage() {
 
   const handleAddLiability = async () => {
     try {
-      if (!editForm.name || !editForm.type || !editForm.value) {
+      if (!editForm.name || !editForm.type || !editForm.value || !editForm.currency) {
         throw new Error("All fields are required")
       }
 
@@ -365,6 +364,7 @@ export default function DashboardPage() {
           name: editForm.name,
           type: editForm.type,
           value: Number(editForm.value),
+          currency: editForm.currency,
           user_id: user?.id,
         })
 
@@ -376,7 +376,7 @@ export default function DashboardPage() {
       })
 
       setIsAddLiabilityOpen(false)
-      setEditForm({ name: "", type: "", value: "" })
+      setEditForm({ name: "", type: "", value: "", currency: "COP" })
       fetchData()
     } catch (error: any) {
       toast({
@@ -587,7 +587,7 @@ export default function DashboardPage() {
                   variant="ghost"
                   size="icon"
                   onClick={() => {
-                    setEditForm({ name: "", type: "", value: "" })
+                    setEditForm({ name: "", type: "", value: "", currency: "COP" })
                     setIsAddLiabilityOpen(true)
                   }}
                 >
@@ -617,7 +617,11 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center">
-                      <p className="font-medium transition-transform group-hover:-translate-x-1">${Number(liability.value).toLocaleString()}</p>
+                      <p 
+                        className="font-medium transition-transform group-hover:-translate-x-1"
+                      >
+                        {formatCurrency(Number(liability.value), liability.currency)}
+                      </p>
                       <div className="w-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex">
                         <Button
                           variant="ghost"
@@ -834,14 +838,34 @@ export default function DashboardPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="liability-value">Value</Label>
-              <Input
-                id="liability-value"
-                type="number"
-                value={editForm.value}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
-              />
+            <div className="grid gap-4 grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="liability-value">Value</Label>
+                <Input
+                  id="liability-value"
+                  type="number"
+                  value={editForm.value}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="liability-currency">Currency</Label>
+                <Select
+                  value={editForm.currency}
+                  onValueChange={(value: CurrencyCode) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.symbol} {currency.code} - {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -955,14 +979,34 @@ export default function DashboardPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="liability-value">Value</Label>
-              <Input
-                id="liability-value"
-                type="number"
-                value={editForm.value}
-                onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
-              />
+            <div className="grid gap-4 grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="liability-value">Value</Label>
+                <Input
+                  id="liability-value"
+                  type="number"
+                  value={editForm.value}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="liability-currency">Currency</Label>
+                <Select
+                  value={editForm.currency}
+                  onValueChange={(value: CurrencyCode) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCIES.map((currency) => (
+                      <SelectItem key={currency.code} value={currency.code}>
+                        {currency.symbol} {currency.code} - {currency.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
           <DialogFooter>
