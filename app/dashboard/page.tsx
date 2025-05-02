@@ -180,66 +180,66 @@ export default function DashboardPage() {
   }
 
   return (
-    <div>
-      <div className="mb-8 flex items-center justify-between">
+    <div className="py-8">
+      <div className="mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold">Financial Dashboard</h1>
-          <p className="text-muted-foreground">Your financial overview at a glance</p>
+          <h1 className="text-4xl font-bold tracking-tight">Financial Dashboard</h1>
+          <p className="mt-2 text-lg text-muted-foreground">Your financial overview at a glance</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-4">
           <Link href="/dashboard/transactions">
-            <Button variant="outline">View All Transactions</Button>
+            <Button variant="outline" size="lg">View All Transactions</Button>
           </Link>
           <Link href="/dashboard/transactions/new">
-            <Button>
-              <PlusIcon className="mr-2 h-4 w-4" />
+            <Button size="lg">
+              <PlusIcon className="mr-2 h-5 w-5" />
               New Transaction
             </Button>
           </Link>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-8 md:grid-cols-3">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Assets</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalAssets.toLocaleString()}</div>
-            <div className="mt-1 flex items-center text-xs text-green-500">
-              <ArrowUp className="mr-1 h-3 w-3" />
+            <div className="text-3xl font-bold">${totalAssets.toLocaleString()}</div>
+            <div className="mt-2 flex items-center text-sm text-green-500">
+              <ArrowUp className="mr-1 h-4 w-4" />
               <span>What you own</span>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Liabilities</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalLiabilities.toLocaleString()}</div>
-            <div className="mt-1 flex items-center text-xs text-red-500">
-              <ArrowDown className="mr-1 h-3 w-3" />
+            <div className="text-3xl font-bold">${totalLiabilities.toLocaleString()}</div>
+            <div className="mt-2 flex items-center text-sm text-red-500">
+              <ArrowDown className="mr-1 h-4 w-4" />
               <span>What you owe</span>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-green-50">
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-green-800">Net Worth (Equity)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-800">${equity.toLocaleString()}</div>
-            <div className="mt-1 flex items-center text-xs text-green-700">
+            <div className="text-3xl font-bold text-green-800">${equity.toLocaleString()}</div>
+            <div className="mt-2 flex items-center text-sm text-green-700">
               <span>Assets - Liabilities</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      <div className="mt-8 grid gap-6 md:grid-cols-2">
+      <div className="mt-12 grid gap-8 md:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Assets</CardTitle>

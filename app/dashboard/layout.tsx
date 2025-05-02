@@ -16,11 +16,13 @@ export default function DashboardLayout({
     <AuthCheck>
       <div className="min-h-screen bg-background">
         <div className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b">
-          <AppHeader user={user} />
+          <div className="container mx-auto">
+            <AppHeader user={user} />
+          </div>
         </div>
-        <div className="container px-4 md:px-6 mx-auto">
+        <main className="container mx-auto px-4 md:px-6">
           {children}
-        </div>
+        </main>
       </div>
     </AuthCheck>
   )

@@ -24,11 +24,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AuthProvider>
-            <div className="min-h-screen bg-background">
-              <div className="container px-4 md:px-6 mx-auto">
-                {children}
-              </div>
-            </div>
+            {children}
           </AuthProvider>
         </ThemeProvider>
       </body>
