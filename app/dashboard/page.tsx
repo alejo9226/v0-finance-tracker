@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
-import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet } from "lucide-react"
+import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon } from "lucide-react"
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
@@ -12,6 +12,23 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 type Asset = {
   id: string
@@ -56,93 +73,104 @@ export default function DashboardPage() {
   const [totalAssets, setTotalAssets] = useState(0)
   const [totalLiabilities, setTotalLiabilities] = useState(0)
   const [equity, setEquity] = useState(0)
+  const [isEditAssetOpen, setIsEditAssetOpen] = useState(false)
+  const [isEditLiabilityOpen, setIsEditLiabilityOpen] = useState(false)
+  const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
+  const [selectedLiability, setSelectedLiability] = useState<Liability | null>(null)
+  const [editForm, setEditForm] = useState({
+    name: "",
+    type: "",
+    value: "",
+  })
   const supabase = getSupabaseBrowserClient()
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (!user) {
-          router.push("/login")
-          return
-        }
-
-        // Fetch assets
-        const { data: assetsData, error: assetsError } = await supabase.from("assets").select("*").order("name")
-
-        if (assetsError) throw assetsError
-
-        // Fetch liabilities
-        const { data: liabilitiesData, error: liabilitiesError } = await supabase
-          .from("liabilities")
-          .select("*")
-          .order("name")
-          .eq("user_id", user.id)
-        if (liabilitiesError) throw liabilitiesError
-
-        // Fetch recent transactions
-        const { data: transactionsData, error: transactionsError } = await supabase
-          .from("transactions")
-          .select(`
-            id,
-            amount,
-            type,
-            description,
-            date,
-            category:category_id(id, name, icon, color),
-            asset:asset_id(id, name)
-          `)
-          .order("date", { ascending: false })
-          .limit(5)
-
-        if (transactionsError) throw transactionsError
-
-        // Set state with type assertions and transformations
-        setAssets(assetsData as Asset[] || [])
-        setLiabilities(liabilitiesData as Liability[] || [])
-        
-        // Transform transactions data to ensure required fields
-        const transformedTransactions = (transactionsData || []).map((t: any) => ({
-          id: t.id,
-          amount: Number(t.amount),
-          type: t.type as "income" | "expense",
-          description: t.description || "",
-          date: t.date,
-          category: t.category || {
-            id: "uncategorized",
-            name: "Uncategorized",
-            icon: t.type === "income" ? "💰" : "💸",
-            color: "#64748b"
-          },
-          asset: t.asset || {
-            id: "no-account",
-            name: "No account"
-          }
-        }))
-        
-        setRecentTransactions(transformedTransactions)
-
-        // Calculate totals
-        const assetsTotal = assetsData ? assetsData.reduce((sum, asset) => sum + Number(asset.value), 0) : 0
-        const liabilitiesTotal = liabilitiesData
-          ? liabilitiesData.reduce((sum, liability) => sum + Number(liability.value), 0)
-          : 0
-
-        setTotalAssets(assetsTotal)
-        setTotalLiabilities(liabilitiesTotal)
-        setEquity(assetsTotal - liabilitiesTotal)
-      } catch (error: any) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to load financial data",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
+  const fetchData = useCallback(async () => {
+    try {
+      if (!user) {
+        router.push("/login")
+        return
       }
-    }
 
-    fetchData()
+      setLoading(true)
+
+      // Fetch assets
+      const { data: assetsData, error: assetsError } = await supabase.from("assets").select("*").order("name")
+
+      if (assetsError) throw assetsError
+
+      // Fetch liabilities
+      const { data: liabilitiesData, error: liabilitiesError } = await supabase
+        .from("liabilities")
+        .select("*")
+        .order("name")
+        .eq("user_id", user.id)
+      if (liabilitiesError) throw liabilitiesError
+
+      // Fetch recent transactions
+      const { data: transactionsData, error: transactionsError } = await supabase
+        .from("transactions")
+        .select(`
+          id,
+          amount,
+          type,
+          description,
+          date,
+          category:category_id(id, name, icon, color),
+          asset:asset_id(id, name)
+        `)
+        .order("date", { ascending: false })
+        .limit(5)
+
+      if (transactionsError) throw transactionsError
+
+      // Set state with type assertions and transformations
+      setAssets(assetsData as Asset[] || [])
+      setLiabilities(liabilitiesData as Liability[] || [])
+      
+      // Transform transactions data to ensure required fields
+      const transformedTransactions = (transactionsData || []).map((t: any) => ({
+        id: t.id,
+        amount: Number(t.amount),
+        type: t.type as "income" | "expense",
+        description: t.description || "",
+        date: t.date,
+        category: t.category || {
+          id: "uncategorized",
+          name: "Uncategorized",
+          icon: t.type === "income" ? "💰" : "💸",
+          color: "#64748b"
+        },
+        asset: t.asset || {
+          id: "no-account",
+          name: "No account"
+        }
+      }))
+      
+      setRecentTransactions(transformedTransactions)
+
+      // Calculate totals
+      const assetsTotal = assetsData ? assetsData.reduce((sum, asset) => sum + Number(asset.value), 0) : 0
+      const liabilitiesTotal = liabilitiesData
+        ? liabilitiesData.reduce((sum, liability) => sum + Number(liability.value), 0)
+        : 0
+
+      setTotalAssets(assetsTotal)
+      setTotalLiabilities(liabilitiesTotal)
+      setEquity(assetsTotal - liabilitiesTotal)
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to load financial data",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
   }, [router, supabase, toast, user])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const getAssetIcon = (type: string) => {
     switch (type) {
@@ -166,6 +194,94 @@ export default function DashboardPage() {
       default:
         return <CreditCard className="h-5 w-5" />
     }
+  }
+
+  const handleEditAsset = async () => {
+    try {
+      if (!selectedAsset || !editForm.name || !editForm.value) {
+        throw new Error("All fields are required")
+      }
+
+      const { error } = await supabase
+        .from("assets")
+        .update({
+          name: editForm.name,
+          type: editForm.type,
+          value: Number(editForm.value),
+        })
+        .eq("id", selectedAsset.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Asset updated",
+        description: "Your asset has been updated successfully",
+      })
+
+      setIsEditAssetOpen(false)
+      setSelectedAsset(null)
+      fetchData()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update asset",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEditLiability = async () => {
+    try {
+      if (!selectedLiability || !editForm.name || !editForm.value) {
+        throw new Error("All fields are required")
+      }
+
+      const { error } = await supabase
+        .from("liabilities")
+        .update({
+          name: editForm.name,
+          type: editForm.type,
+          value: Number(editForm.value),
+        })
+        .eq("id", selectedLiability.id)
+
+      if (error) throw error
+
+      toast({
+        title: "Liability updated",
+        description: "Your liability has been updated successfully",
+      })
+
+      setIsEditLiabilityOpen(false)
+      setSelectedLiability(null)
+      fetchData()
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update liability",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const openEditAsset = (asset: Asset) => {
+    setSelectedAsset(asset)
+    setEditForm({
+      name: asset.name,
+      type: asset.type,
+      value: asset.value.toString(),
+    })
+    setIsEditAssetOpen(true)
+  }
+
+  const openEditLiability = (liability: Liability) => {
+    setSelectedLiability(liability)
+    setEditForm({
+      name: liability.name,
+      type: liability.type,
+      value: liability.value.toString(),
+    })
+    setIsEditLiabilityOpen(true)
   }
 
   if (loading) {
@@ -249,7 +365,10 @@ export default function DashboardPage() {
             {assets.length > 0 ? (
               <div className="space-y-4">
                 {assets.map((asset) => (
-                  <div key={asset.id} className="flex items-center justify-between">
+                  <div
+                    key={asset.id}
+                    className="flex items-center justify-between p-4 rounded-lg border group hover:bg-accent hover:text-accent-foreground"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
                         {getAssetIcon(asset.type)}
@@ -261,7 +380,20 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <p className="font-medium">${Number(asset.value).toLocaleString()}</p>
+                    <div className="flex items-center">
+                      <p className="font-medium transition-transform group-hover:-translate-x-1">${Number(asset.value).toLocaleString()}</p>
+                      <div className="w-9 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="ml-2"
+                          onClick={() => openEditAsset(asset)}
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <Separator />
@@ -290,7 +422,10 @@ export default function DashboardPage() {
             {liabilities.length > 0 ? (
               <div className="space-y-4">
                 {liabilities.map((liability) => (
-                  <div key={liability.id} className="flex items-center justify-between">
+                  <div
+                    key={liability.id}
+                    className="flex items-center justify-between p-4 rounded-lg border group hover:bg-accent hover:text-accent-foreground"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
                         {getLiabilityIcon(liability.type)}
@@ -302,7 +437,20 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <p className="font-medium">${Number(liability.value).toLocaleString()}</p>
+                    <div className="flex items-center">
+                      <p className="font-medium transition-transform group-hover:-translate-x-2">${Number(liability.value).toLocaleString()}</p>
+                      <div className="w-9 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="ml-2"
+                          onClick={() => openEditLiability(liability)}
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 ))}
                 <Separator />
@@ -392,6 +540,107 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Asset Dialog */}
+      <Dialog open={isEditAssetOpen} onOpenChange={setIsEditAssetOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Asset</DialogTitle>
+            <DialogDescription>Update your asset details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="asset-name">Asset Name</Label>
+              <Input
+                id="asset-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="asset-type">Type</Label>
+              <Select
+                value={editForm.type}
+                onValueChange={(value) => setEditForm((prev) => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="bank">Bank Account</SelectItem>
+                  <SelectItem value="investment">Investment</SelectItem>
+                  <SelectItem value="cash">Cash</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="asset-value">Value</Label>
+              <Input
+                id="asset-value"
+                type="number"
+                value={editForm.value}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditAssetOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditAsset}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Liability Dialog */}
+      <Dialog open={isEditLiabilityOpen} onOpenChange={setIsEditLiabilityOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Liability</DialogTitle>
+            <DialogDescription>Update your liability details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="liability-name">Liability Name</Label>
+              <Input
+                id="liability-name"
+                value={editForm.name}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="liability-type">Type</Label>
+              <Select
+                value={editForm.type}
+                onValueChange={(value) => setEditForm((prev) => ({ ...prev, type: value }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="credit">Credit Card</SelectItem>
+                  <SelectItem value="loan">Loan</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="liability-value">Value</Label>
+              <Input
+                id="liability-value"
+                type="number"
+                value={editForm.value}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, value: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditLiabilityOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditLiability}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
