@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon, Trash2Icon } from "lucide-react"
+import currency from 'currency.js'
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
@@ -79,6 +80,32 @@ type Transaction = {
   }
 }
 
+type UserCurrencyPreference = {
+  code: CurrencyCode
+  isPreferred: boolean
+}
+
+const EXCHANGE_RATES: Record<CurrencyCode, number> = {
+  USD: 1,
+  EUR: 0.91,
+  GBP: 0.79,
+  JPY: 151.45,
+  CAD: 1.35,
+  AUD: 1.52,
+  CHF: 0.89,
+  CNY: 7.23,
+  MXN: 16.75,
+  COP: 3927.50
+}
+
+// Add new types and state for per-currency totals
+type CurrencyTotals = {
+  [key in CurrencyCode]: {
+    assets: number;
+    liabilities: number;
+  }
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const { user } = useAuth()
@@ -86,7 +113,7 @@ export default function DashboardPage() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [liabilities, setLiabilities] = useState<Liability[]>([])
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [totalAssets, setTotalAssets] = useState(0)
   const [totalLiabilities, setTotalLiabilities] = useState(0)
   const [equity, setEquity] = useState(0)
@@ -104,6 +131,10 @@ export default function DashboardPage() {
   const [isAddLiabilityOpen, setIsAddLiabilityOpen] = useState(false)
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
   const [itemToDelete, setItemToDelete] = useState<{ id: string; type: "asset" | "liability" } | null>(null)
+  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode | "">("")
+  const [activeCurrencies, setActiveCurrencies] = useState<Set<CurrencyCode>>(new Set())
+  const [userCurrencies, setUserCurrencies] = useState<UserCurrencyPreference[]>([])
+  const [currencyTotals, setCurrencyTotals] = useState<CurrencyTotals>({} as CurrencyTotals)
   const supabase = getSupabaseBrowserClient()
 
   const fetchData = useCallback(async () => {
@@ -170,11 +201,45 @@ export default function DashboardPage() {
       
       setRecentTransactions(transformedTransactions)
 
-      // Calculate totals
-      const assetsTotal = assetsData ? assetsData.reduce((sum, asset) => sum + Number(asset.value), 0) : 0
-      const liabilitiesTotal = liabilitiesData
-        ? liabilitiesData.reduce((sum, liability) => sum + Number(liability.value), 0)
-        : 0
+      // Calculate per-currency totals
+      const newCurrencyTotals: CurrencyTotals = {} as CurrencyTotals
+
+      // Initialize totals for each currency
+      CURRENCIES.forEach(currency => {
+        newCurrencyTotals[currency.code] = {
+          assets: 0,
+          liabilities: 0
+        }
+      })
+
+      // Calculate assets per currency with proper type assertion
+      const typedAssetsData = assetsData as Asset[] || []
+      typedAssetsData.forEach((asset) => {
+        newCurrencyTotals[asset.currency].assets += Number(asset.value)
+      })
+
+      // Calculate liabilities per currency with proper type assertion
+      const typedLiabilitiesData = liabilitiesData as Liability[] || []
+      typedLiabilitiesData.forEach((liability) => {
+        newCurrencyTotals[liability.currency].liabilities += Number(liability.value)
+      })
+
+      setCurrencyTotals(newCurrencyTotals)
+
+      // Calculate converted totals
+      const assetsTotal = typedAssetsData.reduce((sum, asset) => {
+        if (displayCurrency) {
+          return sum + convertCurrency(Number(asset.value), asset.currency, displayCurrency)
+        }
+        return sum + Number(asset.value)
+      }, 0)
+
+      const liabilitiesTotal = typedLiabilitiesData.reduce((sum, liability) => {
+        if (displayCurrency) {
+          return sum + convertCurrency(Number(liability.value), liability.currency, displayCurrency)
+        }
+        return sum + Number(liability.value)
+      }, 0)
 
       setTotalAssets(assetsTotal)
       setTotalLiabilities(liabilitiesTotal)
@@ -188,11 +253,47 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [router, supabase, toast, user])
+  }, [router, supabase, user])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  useEffect(() => {
+    // Calculate converted totals when display currency changes
+    const assetsTotal = assets.reduce((sum, asset) => {
+      if (displayCurrency) {
+        return sum + convertCurrency(Number(asset.value), asset.currency, displayCurrency)
+      }
+      return sum + Number(asset.value)
+    }, 0)
+
+    const liabilitiesTotal = liabilities.reduce((sum, liability) => {
+      if (displayCurrency) {
+        return sum + convertCurrency(Number(liability.value), liability.currency, displayCurrency)
+      }
+      return sum + Number(liability.value)
+    }, 0)
+
+    setTotalAssets(assetsTotal)
+    setTotalLiabilities(liabilitiesTotal)
+    setEquity(assetsTotal - liabilitiesTotal)
+  }, [displayCurrency, assets, liabilities])
+
+  useEffect(() => {
+    // Get unique currencies from assets and liabilities
+    const currencySet = new Set<CurrencyCode>()
+    assets.forEach(asset => currencySet.add(asset.currency))
+    liabilities.forEach(liability => currencySet.add(liability.currency))
+    setActiveCurrencies(currencySet)
+
+    // Create user currencies array with preference
+    const currencies = Array.from(currencySet).map(code => ({
+      code,
+      isPreferred: code === displayCurrency
+    }))
+    setUserCurrencies(currencies)
+  }, [assets, liabilities, displayCurrency])
 
   const getAssetIcon = (type: string) => {
     switch (type) {
@@ -218,11 +319,27 @@ export default function DashboardPage() {
     }
   }
 
-  const formatCurrency = (amount: number, currency: CurrencyCode) => {
-    const currencyInfo = CURRENCIES.find(c => c.code === currency)
+  const formatCurrency = (amount: number, currencyCode: CurrencyCode | "") => {
+    if (currencyCode === "") return `${amount.toLocaleString()}`
+    const currencyInfo = CURRENCIES.find(c => c.code === currencyCode)
     if (!currencyInfo) return `${amount.toLocaleString()}`
     
-    return `${currency} ${amount.toLocaleString()}`
+    return currency(amount, {
+      symbol: currencyInfo.symbol,
+      precision: 0,
+      pattern: '! #',
+      separator: ',',
+      decimal: '.'
+    }).format()
+  }
+
+  const convertCurrency = (amount: number, fromCurrency: CurrencyCode, toCurrency: CurrencyCode | ""): number => {
+    if (toCurrency === "") return amount
+    if (fromCurrency === toCurrency) return amount
+    
+    // Convert through USD as the base currency
+    const amountInUsd = currency(amount).divide(EXCHANGE_RATES[fromCurrency])
+    return amountInUsd.multiply(EXCHANGE_RATES[toCurrency]).value
   }
 
   const handleEditAsset = async () => {
@@ -415,6 +532,21 @@ export default function DashboardPage() {
     }
   }
 
+  const handleSetPreferredCurrency = (currencyCode: CurrencyCode) => {
+    if (currencyCode === displayCurrency) {
+      setDisplayCurrency("") 
+      return
+    }
+
+    setDisplayCurrency(currencyCode)
+    setUserCurrencies(prev => 
+      prev.map(c => ({
+        ...c,
+        isPreferred: c.code === currencyCode
+      }))
+    )
+  }
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -428,11 +560,29 @@ export default function DashboardPage() {
 
   return (
     <div className="py-8">
-      <div className="mb-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+      <div className="mb-12 flex flex-row md:justify-between gap-6">
         <div>
           <h1 className="text-4xl font-bold tracking-tight">Financial Dashboard</h1>
           <p className="mt-2 text-lg text-muted-foreground">Your financial overview at a glance</p>
         </div>
+        
+        {userCurrencies.length > 0 && (
+          <div className="flex gap-2">
+            {userCurrencies.map((curr) => (
+              <Button
+                key={curr.code}
+                size="sm"
+                variant={curr.isPreferred ? "default" : "outline"}
+                className={`flex items-center gap-1.5`}
+                onClick={() => handleSetPreferredCurrency(curr.code)}
+              >
+                <span>{CURRENCIES.find(c => c.code === curr.code)?.symbol}</span>
+                <span>{curr.code}</span>
+              </Button>
+            ))}
+          </div>
+        )}
+
         <div className="flex gap-4">
           <Link href="/dashboard/transactions">
             <Button variant="outline" size="lg">View All Transactions</Button>
@@ -452,7 +602,22 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Assets</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">${totalAssets.toLocaleString()}</div>
+            {displayCurrency ? (
+              <div className="text-3xl font-bold">
+                {formatCurrency(totalAssets, displayCurrency)}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {Array.from(activeCurrencies).sort().map(currency => (
+                  <div key={currency} className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{currency}</span>
+                    <span className={`text-lg font-medium ${currencyTotals[currency].assets === 0 ? 'text-muted-foreground' : ''}`}>
+                      {formatCurrency(currencyTotals[currency].assets, currency)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="mt-2 flex items-center text-sm text-green-500">
               <ArrowUp className="mr-1 h-4 w-4" />
               <span>What you own</span>
@@ -465,7 +630,22 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Liabilities</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">${totalLiabilities.toLocaleString()}</div>
+            {displayCurrency ? (
+              <div className="text-3xl font-bold">
+                {formatCurrency(totalLiabilities, displayCurrency)}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {Array.from(activeCurrencies).sort().map(currency => (
+                  <div key={currency} className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{currency}</span>
+                    <span className={`text-lg font-medium ${currencyTotals[currency].liabilities === 0 ? 'text-muted-foreground' : ''}`}>
+                      {formatCurrency(currencyTotals[currency].liabilities, currency)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="mt-2 flex items-center text-sm text-red-500">
               <ArrowDown className="mr-1 h-4 w-4" />
               <span>What you owe</span>
@@ -478,7 +658,28 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-green-800">Net Worth (Equity)</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-800">${equity.toLocaleString()}</div>
+            {displayCurrency ? (
+              <div className="text-3xl font-bold text-green-800">
+                {formatCurrency(equity, displayCurrency)}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {Array.from(activeCurrencies).sort().map(currency => {
+                  const netWorth = currencyTotals[currency].assets - currencyTotals[currency].liabilities;
+                  return (
+                    <div key={currency} className="flex justify-between items-center">
+                      <span className="text-sm text-green-700">{currency}</span>
+                      <span className={`text-lg font-medium ${
+                        netWorth === 0 ? 'text-muted-foreground' : 
+                        netWorth > 0 ? 'text-green-700' : 'text-red-700'
+                      }`}>
+                        {formatCurrency(netWorth, currency)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div className="mt-2 flex items-center text-sm text-green-700">
               <span>Assets - Liabilities</span>
             </div>
@@ -494,7 +695,7 @@ export default function DashboardPage() {
                 <CardTitle>Assets</CardTitle>
                 <CardDescription>What you own</CardDescription>
               </div>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="hidden group-hover:block transition-opacity">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -508,6 +709,11 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </div>
+            {displayCurrency && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Showing values in {displayCurrency}
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             {assets.length > 0 ? (
@@ -530,13 +736,15 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center">
                       <p className="font-medium transition-transform group-hover:-translate-x-1">
-                        {formatCurrency(asset.value, asset.currency)}
+                        {displayCurrency 
+                          ? formatCurrency(convertCurrency(Number(asset.value), asset.currency, displayCurrency), displayCurrency)
+                          : formatCurrency(Number(asset.value), asset.currency)}
                       </p>
-                      <div className="w-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex">
+                      <div className="hidden group-hover:flex ml-2 transition-all duration-200">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="ml-2"
+                          className="h-8 w-8"
                           onClick={() => openEditAsset(asset)}
                         >
                           <PencilIcon className="h-4 w-4" />
@@ -545,7 +753,7 @@ export default function DashboardPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="ml-1 text-red-600"
+                          className="h-8 w-8 text-red-600"
                           onClick={() => {
                             setItemToDelete({ id: asset.id, type: "asset" })
                             setIsConfirmDeleteOpen(true)
@@ -558,11 +766,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ))}
-                <Separator />
-                <div className="flex items-center justify-between font-bold">
-                  <span>Total (in COP)</span>
-                  <span>${totalAssets.toLocaleString()}</span>
-                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -596,6 +799,11 @@ export default function DashboardPage() {
                 </Button>
               </div>
             </div>
+            {displayCurrency && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Showing values in {displayCurrency}
+              </p>
+            )}
           </CardHeader>
           <CardContent>
             {liabilities.length > 0 ? (
@@ -617,16 +825,16 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="flex items-center">
-                      <p 
-                        className="font-medium transition-transform group-hover:-translate-x-1"
-                      >
-                        {formatCurrency(Number(liability.value), liability.currency)}
+                      <p className="font-medium transition-transform group-hover:-translate-x-1">
+                        {displayCurrency 
+                          ? formatCurrency(convertCurrency(Number(liability.value), liability.currency, displayCurrency), displayCurrency)
+                          : formatCurrency(Number(liability.value), liability.currency)}
                       </p>
-                      <div className="w-20 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex">
+                      <div className="hidden group-hover:flex ml-2 transition-all duration-200">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="ml-2"
+                          className="h-8 w-8"
                           onClick={() => openEditLiability(liability)}
                         >
                           <PencilIcon className="h-4 w-4" />
@@ -635,7 +843,7 @@ export default function DashboardPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="ml-1 text-red-600"
+                          className="h-8 w-8 text-red-600"
                           onClick={() => {
                             setItemToDelete({ id: liability.id, type: "liability" })
                             setIsConfirmDeleteOpen(true)
@@ -648,11 +856,6 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ))}
-                <Separator />
-                <div className="flex items-center justify-between font-bold">
-                  <span>Total</span>
-                  <span>${totalLiabilities.toLocaleString()}</span>
-                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
