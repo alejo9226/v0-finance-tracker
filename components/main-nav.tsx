@@ -24,11 +24,15 @@ const navItems = [
   },
 ]
 
-export function MainNav() {
+type MainNavProps = {
+  onNavigate?: () => void
+}
+
+export function MainNav({ onNavigate }: MainNavProps) {
   const pathname = usePathname()
 
   return (
-    <nav className="flex items-center space-x-4 lg:space-x-6">
+    <nav className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-6">
       {navItems.map((item) => (
         <Link
           key={item.href}
@@ -37,6 +41,7 @@ export function MainNav() {
             "flex items-center text-sm font-medium transition-colors hover:text-primary",
             pathname === item.href ? "text-primary" : "text-muted-foreground",
           )}
+          onClick={onNavigate}
         >
           <item.icon className="mr-2 h-4 w-4" />
           {item.name}
