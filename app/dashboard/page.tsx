@@ -886,7 +886,7 @@ export default function DashboardPage() {
                 <CardTitle className="text-xl sm:text-2xl">Assets</CardTitle>
                 <CardDescription>What you own</CardDescription>
               </div>
-              <div className="hidden group-hover:block transition-opacity">
+              <div className="block sm:hidden group-hover:block transition-opacity">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -977,7 +977,7 @@ export default function DashboardPage() {
                 <CardTitle className="text-xl sm:text-2xl">Liabilities</CardTitle>
                 <CardDescription>What you owe</CardDescription>
               </div>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="block sm:hidden group-hover:block transition-opacity">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -1131,7 +1131,7 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center gap-4">
                       <div
-                        className="flex h-10 w-10 items-center justify-center rounded-full"
+                        className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center p-2 rounded-full"
                         style={{
                           backgroundColor: transaction.category?.color
                             ? `${transaction.category.color}20`
@@ -1144,43 +1144,47 @@ export default function DashboardPage() {
                         </span>
                       </div>
                       <div>
-                        <p className="font-medium">
+                        <p className="text-sm sm:text-md truncate whitespace-nowrap overflow-hidden w-36 sm:w-2/3 md:w-full">
                           {transaction.description || (transaction.type === "income" ? "Income" : "Expense")}
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          {transaction.category?.name || "Uncategorized"} •{" "}
+                        <p className="text-sm text-muted-foreground w-3/3">
                           {transaction.asset?.name || "No account"} •{" "}
                           {format(new Date(transaction.date), "MMM d, yyyy")}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center sm:gap-2 gap-1">
                       <div
-                        className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
+                        className={`text-sm sm:text-md ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
                       >
                         {transaction.type === "income" ? "+" : "-"}$
                         {Math.abs(Number(transaction.amount)).toLocaleString()}
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        setSelectedTx(transaction)
-                        setEditTxForm({
-                          description: transaction.description,
-                          amount: transaction.amount.toString(),
-                          date: transaction.date.slice(0, 10),
-                          categoryId: transaction.category?.id || ""
-                        })
-                        setIsEditTxOpen(true)
-                      }}>
-                        <PencilIcon className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                      <Button variant="ghost" size="icon" onClick={() => {
-                        setSelectedTx(transaction)
-                        setIsDeleteTxOpen(true)
-                      }}>
-                        <Trash2Icon className="h-4 w-4 text-red-600" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
+                      <div className="hidden sm:flex">
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => {
+                            setSelectedTx(transaction)
+                            setEditTxForm({
+                              description: transaction.description,
+                              amount: transaction.amount.toString(),
+                              date: transaction.date.slice(0, 10),
+                              categoryId: transaction.category?.id || ""
+                            })
+                            setIsEditTxOpen(true)
+                        }}>
+                          <PencilIcon className="h-1 w-1 sm:h-4 sm:w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => {
+                          setSelectedTx(transaction)
+                          setIsDeleteTxOpen(true)
+                        }}>
+                          <Trash2Icon className="h-4 w-4 text-black-600" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ))}
