@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 
 const CURRENCIES = [
   { code: "USD", symbol: "$", name: "US Dollar" },
@@ -136,6 +137,15 @@ export default function DashboardPage() {
   const [userCurrencies, setUserCurrencies] = useState<UserCurrencyPreference[]>([])
   const [currencyTotals, setCurrencyTotals] = useState<CurrencyTotals>({} as CurrencyTotals)
   const supabase = getSupabaseBrowserClient()
+  const [isEditTxOpen, setIsEditTxOpen] = useState(false)
+  const [isDeleteTxOpen, setIsDeleteTxOpen] = useState(false)
+  const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
+  const [editTxForm, setEditTxForm] = useState({
+    description: "",
+    amount: "",
+    date: "",
+    categoryId: ""
+  })
 
   const fetchData = useCallback(async () => {
     try {
@@ -895,10 +905,14 @@ export default function DashboardPage() {
                 {recentTransactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 rounded-lg border"
-                    onClick={() => router.push(`/transactions/${transaction.id}`)}
-                    role="button"
+                    className="flex items-center justify-between p-4 rounded-lg border group hover:bg-accent hover:cursor-pointer"
+                    role="group"
                     tabIndex={0}
+                    onClick={e => {
+                      // Prevent navigation if clicking on edit/delete buttons
+                      if ((e.target as HTMLElement).closest('button')) return;
+                      router.push(`/dashboard/transactions/${transaction.id}`)
+                    }}
                   >
                     <div className="flex items-center gap-4">
                       <div
@@ -925,11 +939,33 @@ export default function DashboardPage() {
                         </p>
                       </div>
                     </div>
-                    <div
-                      className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
-                    >
-                      {transaction.type === "income" ? "+" : "-"}$
-                      {Math.abs(Number(transaction.amount)).toLocaleString()}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {transaction.type === "income" ? "+" : "-"}$
+                        {Math.abs(Number(transaction.amount)).toLocaleString()}
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        setSelectedTx(transaction)
+                        setEditTxForm({
+                          description: transaction.description,
+                          amount: transaction.amount.toString(),
+                          date: transaction.date.slice(0, 10),
+                          categoryId: transaction.category?.id || ""
+                        })
+                        setIsEditTxOpen(true)
+                      }}>
+                        <PencilIcon className="h-4 w-4" />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => {
+                        setSelectedTx(transaction)
+                        setIsDeleteTxOpen(true)
+                      }}>
+                        <Trash2Icon className="h-4 w-4 text-red-600" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -1240,6 +1276,71 @@ export default function DashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Edit Transaction Dialog */}
+      <Dialog open={isEditTxOpen} onOpenChange={setIsEditTxOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Transaction</DialogTitle>
+            <DialogDescription>Update your transaction details</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="tx-description" className="block text-sm font-medium">Description</label>
+              <Input
+                id="tx-description"
+                value={editTxForm.description}
+                onChange={e => setEditTxForm(f => ({ ...f, description: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="tx-amount" className="block text-sm font-medium">Amount</label>
+              <Input
+                id="tx-amount"
+                type="number"
+                value={editTxForm.amount}
+                onChange={e => setEditTxForm(f => ({ ...f, amount: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="tx-date" className="block text-sm font-medium">Date</label>
+              <Input
+                id="tx-date"
+                type="date"
+                value={editTxForm.date}
+                onChange={e => setEditTxForm(f => ({ ...f, date: e.target.value }))}
+              />
+            </div>
+            {/* Category selection can be added here if you have categories list */}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditTxOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={/* handle update transaction logic here */() => {}}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Transaction AlertDialog */}
+      <AlertDialog open={isDeleteTxOpen} onOpenChange={setIsDeleteTxOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this transaction? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={/* handle delete transaction logic here */() => {}}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
