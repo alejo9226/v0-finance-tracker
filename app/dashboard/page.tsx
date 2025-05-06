@@ -583,7 +583,7 @@ export default function DashboardPage() {
           </div>
         )}
 
-        <div className="flex gap-4">
+        <div className="hidden md:flex gap-4">
           <Link href="/dashboard/transactions">
             <Button variant="outline" size="lg">View All Transactions</Button>
           </Link>
@@ -876,7 +876,7 @@ export default function DashboardPage() {
               <CardTitle>Recent Transactions</CardTitle>
               <CardDescription>Your latest financial activities</CardDescription>
             </div>
-            <Link href="/transactions">
+            <Link href="/dashboard/transactions">
               <Button variant="outline" size="sm">
                 View All
               </Button>
