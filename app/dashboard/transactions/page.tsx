@@ -97,9 +97,9 @@ export default function TransactionsPage() {
     <div className="container py-10">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Transactions</h1>
-        <Button onClick={() => router.push("/dashboard/transactions/new")}>
-          <PlusIcon className="mr-2 h-4 w-4" />
-          New Transaction
+        <Button onClick={() => router.push("/dashboard/transactions/new")}> 
+          <PlusIcon className="h-5 w-5 md:mr-2" />
+          <span className="hidden md:inline">New Transaction</span>
         </Button>
       </div>
 
