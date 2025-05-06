@@ -3,15 +3,16 @@
 import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { format } from "date-fns"
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns"
 import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon, Trash2Icon, Loader2 } from "lucide-react"
 import currency from 'currency.js'
+import { Bar } from 'react-chartjs-2'
+import { Chart, LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, TooltipItem, PointElement, ArcElement } from 'chart.js'
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import {
   Dialog,
@@ -31,6 +32,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+
+// Register Chart.js components
+Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
 
 const CURRENCIES = [
   { code: "USD", symbol: "$", name: "US Dosllar" },
@@ -107,6 +111,41 @@ type CurrencyTotals = {
   }
 }
 
+const calculateSpendingByCategory = (transactions: Transaction[]): Record<string, number> => {
+  const spendingByCategory: Record<string, number> = {};
+  transactions.forEach((transaction) => {
+    if (transaction.type === 'expense') {
+      const category = transaction.category.name;
+      if (!spendingByCategory[category]) {
+        spendingByCategory[category] = 0;
+      }
+      spendingByCategory[category] += transaction.amount;
+    }
+  });
+  return spendingByCategory;
+};
+
+// Helper to get unique months from transactions
+function getTransactionMonths(transactions: Transaction[]) {
+  const months = new Set<string>();
+  transactions.forEach(t => {
+    if (t.type === 'expense') {
+      const d = parseISO(t.date);
+      months.add(format(d, 'yyyy-MM'));
+    }
+  });
+  // Sort descending (most recent first)
+  return Array.from(months)
+    .sort((a, b) => b.localeCompare(a))
+    .map(ym => {
+      const date = parseISO(ym + '-01');
+      return {
+        value: startOfMonth(date),
+        label: format(date, 'MMMM yyyy'),
+      };
+    });
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const { user } = useAuth()
@@ -148,6 +187,96 @@ export default function DashboardPage() {
   })
   const [editTxLoading, setEditTxLoading] = useState(false)
   const [deleteTxLoading, setDeleteTxLoading] = useState(false)
+  const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()))
+
+  const monthOptions = getTransactionMonths(recentTransactions)
+
+  // Filter transactions by selected month
+  const monthStart = startOfMonth(selectedMonth)
+  const monthEnd = endOfMonth(selectedMonth)
+  const filteredExpenses = recentTransactions.filter(t =>
+    t.type === 'expense' &&
+    isWithinInterval(parseISO(t.date), { start: monthStart, end: monthEnd })
+  )
+  const spendingByCategory = calculateSpendingByCategory(filteredExpenses)
+
+  const data = {
+    labels: Object.keys(spendingByCategory),
+    datasets: [
+      {
+        data: Object.values(spendingByCategory).map(Math.abs),
+        backgroundColor: Object.keys(spendingByCategory).map(
+          (category) => {
+            const color = filteredExpenses.find(t => t.category.name === category)?.category.color || '#000'
+            return `${color}80` // Use pastel colors by adding transparency
+          }
+        ),
+        borderColor: Object.keys(spendingByCategory).map(
+          (category) => filteredExpenses.find(t => t.category.name === category)?.category.color || '#000'
+        ),
+        borderWidth: 1,
+      },
+    ],
+  }
+
+  const options = {
+    indexAxis: 'y' as const, // Horizontal bars
+    responsive: true,
+    scales: {
+      x: {
+        display: false, // Hide x axis
+        grid: { display: false, drawBorder: false },
+        ticks: { display: false },
+      },
+      y: {
+        beginAtZero: true,
+        reverse: false,
+        grid: { display: false, drawBorder: false },
+        ticks: {
+          color: '#6b7280',
+          font: { family: 'Inter, sans-serif', size: 20 },
+          callback: function(value: string | number, index: number) {
+            const category = Object.keys(spendingByCategory)[index];
+            const icon = filteredExpenses.find(t => t.category.name === category)?.category.icon || '';
+            return icon; // Only show icons
+          },
+          padding: 0,
+          display: true,
+        },
+      },
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        enabled: true,
+        backgroundColor: '#fff',
+        titleColor: '#111827',
+        bodyColor: '#111827',
+        borderColor: '#e5e7eb',
+        borderWidth: 1,
+        callbacks: {
+          label: function(tooltipItem: TooltipItem<'bar'>) {
+            const category = tooltipItem.label;
+            const amount = tooltipItem.raw as number;
+            const currencyCode = assets.find(a => a.id === filteredExpenses.find(t => t.category.name === category)?.asset.id)?.currency || 'USD';
+            return `${formatCurrency(amount, currencyCode)}`;
+          },
+        },
+        padding: 10,
+        caretSize: 6,
+        cornerRadius: 8,
+        displayColors: false,
+      },
+    },
+    elements: {
+      bar: {
+        borderRadius: 6, // Rounded corners
+        borderSkipped: 'left' as const,
+      },
+    },
+    maintainAspectRatio: false,
+    backgroundColor: 'transparent',
+  }
 
   const fetchData = useCallback(async () => {
     try {
@@ -256,6 +385,9 @@ export default function DashboardPage() {
       setTotalAssets(assetsTotal)
       setTotalLiabilities(liabilitiesTotal)
       setEquity(assetsTotal - liabilitiesTotal)
+
+      // Calculate the total spending for the current month
+      const totalSpending = filteredExpenses.reduce((sum, transaction) => sum + transaction.amount, 0)
     } catch (error: any) {
       toast({
         title: "Error",
@@ -930,7 +1062,37 @@ export default function DashboardPage() {
       </div>
 
       {/* Spending Summary */}
-      
+      <div className="mt-8">
+        <Card className="flex flex-col sm:flex-row items-center">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-xl sm:text-2xl">Spending Summary</CardTitle>
+              <CardDescription>
+                Your spending by category for{" "}
+                <select
+                  className="border rounded px-1 py-1 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                  value={format(selectedMonth, "yyyy-MM")}
+                  onChange={e => setSelectedMonth(startOfMonth(parseISO(e.target.value + "-01")))}
+                >
+                  {monthOptions.map(opt => (
+                    <option key={opt.label} value={format(opt.value, "yyyy-MM")}>{opt.label}</option>
+                  ))}
+                </select>
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="py-0 sm:p-6 flex-1 w-full">
+            {Object.keys(spendingByCategory).length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <p className="text-muted-foreground mb-4">No spending data available</p>
+              </div>
+            ) : (
+              <Bar data={data} options={options} />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Recent Transactions */}
       <div className="mt-8">
         <Card>
