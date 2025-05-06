@@ -562,8 +562,8 @@ export default function DashboardPage() {
     <div className="py-8">
       <div className="mb-12 flex flex-row md:justify-between gap-6">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight">Financial Dashboard</h1>
-          <p className="mt-2 text-lg text-muted-foreground">Your financial overview at a glance</p>
+          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Financial Dashboard</h1>
+          <p className="mt-2 text-md sm:text-xl text-muted-foreground">Your financial overview at a glance</p>
         </div>
         
         {userCurrencies.length > 0 && (
@@ -692,7 +692,7 @@ export default function DashboardPage() {
           <CardHeader className="relative group">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Assets</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">Assets</CardTitle>
                 <CardDescription>What you own</CardDescription>
               </div>
               <div className="hidden group-hover:block transition-opacity">
@@ -782,7 +782,7 @@ export default function DashboardPage() {
           <CardHeader className="relative group">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle>Liabilities</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl">Liabilities</CardTitle>
                 <CardDescription>What you owe</CardDescription>
               </div>
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
@@ -873,7 +873,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle>Recent Transactions</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl">Recent Transactions</CardTitle>
               <CardDescription>Your latest financial activities</CardDescription>
             </div>
             <Link href="/dashboard/transactions">
