@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
-import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon, Trash2Icon } from "lucide-react"
+import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon, Trash2Icon, Loader2 } from "lucide-react"
 import currency from 'currency.js'
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
@@ -146,6 +146,8 @@ export default function DashboardPage() {
     date: "",
     categoryId: ""
   })
+  const [editTxLoading, setEditTxLoading] = useState(false)
+  const [deleteTxLoading, setDeleteTxLoading] = useState(false)
 
   const fetchData = useCallback(async () => {
     try {
@@ -555,6 +557,51 @@ export default function DashboardPage() {
         isPreferred: c.code === currencyCode
       }))
     )
+  }
+
+  const handleEditTransaction = async () => {
+    if (!selectedTx) return
+    setEditTxLoading(true)
+    try {
+      const { error } = await supabase
+        .from("transactions")
+        .update({
+          description: editTxForm.description,
+          amount: Number(editTxForm.amount),
+          date: editTxForm.date,
+          // category_id: editTxForm.categoryId, // Uncomment if you add category selection
+        })
+        .eq("id", selectedTx.id)
+      if (error) throw error
+      toast({ title: "Transaction updated", description: "The transaction was updated successfully." })
+      setIsEditTxOpen(false)
+      setSelectedTx(null)
+      fetchData()
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to update transaction", variant: "destructive" })
+    } finally {
+      setEditTxLoading(false)
+    }
+  }
+
+  const handleDeleteTransaction = async () => {
+    if (!selectedTx) return
+    setDeleteTxLoading(true)
+    try {
+      const { error } = await supabase
+        .from("transactions")
+        .delete()
+        .eq("id", selectedTx.id)
+      if (error) throw error
+      toast({ title: "Transaction deleted", description: "The transaction was deleted successfully." })
+      setIsDeleteTxOpen(false)
+      setSelectedTx(null)
+      fetchData()
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message || "Failed to delete transaction", variant: "destructive" })
+    } finally {
+      setDeleteTxLoading(false)
+    }
   }
 
   if (loading) {
@@ -1314,10 +1361,11 @@ export default function DashboardPage() {
             {/* Category selection can be added here if you have categories list */}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditTxOpen(false)}>
+            <Button variant="outline" onClick={() => setIsEditTxOpen(false)} disabled={editTxLoading}>
               Cancel
             </Button>
-            <Button onClick={/* handle update transaction logic here */() => {}}>
+            <Button onClick={handleEditTransaction} disabled={editTxLoading}>
+              {editTxLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
               Save Changes
             </Button>
           </DialogFooter>
@@ -1334,8 +1382,9 @@ export default function DashboardPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={/* handle delete transaction logic here */() => {}}>
+            <AlertDialogCancel disabled={deleteTxLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteTransaction} disabled={deleteTxLoading}>
+              {deleteTxLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>
