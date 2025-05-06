@@ -33,7 +33,7 @@ import {
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 
 const CURRENCIES = [
-  { code: "USD", symbol: "$", name: "US Dollar" },
+  { code: "USD", symbol: "$", name: "US Dosllar" },
   { code: "EUR", symbol: "€", name: "Euro" },
   { code: "GBP", symbol: "£", name: "British Pound" },
   { code: "JPY", symbol: "¥", name: "Japanese Yen" },
@@ -63,7 +63,7 @@ type Liability = {
   currency: CurrencyCode
 }
 
-type Transaction = {
+export type Transaction = {
   id: string
   amount: number
   type: "income" | "expense"
@@ -653,6 +653,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Total Assets, Liabilities, and Net Worth */}
       <div className="grid gap-8 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
@@ -745,6 +746,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-12 grid gap-8 md:grid-cols-2">
+        {/* Assets */}
         <Card>
           <CardHeader className="relative group">
             <div className="flex items-center justify-between">
@@ -835,6 +837,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
+        {/* Liabilities */}
         <Card>
           <CardHeader className="relative group">
             <div className="flex items-center justify-between">
@@ -926,6 +929,9 @@ export default function DashboardPage() {
         </Card>
       </div>
 
+      {/* Spending Summary */}
+      
+      {/* Recent Transactions */}
       <div className="mt-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
