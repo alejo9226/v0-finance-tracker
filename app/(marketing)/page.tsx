@@ -1,38 +1,15 @@
 import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import { ArrowRight, Menu, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import Header from "./components/Header"
 
 export default function Home() {
+  
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 md:px-6">
-        <header className="border-b">
-          <div className="container flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2 font-bold text-xl">
-              <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white">F</div>
-              FinanceTrack
-            </div>
-            <div className="flex items-center gap-4">
-              <Link href="/test-supabase">
-                <Button variant="outline" size="sm">
-                  Test Supabase
-                </Button>
-              </Link>
-              <Link href="/admin/create-user">
-                <Button variant="outline" size="sm">
-                  Admin
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button variant="ghost">Login</Button>
-              </Link>
-              <Link href="/signup">
-                <Button>Sign Up</Button>
-              </Link>
-            </div>
-          </div>
-        </header>
+        <Header />
         <main className="flex-1">
           <section className="py-24 md:py-32 lg:py-40">
             <div className="container px-4 md:px-6">
