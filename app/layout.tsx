@@ -5,7 +5,7 @@ import "./globals.css"
 
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
@@ -27,6 +27,9 @@ export default function RootLayout({
             {children}
           </AuthProvider>
         </ThemeProvider>
+
+        {/* Vercel Speed Insights */}
+        <SpeedInsights />
       </body>
     </html>
   )
