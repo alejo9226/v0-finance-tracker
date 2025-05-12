@@ -37,16 +37,10 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
 
 const CURRENCIES = [
-  { code: "USD", symbol: "$", name: "US Dosllar" },
-  { code: "EUR", symbol: "€", name: "Euro" },
-  { code: "GBP", symbol: "£", name: "British Pound" },
-  { code: "JPY", symbol: "¥", name: "Japanese Yen" },
-  { code: "CAD", symbol: "C$", name: "Canadian Dollar" },
-  { code: "AUD", symbol: "A$", name: "Australian Dollar" },
-  { code: "CHF", symbol: "CHF", name: "Swiss Franc" },
-  { code: "CNY", symbol: "¥", name: "Chinese Yuan" },
-  { code: "MXN", symbol: "$", name: "Mexican Peso" },
+  { code: "USD", symbol: "$", name: "US Dollar" },
   { code: "COP", symbol: "$", name: "Colombian Peso" },
+  { code: "ARS", symbol: "$", name: "Argentine Peso" },
+  { code: "BRL", symbol: "R$", name: "Brazilian Real" },
 ] as const
 
 type CurrencyCode = typeof CURRENCIES[number]["code"]
@@ -92,15 +86,9 @@ type UserCurrencyPreference = {
 
 const EXCHANGE_RATES: Record<CurrencyCode, number> = {
   USD: 1,
-  EUR: 0.91,
-  GBP: 0.79,
-  JPY: 151.45,
-  CAD: 1.35,
-  AUD: 1.52,
-  CHF: 0.89,
-  CNY: 7.23,
-  MXN: 16.75,
-  COP: 3927.50
+  ARS: 1130,
+  BRL: 5.69,
+  COP: 4223
 }
 
 // Add new types and state for per-currency totals
