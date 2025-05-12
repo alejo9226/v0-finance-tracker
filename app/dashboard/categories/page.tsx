@@ -47,44 +47,10 @@ export default function CategoriesPage() {
   const [formData, setFormData] = useState({
     name: "",
     type: "expense" as "income" | "expense",
-    icon: "💰",
+    icon: "",
     color: "#4CAF50",
   })
   const supabase = getSupabaseBrowserClient()
-
-  // Common emoji options
-  const emojiOptions = [
-    "💰",
-    "💵",
-    "💸",
-    "🏦",
-    "💳",
-    "🛒",
-    "🍔",
-    "🏠",
-    "🚗",
-    "⛽",
-    "🛍️",
-    "🎮",
-    "📱",
-    "💻",
-    "👕",
-    "👖",
-    "👟",
-    "🎬",
-    "🎭",
-    "🎟️",
-    "🏥",
-    "💊",
-    "🚑",
-    "📚",
-    "🎓",
-    "✈️",
-    "🏨",
-    "🚕",
-    "🚇",
-    "🚌",
-  ]
 
   // Color options
   const colorOptions = [
@@ -102,8 +68,6 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     fetchCategories()
-
-    console.log('user', user)
   }, [activeTab])
 
   const fetchCategories = async () => {
@@ -133,7 +97,22 @@ export default function CategoriesPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
+
+    if (name === "icon") {
+      const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Extended_Pictographic})+$/u
+
+      if (emojiRegex.test(value) || value === "") {
+        setFormData((prev) => ({ ...prev, icon: value }))
+      } else {
+        toast({
+          title: "Invalid emoji",
+          description: "Please enter a valid emoji",
+          variant: "destructive",
+        })
+      }
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }))
+    }
   }
 
   const handleAddCategory = async () => {
@@ -381,21 +360,15 @@ export default function CategoriesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Icon</Label>
-              <div className="grid grid-cols-10 gap-2">
-                {emojiOptions.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    className={`h-8 w-8 flex items-center justify-center rounded-md text-lg ${
-                      formData.icon === emoji ? "bg-primary text-primary-foreground" : "bg-secondary"
-                    }`}
-                    onClick={() => setFormData((prev) => ({ ...prev, icon: emoji }))}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
+              <Label htmlFor="icon-input">Icon</Label>
+              <Input
+                id="icon-input"
+                name="icon"
+                placeholder="e.g., 🍔"
+                type="text"
+                value={formData.icon}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="space-y-2">
@@ -444,21 +417,15 @@ export default function CategoriesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Icon</Label>
-              <div className="grid grid-cols-10 gap-2">
-                {emojiOptions.map((emoji) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    className={`h-8 w-8 flex items-center justify-center rounded-md text-lg ${
-                      formData.icon === emoji ? "bg-primary text-primary-foreground" : "bg-secondary"
-                    }`}
-                    onClick={() => setFormData((prev) => ({ ...prev, icon: emoji }))}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
+              <Label htmlFor="icon-input">Icon</Label>
+              <Input
+                id="icon-input"
+                name="icon"
+                placeholder="e.g., 🍔"
+                type="text"
+                value={formData.icon}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="space-y-2">
