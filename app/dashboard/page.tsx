@@ -1077,6 +1077,78 @@ export default function DashboardPage() {
               <Bar data={data} options={options} />
             )}
           </CardContent>
+          <CardContent className="py-0 sm:p-6 flex-1 w-full">
+            {/* Totals for selected month */}
+            {(() => {
+              // Filter income and expenses for the selected month
+              const filteredIncomes = recentTransactions.filter(t =>
+                t.type === 'income' &&
+                isWithinInterval(parseISO(t.date), { start: monthStart, end: monthEnd })
+              );
+              const filteredExpenses = recentTransactions.filter(t =>
+                t.type === 'expense' &&
+                isWithinInterval(parseISO(t.date), { start: monthStart, end: monthEnd })
+              );
+              // Sum by currency
+              const incomeTotals: { [key: string]: number } = {};
+              const expenseTotals: { [key: string]: number } = {};
+              filteredIncomes.forEach(t => {
+                const assetObj = assets.find(a => a.id === t.asset?.id);
+                const currency = assetObj?.currency || 'USD';
+                incomeTotals[currency] = (incomeTotals[currency] || 0) + t.amount;
+              });
+              filteredExpenses.forEach(t => {
+                const assetObj = assets.find(a => a.id === t.asset?.id);
+                const currency = assetObj?.currency || 'USD';
+                expenseTotals[currency] = (expenseTotals[currency] || 0) + t.amount;
+              });
+              // If displayCurrency is set, convert and sum
+              let totalIncome = 0;
+              let totalExpense = 0;
+              if (displayCurrency) {
+                totalIncome = filteredIncomes.reduce((sum: number, t) => {
+                  const assetObj = assets.find(a => a.id === t.asset?.id);
+                  const currency = assetObj?.currency || 'USD';
+                  return sum + convertCurrency(t.amount, currency, displayCurrency);
+                }, 0);
+                totalExpense = filteredExpenses.reduce((sum: number, t) => {
+                  const assetObj = assets.find(a => a.id === t.asset?.id);
+                  const currency = assetObj?.currency || 'USD';
+                  return sum + convertCurrency(t.amount, currency, displayCurrency);
+                }, 0);
+              }
+              return (
+                <div className="flex flex-col sm:flex-row gap-4 mb-4 sm:mb-0 py-6 sm:py-0">
+                  <div className="flex-1 flex flex-col items-center justify-center bg-green-50 rounded p-2">
+                    <span className="text-xs text-green-700">Total Income</span>
+                    {displayCurrency ? (
+                      <span className="text-lg font-bold text-green-700">{formatCurrency(totalIncome, displayCurrency)}</span>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        {Object.keys(incomeTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
+                          Object.entries(incomeTotals).map(([currency, amount]) => (
+                            <span key={currency} className="text-lg font-bold text-green-700">{formatCurrency(amount, currency as CurrencyCode)}</span>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 flex flex-col items-center justify-center bg-red-50 rounded p-2">
+                    <span className="text-xs text-red-700">Total Expenses</span>
+                    {displayCurrency ? (
+                      <span className="text-lg font-bold text-red-700">{formatCurrency(Math.abs(totalExpense), displayCurrency)}</span>
+                    ) : (
+                      <div className="flex flex-col gap-1">
+                        {Object.keys(expenseTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
+                          Object.entries(expenseTotals).map(([currency, amount]) => (
+                            <span key={currency} className="text-lg font-bold text-red-700">{formatCurrency(Math.abs(amount), currency as CurrencyCode)}</span>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+          </CardContent>
         </Card>
       </div>
 
