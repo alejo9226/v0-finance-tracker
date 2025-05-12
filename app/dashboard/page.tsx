@@ -352,6 +352,15 @@ export default function DashboardPage() {
         newCurrencyTotals[liability.currency].liabilities += Number(liability.value)
       })
 
+      // Now filter for currencies with non-zero values
+      const filteredCurrencyTotals = Object.entries(newCurrencyTotals)
+        .filter(([currency, totals]) => totals.assets > 0 || totals.liabilities > 0);
+
+      // If there is only one currency with non-zero values, set it as the display currency
+      if (filteredCurrencyTotals.length === 1) {
+        setDisplayCurrency(filteredCurrencyTotals[0][0] as CurrencyCode)
+      }
+
       setCurrencyTotals(newCurrencyTotals)
 
       // Calculate converted totals
