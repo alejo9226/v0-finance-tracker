@@ -16,11 +16,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
@@ -46,7 +44,7 @@ export default function CategoriesPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [formData, setFormData] = useState({
     name: "",
-    type: "expense" as "income" | "expense",
+    type: "" as "income" | "expense",
     icon: "",
     color: "#4CAF50",
   })
@@ -117,14 +115,13 @@ export default function CategoriesPage() {
 
   const handleAddCategory = async () => {
     try {
-      console.log('entering', formData)
       if (!formData.name) {
         throw new Error("Category name is required")
       }
 
       const { error } = await supabase.from("categories").insert({
         name: formData.name,
-        type: formData.type,
+        type: activeTab as "income" | "expense",
         icon: formData.icon,
         color: formData.color,
         user_id: user?.id
