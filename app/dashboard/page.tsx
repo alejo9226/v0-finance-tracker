@@ -784,10 +784,17 @@ export default function DashboardPage() {
       {/* Mobile view */}
       <div className="flex md:hidden justify-between w-full pb-8">
         <Link href="/dashboard/transactions">
-          <Button variant="outline" size="lg">View All Transactions</Button>
+          <Button 
+            className="p-2" 
+            variant="outline" 
+            size="sm"
+          >View All Transactions</Button>
         </Link>
         <Link href="/dashboard/transactions/new">
-          <Button size="lg">
+          <Button 
+            className="p-2" 
+            size="sm"
+          >
             <PlusIcon className="mr-2 h-5 w-5" />
             New Transaction
           </Button>
