@@ -742,7 +742,7 @@ export default function DashboardPage() {
           <p className="mt-2 text-md sm:text-xl text-muted-foreground">Your financial overview at a glance</p>
         </div>
         
-        {userCurrencies.length > 0 && (
+        {userCurrencies.length > 1 && (
           <div className="flex gap-2">
             {userCurrencies.map((curr) => (
               <Button
