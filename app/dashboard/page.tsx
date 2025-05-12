@@ -1068,7 +1068,7 @@ export default function DashboardPage() {
               </CardDescription>
             </div>
           </CardHeader>
-          <CardContent className="py-0 sm:p-6 flex-1 w-full">
+          <CardContent className="py-0 sm:p-6 w-max sm:w-1/3">
             {Object.keys(spendingByCategory).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <p className="text-muted-foreground mb-4">No spending data available</p>
@@ -1118,7 +1118,7 @@ export default function DashboardPage() {
                 }, 0);
               }
               return (
-                <div className="flex flex-col sm:flex-row gap-4 mb-4 sm:mb-0 py-6 sm:py-0">
+                <div className="flex flex-col flex-col md:flex-row gap-4 mb-4 sm:mb-0 py-6 sm:py-0">
                   <div className="flex-1 flex flex-col items-center justify-center bg-green-50 rounded p-2">
                     <span className="text-xs text-green-700">Total Income</span>
                     {displayCurrency ? (
@@ -1127,7 +1127,7 @@ export default function DashboardPage() {
                       <div className="flex flex-col gap-1">
                         {Object.keys(incomeTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
                           Object.entries(incomeTotals).map(([currency, amount]) => (
-                            <span key={currency} className="text-lg font-bold text-green-700">{formatCurrency(amount, currency as CurrencyCode)}</span>
+                            <span key={currency} className="text-lg font-bold text-green-700 whitespace-nowrap">{formatCurrency(amount, currency as CurrencyCode)}</span>
                           ))}
                       </div>
                     )}
@@ -1140,7 +1140,7 @@ export default function DashboardPage() {
                       <div className="flex flex-col gap-1">
                         {Object.keys(expenseTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
                           Object.entries(expenseTotals).map(([currency, amount]) => (
-                            <span key={currency} className="text-lg font-bold text-red-700">{formatCurrency(Math.abs(amount), currency as CurrencyCode)}</span>
+                            <span key={currency} className="text-lg font-bold text-red-700 whitespace-nowrap">{formatCurrency(Math.abs(amount), currency as CurrencyCode)}</span>
                           ))}
                       </div>
                     )}
