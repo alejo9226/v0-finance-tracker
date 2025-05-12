@@ -781,6 +781,19 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Mobile view */}
+      <div className="flex md:hidden justify-between w-full pb-8">
+        <Link href="/dashboard/transactions">
+          <Button variant="outline" size="lg">View All Transactions</Button>
+        </Link>
+        <Link href="/dashboard/transactions/new">
+          <Button size="lg">
+            <PlusIcon className="mr-2 h-5 w-5" />
+            New Transaction
+          </Button>
+        </Link>
+      </div>
+
       {/* Total Assets, Liabilities, and Net Worth */}
       <div className="grid gap-8 md:grid-cols-3">
         <Card>
