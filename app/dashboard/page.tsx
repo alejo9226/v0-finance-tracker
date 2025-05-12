@@ -313,7 +313,6 @@ export default function DashboardPage() {
           asset:asset_id(id, name)
         `)
         .order("date", { ascending: false })
-        .limit(5)
 
       if (transactionsError) throw transactionsError
 
@@ -1117,7 +1116,8 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-4">
-                {recentTransactions.map((transaction) => (
+                {/* Filter the transactions to only show the latest 5 */}
+                {recentTransactions.filter((t, i) => i < 5).map((transaction) => (
                   <div
                     key={transaction.id}
                     className="flex items-center justify-between p-4 rounded-lg border group hover:bg-accent hover:cursor-pointer"
