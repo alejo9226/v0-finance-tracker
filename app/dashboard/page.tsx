@@ -264,7 +264,7 @@ export default function DashboardPage() {
         borderSkipped: 'left' as const,
       },
     },
-    maintainAspectRatio: false,
+    maintainAspectRatio: true,
     backgroundColor: 'transparent',
   }
 
