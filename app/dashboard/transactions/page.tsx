@@ -6,13 +6,12 @@ import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { PlusIcon, FilterIcon } from "lucide-react"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
-import { fetchTransactions } from "@/lib/supabase/dataService"
+import { fetchTransactions } from "@/lib/supabase/data-services/transactions"
 
 type Transaction = {
   id: string

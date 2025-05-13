@@ -32,7 +32,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
-import { fetchAssets, fetchLiabilities, fetchTransactions } from "@/lib/supabase/dataService"
+import { fetchAssets, fetchLiabilities } from "@/lib/supabase/dataService"
+import { fetchTransactions } from "@/lib/supabase/data-services/transactions"
 
 // Register Chart.js components
 Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
