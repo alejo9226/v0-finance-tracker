@@ -1285,7 +1285,7 @@ export default function DashboardPage() {
                       <div
                         className={`text-sm sm:text-md ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
                       >
-                        {`$${Math.abs(Number(transaction.amount)).toLocaleString()}}
+                        {`$ ${Math.abs(Number(transaction.amount)).toLocaleString()}`}
                       </div>
                       <div className="hidden sm:flex">
                         <Button 
