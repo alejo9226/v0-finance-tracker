@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { fetchTransactionById, Transaction } from "@/lib/supabase/dataService"
+import { fetchTransactionById } from "@/lib/supabase/data-services/transactions"
+import { Transaction } from "@/lib/supabase/data-services/transactions.types"
 
 export default function TransactionDetailsPage() {
   const router = useRouter()
