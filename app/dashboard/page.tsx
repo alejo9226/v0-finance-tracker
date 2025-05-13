@@ -769,9 +769,11 @@ export default function DashboardPage() {
         )}
 
         <div className="hidden md:flex gap-4">
-          <Link href="/dashboard/transactions">
-            <Button variant="outline" size="lg">View All Transactions</Button>
-          </Link>
+          {recentTransactions.length > 0 && (
+            <Link href="/dashboard/transactions">
+              <Button variant="outline" size="lg">View All Transactions</Button>
+            </Link>
+          )}
           <Link href="/dashboard/transactions/new">
             <Button size="lg">
               <PlusIcon className="mr-2 h-5 w-5" />
@@ -783,20 +785,28 @@ export default function DashboardPage() {
 
       {/* Mobile view */}
       <div className="flex md:hidden justify-between w-full pb-8">
+      {recentTransactions.length > 0 && (
         <Link href="/dashboard/transactions">
-          <Button 
+          <Button
             className="p-2" 
             variant="outline" 
             size="sm"
           >View All Transactions</Button>
         </Link>
-        <Link href="/dashboard/transactions/new">
+      )}
+        <Link 
+          href={assets.length > 0 && liabilities.length > 0 ? "/dashboard/transactions/new" : ""}
+        >
           <Button 
             className="p-2" 
             size="sm"
+            onClick={() => {
+              setEditForm({ name: "", type: "", value: "", currency: "COP" })
+              setIsAddAssetOpen(true)
+            }}
           >
             <PlusIcon className="mr-2 h-5 w-5" />
-            New Transaction
+            {assets.length > 0 ? "New Transaction" : "Add Accounts"}
           </Button>
         </Link>
       </div>
@@ -808,6 +818,9 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Assets</CardTitle>
           </CardHeader>
           <CardContent>
+            {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
+              <div className="text-3xl font-bold">$0,0</div>
+            )}
             {displayCurrency ? (
               <div className="text-3xl font-bold">
                 {formatCurrency(totalAssets, displayCurrency)}
@@ -836,6 +849,9 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-muted-foreground">Total Liabilities</CardTitle>
           </CardHeader>
           <CardContent>
+            {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
+              <div className="text-3xl font-bold">$0,0</div>
+            )}
             {displayCurrency ? (
               <div className="text-3xl font-bold">
                 {formatCurrency(totalLiabilities, displayCurrency)}
@@ -864,6 +880,9 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium text-green-800">Net Worth (Equity)</CardTitle>
           </CardHeader>
           <CardContent>
+            {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
+              <div className="text-3xl font-bold">$0,0</div>
+            )}
             {displayCurrency ? (
               <div className="text-3xl font-bold text-green-800">
                 {formatCurrency(equity, displayCurrency)}
@@ -977,7 +996,14 @@ export default function DashboardPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <p className="text-muted-foreground">No assets added yet</p>
-                <Button variant="outline" className="mt-4" onClick={() => router.push("/onboarding")}>
+                <Button 
+                  variant="outline" 
+                  className="mt-4" 
+                  onClick={() => {
+                    setEditForm({ name: "", type: "", value: "", currency: "COP" })
+                    setIsAddAssetOpen(true)
+                  }}
+                >
                   Add Assets
                 </Button>
               </div>
@@ -1068,7 +1094,14 @@ export default function DashboardPage() {
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <p className="text-muted-foreground">No liabilities added yet</p>
-                <Button variant="outline" className="mt-4" onClick={() => router.push("/onboarding")}>
+                <Button 
+                  variant="outline" 
+                  className="mt-4" 
+                  onClick={() => {
+                    setEditForm({ name: "", type: "", value: "", currency: "COP" })
+                    setIsAddLiabilityOpen(true)
+                  }}
+                >
                   Add Liabilities
                 </Button>
               </div>
@@ -1083,24 +1116,26 @@ export default function DashboardPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="text-xl sm:text-2xl">Spending Summary</CardTitle>
-              <CardDescription>
-                Your spending by category for{" "}
-                <select
-                  className="border rounded px-1 py-1 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                  value={format(selectedMonth, "yyyy-MM")}
-                  onChange={e => setSelectedMonth(startOfMonth(parseISO(e.target.value + "-01")))}
-                >
-                  {monthOptions.map(opt => (
-                    <option key={opt.label} value={format(opt.value, "yyyy-MM")}>{opt.label}</option>
-                  ))}
-                </select>
-              </CardDescription>
+              {monthOptions.length > 0 && (
+                <CardDescription>
+                  Your spending by category for{" "}
+                  <select
+                    className="border rounded px-1 py-1 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                    value={format(selectedMonth, "yyyy-MM")}
+                    onChange={e => setSelectedMonth(startOfMonth(parseISO(e.target.value + "-01")))}
+                  >
+                    {monthOptions.map(opt => (
+                      <option key={opt.label} value={format(opt.value, "yyyy-MM")}>{opt.label}</option>
+                    ))}
+                  </select>
+                </CardDescription>
+              )}
             </div>
           </CardHeader>
           <CardContent className="py-0 sm:p-6 w-max sm:w-1/3">
             {Object.keys(spendingByCategory).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-muted-foreground mb-4">No spending data available</p>
+                <p className="text-muted-foreground">No spending data available</p>
               </div>
             ) : (
               <Bar data={data} options={options} />
@@ -1147,34 +1182,38 @@ export default function DashboardPage() {
                 }, 0);
               }
               return (
-                <div className="flex flex-col flex-col md:flex-row gap-4 mb-4 sm:mb-0 py-6 sm:py-0">
-                  <div className="flex-1 flex flex-col items-center justify-center bg-green-50 rounded p-2">
-                    <span className="text-xs text-green-700">Total Income</span>
-                    {displayCurrency ? (
-                      <span className="text-lg font-bold text-green-700">{formatCurrency(totalIncome, displayCurrency)}</span>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        {Object.keys(incomeTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
-                          Object.entries(incomeTotals).map(([currency, amount]) => (
-                            <span key={currency} className="text-lg font-bold text-green-700 whitespace-nowrap">{formatCurrency(amount, currency as CurrencyCode)}</span>
-                          ))}
+                <>
+                  {Object.keys(spendingByCategory).length > 0 && (
+                    <div className="flex flex-col flex-col md:flex-row gap-4 mb-4 sm:mb-0 py-6 sm:py-0">
+                      <div className="flex-1 flex flex-col items-center justify-center bg-green-50 rounded p-2">
+                        <span className="text-xs text-green-700">Total Income</span>
+                        {displayCurrency ? (
+                          <span className="text-lg font-bold text-green-700">{formatCurrency(totalIncome, displayCurrency)}</span>
+                        ) : (
+                          <div className="flex flex-col gap-1">
+                            {Object.keys(incomeTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
+                              Object.entries(incomeTotals).map(([currency, amount]) => (
+                                <span key={currency} className="text-lg font-bold text-green-700 whitespace-nowrap">{formatCurrency(amount, currency as CurrencyCode)}</span>
+                              ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  <div className="flex-1 flex flex-col items-center justify-center bg-red-50 rounded p-2">
-                    <span className="text-xs text-red-700">Total Expenses</span>
-                    {displayCurrency ? (
-                      <span className="text-lg font-bold text-red-700">{formatCurrency(Math.abs(totalExpense), displayCurrency)}</span>
-                    ) : (
-                      <div className="flex flex-col gap-1">
-                        {Object.keys(expenseTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
-                          Object.entries(expenseTotals).map(([currency, amount]) => (
-                            <span key={currency} className="text-lg font-bold text-red-700 whitespace-nowrap">{formatCurrency(Math.abs(amount), currency as CurrencyCode)}</span>
-                          ))}
+                      <div className="flex-1 flex flex-col items-center justify-center bg-red-50 rounded p-2">
+                        <span className="text-xs text-red-700">Total Expenses</span>
+                        {displayCurrency ? (
+                          <span className="text-lg font-bold text-red-700">{formatCurrency(Math.abs(totalExpense), displayCurrency)}</span>
+                        ) : (
+                          <div className="flex flex-col gap-1">
+                            {Object.keys(expenseTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
+                              Object.entries(expenseTotals).map(([currency, amount]) => (
+                                <span key={currency} className="text-lg font-bold text-red-700 whitespace-nowrap">{formatCurrency(Math.abs(amount), currency as CurrencyCode)}</span>
+                              ))}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                  )}
+                </>
               );
             })()}
           </CardContent>
@@ -1199,7 +1238,7 @@ export default function DashboardPage() {
             {recentTransactions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <p className="text-muted-foreground mb-4">No transactions yet</p>
-                <Link href="/transactions/new">
+                <Link href="/dashboard/transactions/new">
                   <Button>Add Your First Transaction</Button>
                 </Link>
               </div>

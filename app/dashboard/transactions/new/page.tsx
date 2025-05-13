@@ -5,7 +5,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { format } from "date-fns"
-import { ArrowLeft, CalendarIcon } from "lucide-react"
+import { ArrowLeft, CalendarIcon, PlusIcon } from "lucide-react"
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
@@ -138,7 +138,7 @@ export default function NewTransactionPage() {
 
       if (assetError) throw assetError
 
-      const newValue = Number.parseFloat(assetData.value) + (transactionType === "expense" ? -amount : amount)
+      const newValue = Number.parseFloat(assetData.value as string) + (transactionType === "expense" ? -amount : amount)
 
       const { error: updateError } = await supabase
         .from("assets")
@@ -233,34 +233,72 @@ export default function NewTransactionPage() {
             <div className="space-y-2">
               <Label>Category</Label>
               <Select value={formData.categoryId} onValueChange={(value) => handleSelectChange("categoryId", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      <span className="mr-2">{category.icon}</span>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+                {categories.length === 0 ? (
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      id="category"
+                      name="category"
+                      type="text"
+                      placeholder="No categories found"
+                      value={""}
+                      disabled
+                    />
+                    <Button variant="secondary" size="icon" onClick={() => router.push("/dashboard/categories")}>
+                      <PlusIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    {categories.length > 0 ? (
+                      <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          <span className="mr-2">{category.icon}</span>
+                          {category.name}
+                        </SelectItem>
+                        ))}
+                      </SelectContent>
+                    ) : (
+                      <span className="text-muted-foreground">No categories found</span>
+                    )}
+                  </>
+                )}
               </Select>
             </div>
 
             <div className="space-y-2">
               <Label>Account</Label>
-              <Select value={formData.assetId} onValueChange={(value) => handleSelectChange("assetId", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {assets.map((asset) => (
-                    <SelectItem key={asset.id} value={asset.id}>
-                      {asset.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {assets.length === 0 ? (
+                <div className="flex items-center space-x-2">
+                  <Input
+                    id="asset"
+                    name="asset"
+                    type="text"
+                    placeholder="No accounts found"
+                    value={""}
+                    disabled
+                  />
+                  <Button variant="secondary" size="icon" onClick={() => router.push("/dashboard")}>
+                    <PlusIcon className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Select value={formData.assetId} onValueChange={(value) => handleSelectChange("assetId", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an account" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {assets.map((asset) => (
+                      <SelectItem key={asset.id} value={asset.id}>
+                        {asset.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
 
             <div className="space-y-2">

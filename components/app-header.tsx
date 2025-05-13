@@ -26,7 +26,10 @@ export function AppHeader({ user }: AppHeaderProps) {
     <header className="bg-white border-b px-4">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo and title */}
-        <div className="flex items-center gap-2 font-bold text-xl">
+        <div 
+          className="flex items-center gap-2 font-bold text-xl"
+          onClick={() => router.push("/dashboard")}
+        >
           <div className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center text-white">F</div>
           FinanceTrack
         </div>
