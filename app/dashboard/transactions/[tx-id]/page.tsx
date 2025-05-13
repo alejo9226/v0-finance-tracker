@@ -11,13 +11,14 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
+import { fetchTransactionById, Transaction } from "@/lib/supabase/dataService"
 
 export default function TransactionDetailsPage() {
   const router = useRouter()
   const params = useParams()
   const { toast } = useToast()
   const supabase = getSupabaseBrowserClient()
-  const [transaction, setTransaction] = useState<any>(null)
+  const [transaction, setTransaction] = useState<Transaction | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [isEditOpen, setIsEditOpen] = useState(false)
@@ -37,37 +38,25 @@ export default function TransactionDetailsPage() {
   }, [params["tx-id"]])
 
   async function fetchTransaction() {
-    setLoading(true)
-    setError("")
-    const id = params["tx-id"]
-    const { data, error } = await supabase
-      .from("transactions")
-      .select(`
-        id,
-        amount,
-        type,
-        description,
-        date,
-        category:category_id(id, name, icon, color),
-        asset:asset_id(id, name)
-      `)
-      .eq("id", id as string)
-      .single()
-    if (error || !data) {
-      setError("Transaction not found.")
-      setTransaction(null)
-    } else {
+    try {
+      setLoading(true)
+      setError("")
+      const id = params["tx-id"]
+      const data = await fetchTransactionById(id as string)
       setTransaction(data)
+    } catch (error: any) {
+      setTransaction(null)
+      setError(error.message || "Transaction not found.")
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const openEdit = () => {
     setEditForm({
-      description: transaction.description,
-      amount: transaction.amount.toString(),
-      date: transaction.date.slice(0, 10),
-      // categoryId: transaction.category?.id || ""
+      description: transaction?.description || "",
+      amount: transaction?.amount.toString() || "",
+      date: transaction?.date.slice(0, 10) || "",
     })
     setIsEditOpen(true)
   }
@@ -149,22 +138,22 @@ export default function TransactionDetailsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <span className="font-semibold">Description:</span> {transaction.description}
+            <span className="font-semibold">Description:</span> {transaction?.description}
           </div>
           <div>
-            <span className="font-semibold">Amount:</span> {transaction.type === "income" ? "+" : "-"}${Math.abs(Number(transaction.amount)).toLocaleString()}
+            <span className="font-semibold">Amount:</span> {transaction?.type === "income" ? "+" : "-"}${Math.abs(Number(transaction?.amount)).toLocaleString()}
           </div>
           <div>
-            <span className="font-semibold">Date:</span> {format(new Date(transaction.date), "MMM d, yyyy")}
+            <span className="font-semibold">Date:</span> {format(new Date(transaction?.date || ""), "MMM d, yyyy")}
           </div>
           <div>
-            <span className="font-semibold">Category:</span> {transaction.category?.name || "Uncategorized"}
+            <span className="font-semibold">Category:</span> {transaction?.category?.name || "Uncategorized"}
           </div>
           <div>
-            <span className="font-semibold">Account:</span> {transaction.asset?.name || "No account"}
+            <span className="font-semibold">Account:</span> {transaction?.asset?.name || "No account"}
           </div>
           <div>
-            <span className="font-semibold">Type:</span> {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+            <span className="font-semibold">Type:</span> {`${transaction?.type?.charAt(0).toUpperCase()}${transaction?.type?.slice(1)}`}
           </div>
         </CardContent>
       </Card>

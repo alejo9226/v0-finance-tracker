@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
+import { fetchTransactions } from "@/lib/supabase/dataService"
 
 type Transaction = {
   id: string
@@ -38,39 +39,18 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
-    fetchTransactions()
+    fetchData()
   }, [activeTab])
 
-  const fetchTransactions = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true)
 
-      let query = supabase
-        .from("transactions")
-        .select(`
-          id,
-          amount,
-          type,
-          description,
-          date,
-          category:category_id(id, name, icon, color),
-          asset:asset_id(id, name)
-        `)
+      const transactionsData = await fetchTransactions(activeTab === 'all' ? undefined : activeTab as "income" | "expense")
 
-      if (activeTab !== "all") {
-        query = query.eq("type", activeTab)
-      }
-
-      const { data, error } = await query
-        .order("date", { ascending: false })
-        .returns<Transaction[]>()
-
-      if (error) throw error
-
-      setTransactions(data || [])
+      setTransactions(transactionsData || [])
     } catch (error: any) {
       toast({
         title: "Error",

@@ -19,6 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
+import { Asset, fetchAssets, fetchCategories, Transaction } from "@/lib/supabase/dataService"
 
 type Category = {
   id: string
@@ -28,19 +29,13 @@ type Category = {
   color: string
 }
 
-type Asset = {
-  id: string
-  name: string
-  value: number
-}
-
 export default function NewTransactionPage() {
   const router = useRouter()
   const { toast } = useToast()
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [transactionType, setTransactionType] = useState<"income" | "expense">("expense")
-  const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<Transaction["category"][]>([])
   const [assets, setAssets] = useState<Asset[]>([])
   const [date, setDate] = useState<Date>(new Date())
   const [formData, setFormData] = useState({
@@ -52,39 +47,24 @@ export default function NewTransactionPage() {
   const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
-    fetchCategories()
-    fetchAssets()
+    fetchData()
   }, [transactionType])
 
-  const fetchCategories = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase.from("categories").select("*").eq("type", transactionType).order("name")
+      const assetsData = await fetchAssets()
 
-      if (error) throw error
+      const categoriesData = await fetchCategories(transactionType)
 
-      setCategories(data || [])
+      setCategories(categoriesData || [])
       // Reset category selection when type changes
       setFormData((prev) => ({ ...prev, categoryId: "" }))
+
+      setAssets(assetsData as Asset[] || [])
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to load categories",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const fetchAssets = async () => {
-    try {
-      const { data, error } = await supabase.from("assets").select("*").order("name")
-
-      if (error) throw error
-
-      setAssets(data || [])
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to load accounts",
+        description: error.message || "Failed to load data",
         variant: "destructive",
       })
     }

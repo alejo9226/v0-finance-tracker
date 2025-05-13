@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
-import { ArrowLeft, PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
+import { PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
@@ -22,14 +22,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
-
-type Category = {
-  id: string
-  name: string
-  type: "income" | "expense"
-  icon: string
-  color: string
-}
+import { Category, fetchCountTransactionsByCategory } from "@/lib/supabase/dataService"
 
 export default function CategoriesPage() {
   const router = useRouter()
@@ -194,14 +187,9 @@ export default function CategoriesPage() {
       }
 
       // Check if category is used in transactions
-      const { count, error: countError } = await supabase
-        .from("transactions")
-        .select("id", { count: "exact" })
-        .eq("category_id", selectedCategory.id)
+      const count = await fetchCountTransactionsByCategory(selectedCategory.id)
 
-      if (countError) throw countError
-
-      if (count && count > 0) {
+      if (count > 0) {
         // If category is used, update transactions to remove category reference
         const { error: updateError } = await supabase
           .from("transactions")

@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
+import { fetchAssets, fetchLiabilities, fetchTransactions } from "@/lib/supabase/dataService"
 
 // Register Chart.js components
 Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
@@ -276,57 +277,19 @@ export default function DashboardPage() {
       setLoading(true)
 
       // Fetch assets
-      const { data: assetsData, error: assetsError } = await supabase.from("assets").select("*").order("name").eq("user_id", user.id)
-
-      if (assetsError) throw assetsError
+      const assetsData = await fetchAssets()
 
       // Fetch liabilities
-      const { data: liabilitiesData, error: liabilitiesError } = await supabase
-        .from("liabilities")
-        .select("*")
-        .order("name")
-        .eq("user_id", user.id)
-      if (liabilitiesError) throw liabilitiesError
+      const liabilitiesData = await fetchLiabilities()
 
       // Fetch recent transactions
-      const { data: transactionsData, error: transactionsError } = await supabase
-        .from("transactions")
-        .select(`
-          id,
-          amount,
-          type,
-          description,
-          date,
-          category:category_id(id, name, icon, color),
-          asset:asset_id(id, name)
-        `)
-        .order("date", { ascending: false })
-
-      if (transactionsError) throw transactionsError
+      const transformedTransactions = await fetchTransactions()
 
       // Set state with type assertions and transformations
       setAssets(assetsData as Asset[] || [])
       setLiabilities(liabilitiesData as Liability[] || [])
       
-      // Transform transactions data to ensure required fields
-      const transformedTransactions = (transactionsData || []).map((t: any) => ({
-        id: t.id,
-        amount: Number(t.amount),
-        type: t.type as "income" | "expense",
-        description: t.description || "",
-        date: t.date,
-        category: t.category || {
-          id: "uncategorized",
-          name: "Uncategorized",
-          icon: t.type === "income" ? "💰" : "💸",
-          color: "#64748b"
-        },
-        asset: t.asset || {
-          id: "no-account",
-          name: "No account"
-        }
-      }))
-      
+      // Transactions data comes transformed to ensure required fields
       setRecentTransactions(transformedTransactions)
 
       // Calculate per-currency totals
@@ -393,7 +356,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [router, supabase, user])
+  }, [router, user])
 
   useEffect(() => {
     fetchData()
