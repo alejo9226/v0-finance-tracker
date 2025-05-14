@@ -224,13 +224,19 @@ export default function DashboardPage() {
         grid: { display: false, drawBorder: false },
         ticks: {
           color: '#6b7280',
-          font: { family: 'Inter, sans-serif', size: 20 },
+          font: { 
+            family: 'Inter, sans-serif', 
+            size: (context: any) => {
+              const width = context.chart.width;
+              return width < 360 ? 8 : 14;
+            }
+          },
           callback: function(value: string | number, index: number) {
             const category = Object.keys(spendingByCategory)[index];
             const icon = filteredExpenses.find(t => t.category.name === category)?.category.icon || '';
             return icon; // Only show icons
           },
-          padding: 0,
+          padding: 2,
           display: true,
         },
       },
