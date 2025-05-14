@@ -84,8 +84,8 @@ export default function NewTransactionPage() {
     setIsLoading(true)
 
     try {
-      if (!formData.amount || !formData.assetId) {
-        throw new Error("Amount and account are required")
+      if (!formData.amount || !formData.assetId || !formData.categoryId) {
+        throw new Error("Amount, account and category are required")
       }
 
       const amount = Number.parseFloat(formData.amount)
