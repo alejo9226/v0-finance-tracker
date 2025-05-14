@@ -1218,7 +1218,7 @@ export default function DashboardPage() {
                 {recentTransactions.filter((t, i) => i < 5).map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 rounded-lg border group hover:bg-accent hover:cursor-pointer"
+                    className="flex items-center justify-between py-2 px-2 sm:p-4 rounded-lg border group hover:bg-accent hover:cursor-pointer"
                     role="group"
                     tabIndex={0}
                     onClick={e => {
@@ -1253,7 +1253,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex items-center sm:gap-2 gap-1">
                       <div
-                        className={`text-sm sm:text-md ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
+                        className={`text-sm sm:text-md whitespace-nowrap ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
                       >
                         {`$ ${Math.abs(Number(transaction.amount)).toLocaleString()}`}
                       </div>
