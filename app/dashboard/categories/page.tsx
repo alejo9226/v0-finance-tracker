@@ -6,7 +6,6 @@ import { useEffect, useState } from "react"
 import { PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
 import { useRouter } from "next/navigation"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -22,7 +21,8 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
-import { Category, fetchCountTransactionsByCategory } from "@/lib/supabase/dataService"
+import { fetchCountTransactionsByCategory, removeCategoryFromTransactions } from "@/lib/supabase/data-services/transactions"
+import { Category, createCategory, deleteCategory, fetchCategories, updateCategory } from "@/lib/supabase/data-services/categories"
 
 export default function CategoriesPage() {
   const router = useRouter()
@@ -41,7 +41,6 @@ export default function CategoriesPage() {
     icon: "",
     color: "#4CAF50",
   })
-  const supabase = getSupabaseBrowserClient()
 
   // Color options
   const colorOptions = [
@@ -58,21 +57,14 @@ export default function CategoriesPage() {
   ]
 
   useEffect(() => {
-    fetchCategories()
+    fetchData()
   }, [activeTab])
 
-  const fetchCategories = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true)
 
-      const { data, error } = await supabase
-        .from("categories")
-        .select("*")
-        .eq("type", activeTab)
-        .order("name")
-        .returns<Category[]>()
-
-      if (error) throw error
+      const data = await fetchCategories(activeTab as "income" | "expense")
 
       setCategories(data || [])
     } catch (error: any) {
@@ -112,17 +104,13 @@ export default function CategoriesPage() {
         throw new Error("Category name is required")
       }
 
-      const { error } = await supabase.from("categories").insert({
+      await createCategory({
         name: formData.name,
         type: activeTab as "income" | "expense",
         icon: formData.icon,
         color: formData.color,
-        user_id: user?.id
+        user_id: user?.id as string,
       })
-
-      console.log('error', error)
-
-      if (error) throw error
 
       toast({
         title: "Category added",
@@ -136,7 +124,7 @@ export default function CategoriesPage() {
         icon: "💰",
         color: "#4CAF50",
       })
-      fetchCategories()
+      fetchData()
     } catch (error: any) {
       toast({
         title: "Error",
@@ -152,16 +140,11 @@ export default function CategoriesPage() {
         throw new Error("Category name is required")
       }
 
-      const { error } = await supabase
-        .from("categories")
-        .update({
-          name: formData.name,
-          icon: formData.icon,
-          color: formData.color,
-        })
-        .eq("id", selectedCategory.id)
-
-      if (error) throw error
+      await updateCategory(selectedCategory.id, {
+        name: formData.name,
+        icon: formData.icon,
+        color: formData.color,
+      })
 
       toast({
         title: "Category updated",
@@ -170,7 +153,7 @@ export default function CategoriesPage() {
 
       setIsEditDialogOpen(false)
       setSelectedCategory(null)
-      fetchCategories()
+      fetchData()
     } catch (error: any) {
       toast({
         title: "Error",
@@ -191,18 +174,11 @@ export default function CategoriesPage() {
 
       if (count > 0) {
         // If category is used, update transactions to remove category reference
-        const { error: updateError } = await supabase
-          .from("transactions")
-          .update({ category_id: null })
-          .eq("category_id", selectedCategory.id)
-
-        if (updateError) throw updateError
+        await removeCategoryFromTransactions(selectedCategory.id)
       }
 
       // Delete the category
-      const { error } = await supabase.from("categories").delete().eq("id", selectedCategory.id)
-
-      if (error) throw error
+      await deleteCategory(selectedCategory.id)
 
       toast({
         title: "Category deleted",
@@ -211,7 +187,7 @@ export default function CategoriesPage() {
 
       setIsDeleteDialogOpen(false)
       setSelectedCategory(null)
-      fetchCategories()
+      fetchData()
     } catch (error: any) {
       toast({
         title: "Error",

@@ -18,6 +18,7 @@ export function AppHeader({ user }: AppHeaderProps) {
   const [open, setOpen] = useState(false)
 
   const handleSignOut = async () => {
+    // TODO: Add wrapper to sign out
     await supabase.auth.signOut()
     router.push("/login")
   }

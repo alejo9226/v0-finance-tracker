@@ -28,10 +28,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const getSession = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession()
+      // TODO: Add wrapper to get session
+      const { data: { session }, error } = await supabase.auth.getSession()
       setSession(session)
       setUser(session?.user ?? null)
       setIsLoading(false)
@@ -39,6 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getSession()
 
+    // TODO: Add wrapper to listen for auth state changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -53,6 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase.auth])
 
   const signUp = async (email: string, password: string, name: string) => {
+    // TODO: Add wrapper to sign up
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -67,6 +67,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
+    // TODO: Add wrapper to sign in with password
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    // TODO: Add wrapper to sign out
     await supabase.auth.signOut()
     router.push("/login")
   }

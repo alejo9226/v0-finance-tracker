@@ -85,6 +85,7 @@ export default function SignupPage() {
         console.log("Supabase client initialized:", !!supabase)
 
         // Attempt to sign up
+        // TODO: Add wrapper to sign up
         const { data, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,

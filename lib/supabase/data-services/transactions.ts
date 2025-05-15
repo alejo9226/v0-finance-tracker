@@ -1,7 +1,18 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { Transaction } from "@/lib/supabase/data-services/transactions.types"
+import { Category } from "@/lib/supabase/data-services/categories"
+import { Asset } from "@/lib/supabase/data-services/assets"
+export interface Transaction {
+  id: string
+  amount: number
+  type: "income" | "expense"
+  description: string
+  date: Date
+  category: Category
+  asset: Pick<Asset, 'id' | 'name'>
+}
 
 const supabase = getSupabaseBrowserClient()
+
 /**
  * Fetches all transactions from Supabase for a given type.
  * Supabase returns all transactions for a specific user, 
@@ -91,4 +102,71 @@ export async function fetchCountTransactionsByCategory(categoryId: string): Prom
     .eq("category_id", categoryId)
   if (error) throw error
   return count || 0
+}
+
+export async function createTransaction(
+  transaction: Omit<Transaction, 'id' | 'category' | 'asset'> & {
+    category_id: string
+    asset_id: string
+    user_id: string
+  }
+): Promise<void> {
+  const { error: transactionError } = await supabase
+    .from("transactions")
+    .insert(transaction)
+    .select()
+
+  if (transactionError) throw transactionError
+}
+
+/**
+ * Updates a transaction in the database.
+ * 
+ * @param id - The ID of the transaction to update.
+ * @param transaction - The data to update the transaction with.
+ */
+export async function updateTransaction(
+  id: string, 
+  transaction: Pick<
+    Transaction, 
+    'description' | 
+    'amount' | 
+    'date'
+    // category_id: Uncomment if you add category selection
+  >
+): Promise<void> {
+  const { error } = await supabase
+    .from("transactions")
+    .update(transaction)
+    .eq("id", id)
+  if (error) throw error
+}
+
+/**
+ * Removes a category from all transactions that belong to
+ * a specific category in the database.
+ * 
+ * @param transactionsCategoryId - The ID of the category to remove from transactions.
+ */
+export async function removeCategoryFromTransactions(
+  transactionsCategoryId: string, 
+): Promise<void> {
+  const { error } = await supabase
+    .from("transactions")
+    .update({ category_id: null })
+    .eq("category_id", transactionsCategoryId)
+  if (error) throw error
+}
+
+/**
+ * Deletes a transaction from the database.
+ * 
+ * @param id - The ID of the transaction to delete.
+ */
+export async function deleteTransaction(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("transactions")
+    .delete()
+    .eq("id", id)
+  if (error) throw error
 }

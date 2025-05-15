@@ -39,6 +39,7 @@ export default function LoginPage() {
 
       console.log("Login attempt for:", formData.email)
 
+      // TODO: Add wrapper to sign in with password
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,

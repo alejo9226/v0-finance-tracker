@@ -27,6 +27,7 @@ export default function TestSupabasePage() {
         })
 
         // Test a simple query
+        // TODO: Add wrapper to get profiles
         const { data, error } = await supabase.from("profiles").select("count").limit(1)
 
         if (error) {

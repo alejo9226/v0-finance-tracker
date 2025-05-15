@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation"
 import { format } from "date-fns"
 import { ArrowLeft, CalendarIcon, PlusIcon } from "lucide-react"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -19,15 +18,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
-import { Asset, fetchAssets, fetchCategories, Transaction } from "@/lib/supabase/dataService"
+import { createTransaction, Transaction } from "@/lib/supabase/data-services/transactions"
+import { Asset, fetchAssetCurrentValue, fetchAssets, updateAsset } from "@/lib/supabase/data-services/assets"
+import { fetchCategories } from "@/lib/supabase/data-services/categories"
 
-type Category = {
-  id: string
-  name: string
-  type: "income" | "expense"
-  icon: string
-  color: string
-}
 
 export default function NewTransactionPage() {
   const router = useRouter()
@@ -44,7 +38,6 @@ export default function NewTransactionPage() {
     assetId: "",
     description: "",
   })
-  const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
     fetchData()
@@ -94,38 +87,22 @@ export default function NewTransactionPage() {
       }
 
       // First, insert the transaction
-      const { data: transactionData, error: transactionError } = await supabase
-        .from("transactions")
-        .insert({
-          amount: transactionType === "expense" ? -amount : amount,
-          type: transactionType,
-          category_id: formData.categoryId || null,
-          asset_id: formData.assetId,
-          description: formData.description,
-          date,
-          user_id: user?.id
-        })
-        .select()
-
-      if (transactionError) throw transactionError
+      await createTransaction({
+        amount: transactionType === "expense" ? -amount : amount,
+        type: transactionType,
+        category_id: formData.categoryId!,
+        asset_id: formData.assetId,
+        description: formData.description,
+        date: date,
+        user_id: user?.id!,
+      })
 
       // Then, update the asset balance
-      const { data: assetData, error: assetError } = await supabase
-        .from("assets")
-        .select("value")
-        .eq("id", formData.assetId)
-        .single()
+      const assetData: Asset = await fetchAssetCurrentValue(formData.assetId)
 
-      if (assetError) throw assetError
+      const newValue = Number.parseFloat(`${assetData.value}`) + (transactionType === "expense" ? -amount : amount)
 
-      const newValue = Number.parseFloat(assetData.value as string) + (transactionType === "expense" ? -amount : amount)
-
-      const { error: updateError } = await supabase
-        .from("assets")
-        .update({ value: newValue })
-        .eq("id", formData.assetId)
-
-      if (updateError) throw updateError
+      await updateAsset(formData.assetId, { value: newValue })
 
       toast({
         title: "Transaction added",

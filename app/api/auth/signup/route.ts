@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     const supabase = createClient(supabaseUrl!, supabaseServiceKey!)
 
     // Create user with admin privileges
+    // TODO: Add wrapper to create users
     const { data: userData, error: userError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
 
     // If user was created successfully, create a profile
     if (userData.user) {
+      // TODO: Add wrapper to create profile
       const { error: profileError } = await supabase.from("profiles").insert([
         {
           id: userData.user.id,

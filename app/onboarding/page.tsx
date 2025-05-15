@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { ArrowLeft, ArrowRight, Check, CreditCard, DollarSign, Landmark, Wallet } from "lucide-react"
 
 import { useAuth } from "@/contexts/auth-context"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { AuthCheck } from "@/components/auth-check"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,6 +12,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
+import { createMultipleAssets } from "@/lib/supabase/data-services/assets"
+import { createMultipleLiabilities } from "@/lib/supabase/data-services/liabilities"
+import { getProfileOnboardingStatus, updateProfileOnboardingStatus } from "@/lib/supabase/data-services/profiles"
 
 type AssetType = {
   id: string
@@ -38,13 +40,12 @@ export default function OnboardingPage() {
   const [newAsset, setNewAsset] = useState({ type: "bank", name: "", value: "" })
   const [newLiability, setNewLiability] = useState({ type: "credit", name: "", value: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       if (!user) return
 
-      const { data: profile } = await supabase.from("profiles").select("is_onboarded").eq("id", user.id).single()
+      const profile = await getProfileOnboardingStatus(user.id)
 
       if (profile && profile.is_onboarded) {
         router.push("/dashboard")
@@ -52,7 +53,7 @@ export default function OnboardingPage() {
     }
 
     checkOnboardingStatus()
-  }, [user, router, supabase])
+  }, [user, router])
 
   const handleAddAsset = () => {
     if (newAsset.name && newAsset.value) {
@@ -100,21 +101,20 @@ export default function OnboardingPage() {
     try {
       // Save assets to Supabase
       if (assets.length > 0) {
-        const { error: assetsError } = await supabase.from("assets").insert(
+        await createMultipleAssets(
           assets.map((asset) => ({
             user_id: user.id,
             type: asset.type,
             name: asset.name,
             value: asset.value,
+            // currency: "USD", TODO: Add currency to onboarding
           })),
         )
-
-        if (assetsError) throw assetsError
       }
 
       // Save liabilities to Supabase
       if (liabilities.length > 0) {
-        const { error: liabilitiesError } = await supabase.from("liabilities").insert(
+        await createMultipleLiabilities(
           liabilities.map((liability) => ({
             user_id: user.id,
             type: liability.type,
@@ -122,14 +122,10 @@ export default function OnboardingPage() {
             value: liability.value,
           })),
         )
-
-        if (liabilitiesError) throw liabilitiesError
       }
 
       // Update user profile as onboarded
-      const { error: profileError } = await supabase.from("profiles").update({ is_onboarded: true }).eq("id", user.id)
-
-      if (profileError) throw profileError
+      await updateProfileOnboardingStatus(user.id, true)
 
       toast({
         title: "Setup complete",

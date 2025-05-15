@@ -9,7 +9,6 @@ import currency from 'currency.js'
 import { Bar } from 'react-chartjs-2'
 import { Chart, LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, TooltipItem, PointElement, ArcElement } from 'chart.js'
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useAuth } from "@/contexts/auth-context"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -32,28 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
-import { fetchAssets, fetchLiabilities } from "@/lib/supabase/dataService"
-import { fetchTransactions } from "@/lib/supabase/data-services/transactions"
+import { deleteTransaction, fetchTransactions, updateTransaction } from "@/lib/supabase/data-services/transactions"
+import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
+import { createLiability, deleteLiability, fetchLiabilities, updateLiability } from "@/lib/supabase/data-services/liabilities"
 
 // Register Chart.js components
 Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
-
-const CURRENCIES = [
-  { code: "USD", symbol: "$", name: "US Dollar" },
-  { code: "COP", symbol: "$", name: "Colombian Peso" },
-  { code: "ARS", symbol: "$", name: "Argentine Peso" },
-  { code: "BRL", symbol: "R$", name: "Brazilian Real" },
-] as const
-
-type CurrencyCode = typeof CURRENCIES[number]["code"]
-
-type Asset = {
-  id: string
-  type: string
-  name: string
-  value: number
-  currency: CurrencyCode
-}
 
 type Liability = {
   id: string
@@ -165,7 +148,6 @@ export default function DashboardPage() {
   const [activeCurrencies, setActiveCurrencies] = useState<Set<CurrencyCode>>(new Set())
   const [userCurrencies, setUserCurrencies] = useState<UserCurrencyPreference[]>([])
   const [currencyTotals, setCurrencyTotals] = useState<CurrencyTotals>({} as CurrencyTotals)
-  const supabase = getSupabaseBrowserClient()
   const [isEditTxOpen, setIsEditTxOpen] = useState(false)
   const [isDeleteTxOpen, setIsDeleteTxOpen] = useState(false)
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
@@ -458,17 +440,12 @@ export default function DashboardPage() {
         throw new Error("All fields are required")
       }
 
-      const { error } = await supabase
-        .from("assets")
-        .update({
-          name: editForm.name,
-          type: editForm.type,
-          value: Number(editForm.value),
-          currency: editForm.currency,
-        })
-        .eq("id", selectedAsset.id)
-
-      if (error) throw error
+      await updateAsset(selectedAsset.id, {
+        name: editForm.name,
+        type: editForm.type,
+        value: Number(editForm.value),
+        currency: editForm.currency,
+      })
 
       toast({
         title: "Asset updated",
@@ -493,17 +470,12 @@ export default function DashboardPage() {
         throw new Error("All fields are required")
       }
 
-      const { error } = await supabase
-        .from("liabilities")
-        .update({
-          name: editForm.name,
-          type: editForm.type,
-          value: Number(editForm.value),
-          currency: editForm.currency,
-        })
-        .eq("id", selectedLiability.id)
-
-      if (error) throw error
+      await updateLiability(selectedLiability.id, {
+        name: editForm.name,
+        type: editForm.type,
+        value: Number(editForm.value),
+        currency: editForm.currency,
+      })
 
       toast({
         title: "Liability updated",
@@ -550,17 +522,13 @@ export default function DashboardPage() {
         throw new Error("All fields are required")
       }
 
-      const { error } = await supabase
-        .from("assets")
-        .insert({
-          name: editForm.name,
-          type: editForm.type,
-          value: Number(editForm.value),
-          currency: editForm.currency,
-          user_id: user?.id,
-        })
-
-      if (error) throw error
+      await createAsset({
+        name: editForm.name,
+        type: editForm.type,
+        value: Number(editForm.value),
+        currency: editForm.currency,
+        user_id: user?.id as string,
+      })
 
       toast({
         title: "Asset added",
@@ -585,17 +553,13 @@ export default function DashboardPage() {
         throw new Error("All fields are required")
       }
 
-      const { error } = await supabase
-        .from("liabilities")
-        .insert({
-          name: editForm.name,
-          type: editForm.type,
-          value: Number(editForm.value),
-          currency: editForm.currency,
-          user_id: user?.id,
-        })
-
-      if (error) throw error
+      await createLiability({
+        name: editForm.name,
+        type: editForm.type,
+        value: Number(editForm.value),
+        currency: editForm.currency,
+        user_id: user?.id as string,
+      })
 
       toast({
         title: "Liability added",
@@ -618,12 +582,11 @@ export default function DashboardPage() {
     try {
       if (!itemToDelete) return
 
-      const { error } = await supabase
-        .from(itemToDelete.type === "asset" ? "assets" : "liabilities")
-        .delete()
-        .eq("id", itemToDelete.id)
-
-      if (error) throw error
+      if (itemToDelete.type === "asset") {
+        await deleteAsset(itemToDelete.id)
+      } else {
+        await deleteLiability(itemToDelete.id)
+      }
 
       toast({
         title: `${itemToDelete.type === "asset" ? "Asset" : "Liability"} deleted`,
@@ -660,17 +623,15 @@ export default function DashboardPage() {
   const handleEditTransaction = async () => {
     if (!selectedTx) return
     setEditTxLoading(true)
+
     try {
-      const { error } = await supabase
-        .from("transactions")
-        .update({
-          description: editTxForm.description,
-          amount: Number(editTxForm.amount),
-          date: editTxForm.date,
-          // category_id: editTxForm.categoryId, // Uncomment if you add category selection
-        })
-        .eq("id", selectedTx.id)
-      if (error) throw error
+      await updateTransaction(selectedTx.id, {
+        description: editTxForm.description,
+        amount: Number(editTxForm.amount),
+        date: editTxForm.date,
+        // category_id:  Uncomment if you add category selection
+      })
+
       toast({ title: "Transaction updated", description: "The transaction was updated successfully." })
       setIsEditTxOpen(false)
       setSelectedTx(null)
@@ -686,11 +647,7 @@ export default function DashboardPage() {
     if (!selectedTx) return
     setDeleteTxLoading(true)
     try {
-      const { error } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", selectedTx.id)
-      if (error) throw error
+      await deleteTransaction(selectedTx.id)
       toast({ title: "Transaction deleted", description: "The transaction was deleted successfully." })
       setIsDeleteTxOpen(false)
       setSelectedTx(null)

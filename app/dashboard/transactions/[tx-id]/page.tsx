@@ -4,21 +4,19 @@ import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { format } from "date-fns"
 import { PencilIcon, Trash2Icon, Loader2 } from "lucide-react"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { fetchTransactionById } from "@/lib/supabase/data-services/transactions"
-import { Transaction } from "@/lib/supabase/data-services/transactions.types"
+import { deleteTransaction, fetchTransactionById, updateTransaction } from "@/lib/supabase/data-services/transactions"
+import { Transaction } from "@/lib/supabase/data-services/transactions"
 
 export default function TransactionDetailsPage() {
   const router = useRouter()
   const params = useParams()
   const { toast } = useToast()
-  const supabase = getSupabaseBrowserClient()
   const [transaction, setTransaction] = useState<Transaction | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -66,16 +64,12 @@ export default function TransactionDetailsPage() {
     if (!transaction) return
     setEditLoading(true)
     try {
-      const { error } = await supabase
-        .from("transactions")
-        .update({
-          description: editForm.description,
-          amount: Number(editForm.amount),
-          date: editForm.date,
-          // category_id: editForm.categoryId,
-        })
-        .eq("id", transaction.id)
-      if (error) throw error
+      await updateTransaction(transaction.id, {
+        description: editForm.description,
+        amount: Number(editForm.amount),
+        date: editForm.date,
+        // category_id: editForm.categoryId,
+      })
       toast({ title: "Transaction updated", description: "The transaction was updated successfully." })
       setIsEditOpen(false)
       fetchTransaction()
@@ -90,11 +84,8 @@ export default function TransactionDetailsPage() {
     if (!transaction) return
     setDeleteLoading(true)
     try {
-      const { error } = await supabase
-        .from("transactions")
-        .delete()
-        .eq("id", transaction.id)
-      if (error) throw error
+      await deleteTransaction(transaction.id)
+
       toast({ title: "Transaction deleted", description: "The transaction was deleted successfully." })
       setIsDeleteOpen(false)
       router.push("/dashboard/transactions")
