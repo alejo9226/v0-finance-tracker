@@ -386,17 +386,28 @@ export default function DashboardPage() {
   }
 
   const formatCurrency = (amount: number, currencyCode: CurrencyCode | "") => {
-    if (currencyCode === "") return `${amount.toLocaleString()}`
-    const currencyInfo = CURRENCIES.find(c => c.code === currencyCode)
-    if (!currencyInfo) return `${amount.toLocaleString()}`
-    
-    return currency(amount, {
+    let displayAmount = amount;
+    let suffix = '';
+
+    if (Math.abs(amount) >= 1_000_000) {
+      displayAmount = amount / 1_000_000;
+      suffix = 'M';
+    } else if (Math.abs(amount) >= 1_000) {
+      displayAmount = amount / 1_000;
+      suffix = 'k';
+    }
+
+    if (currencyCode === "") return `${displayAmount.toFixed(suffix ? 1 : 0)}${suffix}`;
+    const currencyInfo = CURRENCIES.find(c => c.code === currencyCode);
+    if (!currencyInfo) return `${displayAmount.toFixed(suffix ? 1 : 0)}${suffix}`;
+
+    return currency(displayAmount, {
       symbol: currencyInfo.symbol,
-      precision: 0,
+      precision: suffix ? 1 : 0,
       pattern: '! #',
       separator: ',',
       decimal: '.'
-    }).format()
+    }).format() + suffix;
   }
 
   const convertCurrency = (amount: number, fromCurrency: CurrencyCode, toCurrency: CurrencyCode | ""): number => {
