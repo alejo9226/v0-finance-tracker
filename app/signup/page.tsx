@@ -25,7 +25,6 @@ export default function SignupPage() {
     password: "",
   })
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
-  const [useServerRoute, setUseServerRoute] = useState(true)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -37,27 +36,36 @@ export default function SignupPage() {
     setIsLoading(true)
     setDebugInfo(null)
 
-    if (useServerRoute) {
-      // Use server-side route for signup
-      try {
-        const response = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
+     // Use client-side Supabase signup
+     try {
+      // Attempt to sign up
+      const { data, error } = await signUpWrapper(
+        formData.email, 
+        formData.password, 
+        { data: { name: formData.name } }
+      )
+
+      if (error) {
+        setDebugInfo(`Error: ${error.message}`)
+        toast({
+          title: "Signup failed",
+          description: error.message,
+          variant: "destructive",
         })
+        return
+      }
 
-        const data = await response.json()
+      if (data.user) {
+        // Create profile entry
+        const { error: profileError } = await createProfile(data.user.id, formData.name)
 
-        if (!response.ok) {
-          setDebugInfo(`Server error: ${data.error}`)
-          toast({
-            title: "Signup failed",
-            description: data.error,
-            variant: "destructive",
-          })
-          return
+        if (profileError && 
+          typeof profileError === 'object' && 
+          'message' in profileError && 
+          typeof profileError.message === 'string'
+        ) {
+          setDebugInfo(`Profile creation error: ${profileError.message}`)
+          console.error("Profile creation error:", profileError)
         }
 
         toast({
@@ -66,74 +74,23 @@ export default function SignupPage() {
         })
 
         router.push("/login")
-      } catch (error: any) {
-        console.error("Signup error:", error)
-        setDebugInfo(`Exception: ${error.message}`)
+      } else {
+        setDebugInfo("No user returned from signup. Check email confirmation requirements.")
         toast({
-          title: "Error",
-          description: error.message || "Something went wrong",
-          variant: "destructive",
+          title: "Check your email",
+          description: "We've sent you a confirmation link to complete your signup",
         })
-      } finally {
-        setIsLoading(false)
       }
-    } else {
-      // Use client-side Supabase signup
-      try {
-        // Attempt to sign up
-        const { data, error } = await signUpWrapper(
-          formData.email, 
-          formData.password, 
-          { data: { name: formData.name } }
-        )
-
-        if (error) {
-          setDebugInfo(`Error: ${error.message}`)
-          toast({
-            title: "Signup failed",
-            description: error.message,
-            variant: "destructive",
-          })
-          return
-        }
-
-        if (data.user) {
-          // Create profile entry
-          const { error: profileError } = await createProfile(data.user.id, formData.name)
-
-          if (profileError && 
-            typeof profileError === 'object' && 
-            'message' in profileError && 
-            typeof profileError.message === 'string'
-          ) {
-            setDebugInfo(`Profile creation error: ${profileError.message}`)
-            console.error("Profile creation error:", profileError)
-          }
-
-          toast({
-            title: "Account created",
-            description: "You can now sign in with your credentials",
-          })
-
-          router.push("/login")
-        } else {
-          setDebugInfo("No user returned from signup. Check email confirmation requirements.")
-          toast({
-            title: "Check your email",
-            description: "We've sent you a confirmation link to complete your signup",
-          })
-        }
-      } catch (error: any) {
-        console.error("Signup error:", error)
-        setDebugInfo(`Exception: ${error.message}`)
-        toast({
-          title: "Error",
-          description: error.message || "Something went wrong",
-          variant: "destructive",
-        })
-      } finally {
-        setIsLoading(false)
-      }
+    } catch (error: any) {
+      console.error("Signup error:", error)
+      setDebugInfo(`Exception: ${error.message}`)
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -188,19 +145,6 @@ export default function SignupPage() {
                 onChange={handleChange}
               />
               <p className="text-xs text-muted-foreground">Password must be at least 6 characters</p>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="use-server-route"
-                checked={useServerRoute}
-                onChange={() => setUseServerRoute(!useServerRoute)}
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-              />
-              <Label htmlFor="use-server-route" className="text-sm font-normal">
-                Use server-side signup (recommended)
-              </Label>
             </div>
 
             {debugInfo && (
