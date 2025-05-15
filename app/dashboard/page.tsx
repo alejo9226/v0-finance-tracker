@@ -34,6 +34,8 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
 import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
 import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
+import { AssetList } from "@/components/dashboard/AssetList"
+import { LiabilityList } from "@/components/dashboard/LiabilityList"
 
 // Register Chart.js components
 Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
@@ -826,200 +828,39 @@ export default function DashboardPage() {
 
       <div className="mt-12 grid gap-8 md:grid-cols-2">
         {/* Assets */}
-        <Card>
-          <CardHeader className="relative group">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-xl sm:text-2xl">Assets</CardTitle>
-                <CardDescription>What you own</CardDescription>
-              </div>
-              <div className="block sm:hidden group-hover:block transition-opacity">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setEditForm({ name: "", type: "", value: "", currency: "USD" })
-                    setIsAddAssetOpen(true)
-                  }}
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span className="sr-only">Add Asset</span>
-                </Button>
-              </div>
-            </div>
-            {displayCurrency && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Showing values in {displayCurrency}
-              </p>
-            )}
-          </CardHeader>
-          <CardContent>
-            {assets.length > 0 ? (
-              <div className="space-y-4">
-                {assets.map((asset) => (
-                  <div
-                    key={asset.id}
-                    className="flex items-center justify-between p-4 rounded-lg border group hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-green-600">
-                        {getAssetIcon(asset.type)}
-                      </div>
-                      <div>
-                        <p className="font-medium">{asset.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {asset.type.charAt(0).toUpperCase() + asset.type.slice(1)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <p className="font-medium transition-transform group-hover:-translate-x-1">
-                        {displayCurrency 
-                          ? formatCurrency(convertCurrency(Number(asset.value), asset.currency, displayCurrency), displayCurrency)
-                          : formatCurrency(Number(asset.value), asset.currency)}
-                      </p>
-                      <div className="hidden group-hover:flex ml-2 transition-all duration-200">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => openEditAsset(asset)}
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-600"
-                          onClick={() => {
-                            setItemToDelete({ id: asset.id, type: "asset" })
-                            setIsConfirmDeleteOpen(true)
-                          }}
-                        >
-                          <Trash2Icon className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-muted-foreground">No assets added yet</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4" 
-                  onClick={() => {
-                    setEditForm({ name: "", type: "", value: "", currency: "COP" })
-                    setIsAddAssetOpen(true)
-                  }}
-                >
-                  Add Assets
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
+        <AssetList
+          assets={assets}
+          displayCurrency={displayCurrency}
+          formatCurrency={formatCurrency}
+          convertCurrency={convertCurrency}
+          onAdd={() => {
+            setEditForm({ name: "", type: "", value: "", currency: "USD" })
+            setIsAddAssetOpen(true)
+          }}
+          onEdit={openEditAsset}
+          onDelete={id => {
+            setItemToDelete({ id, type: "asset" })
+            setIsConfirmDeleteOpen(true)
+          }}
+          getAssetIcon={getAssetIcon}
+        />
         {/* Liabilities */}
-        <Card>
-          <CardHeader className="relative group">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-xl sm:text-2xl">Liabilities</CardTitle>
-                <CardDescription>What you owe</CardDescription>
-              </div>
-              <div className="block sm:hidden group-hover:block transition-opacity">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    setEditForm({ name: "", type: "", value: "", currency: "COP" })
-                    setIsAddLiabilityOpen(true)
-                  }}
-                >
-                  <PlusIcon className="h-4 w-4" />
-                  <span className="sr-only">Add Liability</span>
-                </Button>
-              </div>
-            </div>
-            {displayCurrency && (
-              <p className="text-sm text-muted-foreground mt-1">
-                Showing values in {displayCurrency}
-              </p>
-            )}
-          </CardHeader>
-          <CardContent>
-            {liabilities.length > 0 ? (
-              <div className="space-y-4">
-                {liabilities.map((liability) => (
-                  <div
-                    key={liability.id}
-                    className="flex items-center justify-between p-4 rounded-lg border group hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-                        {getLiabilityIcon(liability.type)}
-                      </div>
-                      <div>
-                        <p className="font-medium">{liability.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {liability.type.charAt(0).toUpperCase() + liability.type.slice(1)}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center">
-                      <p className="font-medium transition-transform group-hover:-translate-x-1">
-                        {displayCurrency 
-                          ? formatCurrency(convertCurrency(Number(liability.value), liability.currency as CurrencyCode, displayCurrency), displayCurrency)
-                          : formatCurrency(Number(liability.value), liability.currency as CurrencyCode)}
-                      </p>
-                      <div className="hidden group-hover:flex ml-2 transition-all duration-200">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => openEditLiability(liability)}
-                        >
-                          <PencilIcon className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-red-600"
-                          onClick={() => {
-                            setItemToDelete({ id: liability.id, type: "liability" })
-                            setIsConfirmDeleteOpen(true)
-                          }}
-                        >
-                          <Trash2Icon className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-muted-foreground">No liabilities added yet</p>
-                <Button 
-                  variant="outline" 
-                  className="mt-4" 
-                  onClick={() => {
-                    setEditForm({ name: "", type: "", value: "", currency: "COP" })
-                    setIsAddLiabilityOpen(true)
-                  }}
-                >
-                  Add Liabilities
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <LiabilityList
+          liabilities={liabilities}
+          displayCurrency={displayCurrency}
+          formatCurrency={formatCurrency}
+          convertCurrency={convertCurrency}
+          onAdd={() => {
+            setEditForm({ name: "", type: "", value: "", currency: "COP" })
+            setIsAddLiabilityOpen(true)
+          }}
+          onEdit={openEditLiability}
+          onDelete={id => {
+            setItemToDelete({ id, type: "liability" })
+            setIsConfirmDeleteOpen(true)
+          }}
+          getLiabilityIcon={getLiabilityIcon}
+        />
       </div>
 
       {/* Spending Summary */}
