@@ -6,13 +6,17 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import type { Session, User } from "@supabase/supabase-js"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { getSessionWrapper, onAuthStateChangeWrapper, signInWithPasswordWrapper, signOutWrapper, signUpWrapper } from "@/lib/supabase/data-services/auth"
 
 type AuthContextType = {
   user: User | null
   session: Session | null
   isLoading: boolean
-  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>
+  signUp: (
+    email: string, 
+    password: string, 
+    name: string
+  ) => Promise<{ error: any }>
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
 }
@@ -24,12 +28,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
     const getSession = async () => {
-      // TODO: Add wrapper to get session
-      const { data: { session }, error } = await supabase.auth.getSession()
+      const { data: { session }, error } = await getSessionWrapper()
       setSession(session)
       setUser(session?.user ?? null)
       setIsLoading(false)
@@ -37,10 +39,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getSession()
 
-    // TODO: Add wrapper to listen for auth state changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = onAuthStateChangeWrapper((_event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
       setIsLoading(false)
@@ -49,36 +50,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe()
     }
-  }, [supabase.auth])
+  }, [getSessionWrapper, onAuthStateChangeWrapper])
 
   const signUp = async (email: string, password: string, name: string) => {
-    // TODO: Add wrapper to sign up
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-        },
-      },
-    })
+    const { error } = await signUpWrapper(
+      email, 
+      password, 
+      { data: { name } }
+    )
 
     return { error }
   }
 
   const signIn = async (email: string, password: string) => {
-    // TODO: Add wrapper to sign in with password
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await signInWithPasswordWrapper(
       email,
-      password,
-    })
+      password
+    )
 
     return { error }
   }
 
   const signOut = async () => {
-    // TODO: Add wrapper to sign out
-    await supabase.auth.signOut()
+    await signOutWrapper()
     router.push("/login")
   }
 

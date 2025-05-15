@@ -12,31 +12,17 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
-import { createMultipleAssets } from "@/lib/supabase/data-services/assets"
-import { createMultipleLiabilities } from "@/lib/supabase/data-services/liabilities"
+import { Asset, createMultipleAssets } from "@/lib/supabase/data-services/assets"
+import { createMultipleLiabilities, Liability } from "@/lib/supabase/data-services/liabilities"
 import { getProfileOnboardingStatus, updateProfileOnboardingStatus } from "@/lib/supabase/data-services/profiles"
-
-type AssetType = {
-  id: string
-  type: string
-  name: string
-  value: number
-}
-
-type LiabilityType = {
-  id: string
-  type: string
-  name: string
-  value: number
-}
 
 export default function OnboardingPage() {
   const router = useRouter()
   const { user } = useAuth()
   const { toast } = useToast()
   const [step, setStep] = useState(1)
-  const [assets, setAssets] = useState<AssetType[]>([])
-  const [liabilities, setLiabilities] = useState<LiabilityType[]>([])
+  const [assets, setAssets] = useState<Omit<Asset, 'currency' | 'user_id'>[]>([])
+  const [liabilities, setLiabilities] = useState<Omit<Liability, 'currency' | 'user_id'>[]>([])
   const [newAsset, setNewAsset] = useState({ type: "bank", name: "", value: "" })
   const [newLiability, setNewLiability] = useState({ type: "credit", name: "", value: "" })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -45,7 +31,7 @@ export default function OnboardingPage() {
     const checkOnboardingStatus = async () => {
       if (!user) return
 
-      const profile = await getProfileOnboardingStatus(user.id)
+      const {data: profile} = await getProfileOnboardingStatus(user.id)
 
       if (profile && profile.is_onboarded) {
         router.push("/dashboard")

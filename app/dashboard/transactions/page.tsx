@@ -11,25 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useToast } from "@/hooks/use-toast"
-import { fetchTransactions } from "@/lib/supabase/data-services/transactions"
-
-type Transaction = {
-  id: string
-  amount: number
-  type: "income" | "expense"
-  description: string
-  date: string
-  category: {
-    id: string
-    name: string
-    icon: string
-    color: string
-  }
-  asset: {
-    id: string
-    name: string
-  }
-}
+import { fetchTransactions, Transaction } from "@/lib/supabase/data-services/transactions"
 
 export default function TransactionsPage() {
   const router = useRouter()

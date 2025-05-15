@@ -4,9 +4,9 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { testConnectivityToSupabase } from "@/lib/supabase/data-services/auth"
 
 export default function TestSupabasePage() {
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
@@ -16,7 +16,6 @@ export default function TestSupabasePage() {
   useEffect(() => {
     async function testConnection() {
       try {
-        const supabase = getSupabaseBrowserClient()
 
         // Test environment variables
         setDetails({
@@ -27,8 +26,7 @@ export default function TestSupabasePage() {
         })
 
         // Test a simple query
-        // TODO: Add wrapper to get profiles
-        const { data, error } = await supabase.from("profiles").select("count").limit(1)
+        const { data, error } = await testConnectivityToSupabase()
 
         if (error) {
           setStatus("error")

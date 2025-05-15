@@ -7,7 +7,7 @@ export interface Transaction {
   type: "income" | "expense"
   description: string
   date: Date
-  category: Category
+  category: Omit<Category, 'type' | 'user_id'>
   asset: Pick<Asset, 'id' | 'name'>
 }
 

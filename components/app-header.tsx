@@ -1,12 +1,12 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { MainNav } from "@/components/main-nav"
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Menu as MenuIcon } from "lucide-react"
 import { useState } from "react"
+import { signOutWrapper } from "@/lib/supabase/data-services/auth"
 
 type AppHeaderProps = {
   user: any
@@ -14,12 +14,10 @@ type AppHeaderProps = {
 
 export function AppHeader({ user }: AppHeaderProps) {
   const router = useRouter()
-  const supabase = getSupabaseBrowserClient()
   const [open, setOpen] = useState(false)
 
   const handleSignOut = async () => {
-    // TODO: Add wrapper to sign out
-    await supabase.auth.signOut()
+    await signOutWrapper()
     router.push("/login")
   }
 

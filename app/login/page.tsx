@@ -7,12 +7,13 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { signInWithPasswordWrapper } from "@/lib/supabase/data-services/auth"
+import { getProfileOnboardingStatus } from "@/lib/supabase/data-services/profiles"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -35,15 +36,12 @@ export default function LoginPage() {
     setDebugInfo(null)
 
     try {
-      const supabase = getSupabaseBrowserClient()
-
       console.log("Login attempt for:", formData.email)
 
-      // TODO: Add wrapper to sign in with password
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      })
+      const { data, error } = await signInWithPasswordWrapper(
+        formData.email,
+        formData.password
+      )
 
       console.log("Login response:", { data: !!data, error })
 
@@ -59,18 +57,18 @@ export default function LoginPage() {
 
       if (data.user) {
         // Check if user is onboarded
-        const { data: profile, error: profileError } = await supabase
-          .from("profiles")
-          .select("is_onboarded")
-          .eq("id", data.user.id)
-          .single()
+        const { data: profile, error } = await getProfileOnboardingStatus(data.user.id)
 
-        if (profileError) {
-          setDebugInfo(`Profile fetch error: ${profileError.message}`)
-          console.error("Profile fetch error:", profileError)
+        if (error && 
+          typeof error === 'object' && 
+          'message' in error && 
+          typeof error.message === 'string'
+        ) {
+          setDebugInfo(`Profile fetch error: ${error.message}`)
+          console.error("Profile fetch error:", error)
         }
 
-        if (profile && profile.is_onboarded) {
+        if (profile?.is_onboarded) {
           router.push("/dashboard")
         } else {
           router.push("/onboarding")

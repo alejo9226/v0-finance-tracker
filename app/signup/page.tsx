@@ -7,12 +7,13 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ArrowLeft } from "lucide-react"
 
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { signUpWrapper } from "@/lib/supabase/data-services/auth"
+import { createProfile } from "@/lib/supabase/data-services/profiles"
 
 export default function SignupPage() {
   const router = useRouter()
@@ -79,24 +80,12 @@ export default function SignupPage() {
     } else {
       // Use client-side Supabase signup
       try {
-        const supabase = getSupabaseBrowserClient()
-
-        console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL)
-        console.log("Supabase client initialized:", !!supabase)
-
         // Attempt to sign up
-        // TODO: Add wrapper to sign up
-        const { data, error } = await supabase.auth.signUp({
-          email: formData.email,
-          password: formData.password,
-          options: {
-            data: {
-              name: formData.name,
-            },
-          },
-        })
-
-        console.log("Signup response:", { data, error })
+        const { data, error } = await signUpWrapper(
+          formData.email, 
+          formData.password, 
+          { data: { name: formData.name } }
+        )
 
         if (error) {
           setDebugInfo(`Error: ${error.message}`)
@@ -110,12 +99,13 @@ export default function SignupPage() {
 
         if (data.user) {
           // Create profile entry
-          const { error: profileError } = await supabase
-            .from("profiles")
-            .insert([{ id: data.user.id, name: formData.name, is_onboarded: false }])
-            .select()
+          const { error: profileError } = await createProfile(data.user.id, formData.name)
 
-          if (profileError) {
+          if (profileError && 
+            typeof profileError === 'object' && 
+            'message' in profileError && 
+            typeof profileError.message === 'string'
+          ) {
             setDebugInfo(`Profile creation error: ${profileError.message}`)
             console.error("Profile creation error:", profileError)
           }

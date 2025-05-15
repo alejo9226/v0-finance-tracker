@@ -10,8 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { deleteTransaction, fetchTransactionById, updateTransaction } from "@/lib/supabase/data-services/transactions"
-import { Transaction } from "@/lib/supabase/data-services/transactions"
+import { deleteTransaction, fetchTransactionById, updateTransaction, Transaction } from "@/lib/supabase/data-services/transactions"
 
 export default function TransactionDetailsPage() {
   const router = useRouter()
@@ -55,7 +54,7 @@ export default function TransactionDetailsPage() {
     setEditForm({
       description: transaction?.description || "",
       amount: transaction?.amount.toString() || "",
-      date: transaction?.date.slice(0, 10) || "",
+      date: format(transaction?.date || new Date(), "yyyy-MM-dd") || "",
     })
     setIsEditOpen(true)
   }
@@ -67,7 +66,7 @@ export default function TransactionDetailsPage() {
       await updateTransaction(transaction.id, {
         description: editForm.description,
         amount: Number(editForm.amount),
-        date: editForm.date,
+        date: new Date(editForm.date),
         // category_id: editForm.categoryId,
       })
       toast({ title: "Transaction updated", description: "The transaction was updated successfully." })

@@ -31,38 +31,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
-import { deleteTransaction, fetchTransactions, updateTransaction } from "@/lib/supabase/data-services/transactions"
+import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
 import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
-import { createLiability, deleteLiability, fetchLiabilities, updateLiability } from "@/lib/supabase/data-services/liabilities"
+import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
 
 // Register Chart.js components
 Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
-
-type Liability = {
-  id: string
-  type: string
-  name: string
-  value: number
-  currency: CurrencyCode
-}
-
-export type Transaction = {
-  id: string
-  amount: number
-  type: "income" | "expense"
-  description: string
-  date: string
-  category: {
-    id: string
-    name: string
-    icon: string
-    color: string
-  }
-  asset: {
-    id: string
-    name: string
-  }
-}
 
 type UserCurrencyPreference = {
   code: CurrencyCode
@@ -103,7 +77,7 @@ function getTransactionMonths(transactions: Transaction[]) {
   const months = new Set<string>();
   transactions.forEach(t => {
     if (t.type === 'expense') {
-      const d = parseISO(t.date);
+      const d = parseISO(t.date as unknown as string)
       months.add(format(d, 'yyyy-MM'));
     }
   });
@@ -168,7 +142,7 @@ export default function DashboardPage() {
   const monthEnd = endOfMonth(selectedMonth)
   const filteredExpenses = recentTransactions.filter(t =>
     t.type === 'expense' &&
-    isWithinInterval(parseISO(t.date), { start: monthStart, end: monthEnd })
+    isWithinInterval(parseISO(t.date as unknown as string), { start: monthStart, end: monthEnd })
   )
   const spendingByCategory = calculateSpendingByCategory(filteredExpenses)
 
@@ -301,7 +275,7 @@ export default function DashboardPage() {
       // Calculate liabilities per currency with proper type assertion
       const typedLiabilitiesData = liabilitiesData as Liability[] || []
       typedLiabilitiesData.forEach((liability) => {
-        newCurrencyTotals[liability.currency].liabilities += Number(liability.value)
+        newCurrencyTotals[liability.currency as CurrencyCode].liabilities += Number(liability.value)
       })
 
       // Now filter for currencies with non-zero values
@@ -325,7 +299,7 @@ export default function DashboardPage() {
 
       const liabilitiesTotal = typedLiabilitiesData.reduce((sum, liability) => {
         if (displayCurrency) {
-          return sum + convertCurrency(Number(liability.value), liability.currency, displayCurrency)
+          return sum + convertCurrency(Number(liability.value), liability.currency as CurrencyCode, displayCurrency)
         }
         return sum + Number(liability.value)
       }, 0)
@@ -362,7 +336,7 @@ export default function DashboardPage() {
 
     const liabilitiesTotal = liabilities.reduce((sum, liability) => {
       if (displayCurrency) {
-        return sum + convertCurrency(Number(liability.value), liability.currency, displayCurrency)
+        return sum + convertCurrency(Number(liability.value), liability.currency as CurrencyCode, displayCurrency)
       }
       return sum + Number(liability.value)
     }, 0)
@@ -376,7 +350,7 @@ export default function DashboardPage() {
     // Get unique currencies from assets and liabilities
     const currencySet = new Set<CurrencyCode>()
     assets.forEach(asset => currencySet.add(asset.currency))
-    liabilities.forEach(liability => currencySet.add(liability.currency))
+    liabilities.forEach(liability => currencySet.add(liability.currency as CurrencyCode))
     setActiveCurrencies(currencySet)
 
     // Create user currencies array with preference
@@ -511,7 +485,7 @@ export default function DashboardPage() {
       name: liability.name,
       type: liability.type,
       value: liability.value.toString(),
-      currency: liability.currency,
+      currency: liability.currency as CurrencyCode,
     })
     setIsEditLiabilityOpen(true)
   }
@@ -628,7 +602,7 @@ export default function DashboardPage() {
       await updateTransaction(selectedTx.id, {
         description: editTxForm.description,
         amount: Number(editTxForm.amount),
-        date: editTxForm.date,
+        date: new Date(editTxForm.date),
         // category_id:  Uncomment if you add category selection
       })
 
@@ -988,8 +962,8 @@ export default function DashboardPage() {
                     <div className="flex items-center">
                       <p className="font-medium transition-transform group-hover:-translate-x-1">
                         {displayCurrency 
-                          ? formatCurrency(convertCurrency(Number(liability.value), liability.currency, displayCurrency), displayCurrency)
-                          : formatCurrency(Number(liability.value), liability.currency)}
+                          ? formatCurrency(convertCurrency(Number(liability.value), liability.currency as CurrencyCode, displayCurrency), displayCurrency)
+                          : formatCurrency(Number(liability.value), liability.currency as CurrencyCode)}
                       </p>
                       <div className="hidden group-hover:flex ml-2 transition-all duration-200">
                         <Button
@@ -1074,11 +1048,11 @@ export default function DashboardPage() {
               // Filter income and expenses for the selected month
               const filteredIncomes = recentTransactions.filter(t =>
                 t.type === 'income' &&
-                isWithinInterval(parseISO(t.date), { start: monthStart, end: monthEnd })
+                isWithinInterval(parseISO(t.date as unknown as string), { start: monthStart, end: monthEnd })
               );
               const filteredExpenses = recentTransactions.filter(t =>
                 t.type === 'expense' &&
-                isWithinInterval(parseISO(t.date), { start: monthStart, end: monthEnd })
+                isWithinInterval(parseISO(t.date as unknown as string), { start: monthStart, end: monthEnd })
               );
               // Sum by currency
               const incomeTotals: { [key: string]: number } = {};
@@ -1223,7 +1197,7 @@ export default function DashboardPage() {
                             setEditTxForm({
                               description: transaction.description,
                               amount: transaction.amount.toString(),
-                              date: transaction.date.slice(0, 10),
+                              date: transaction.date.toISOString().slice(0, 10),
                               categoryId: transaction.category?.id || ""
                             })
                             setIsEditTxOpen(true)
