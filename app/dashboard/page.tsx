@@ -690,7 +690,7 @@ export default function DashboardPage() {
           )}
           <Link href="/dashboard/transactions/new">
             <Button size="lg">
-              <PlusIcon className="mr-2 h-5 w-5" />
+              <PlusIcon className="sm:mr-2 mr-0 h-5 w-5" />
               New Transaction
             </Button>
           </Link>
@@ -709,17 +709,19 @@ export default function DashboardPage() {
         </Link>
       )}
         <Link 
-          href={assets.length > 0 && liabilities.length > 0 ? "/dashboard/transactions/new" : ""}
+          href={assets.length > 0 ? "/dashboard/transactions/new" : ""}
         >
           <Button 
             className="p-2" 
             size="sm"
             onClick={() => {
-              setEditForm({ name: "", type: "", value: "", currency: "COP" })
-              setIsAddAssetOpen(true)
+              if (assets.length === 0) {
+                setEditForm({ name: "", type: "", value: "", currency: "COP" })
+                setIsAddAssetOpen(true)
+              }
             }}
           >
-            <PlusIcon className="mr-2 h-5 w-5" />
+            <PlusIcon className="sm:mr-2 mr-0 h-5 w-5" />
             {assets.length > 0 ? "New Transaction" : "Add Accounts"}
           </Button>
         </Link>
@@ -1049,7 +1051,7 @@ export default function DashboardPage() {
                             setEditTxForm({
                               description: transaction.description,
                               amount: transaction.amount.toString(),
-                              date: transaction.date.toISOString().slice(0, 10),
+                              date: transaction.date.toString().slice(0, 10),
                               categoryId: transaction.category?.id || ""
                             })
                             setIsEditTxOpen(true)
