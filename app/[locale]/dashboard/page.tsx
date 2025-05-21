@@ -36,6 +36,8 @@ import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset,
 import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
 import { AssetList } from "@/components/dashboard/AssetList"
 import { LiabilityList } from "@/components/dashboard/LiabilityList"
+import { useScopedI18n } from "@/locales/client"
+import { useI18n } from "@/locales/client"
 
 // Register Chart.js components
 Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
@@ -136,6 +138,8 @@ export default function DashboardPage() {
   const [editTxLoading, setEditTxLoading] = useState(false)
   const [deleteTxLoading, setDeleteTxLoading] = useState(false)
   const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()))
+  
+  const t = useI18n()
 
   const monthOptions = getTransactionMonths(recentTransactions)
 
@@ -661,8 +665,8 @@ export default function DashboardPage() {
     <div className="py-8">
       <div className="mb-12 flex flex-row md:justify-between gap-6">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Financial Dashboard</h1>
-          <p className="mt-2 text-md sm:text-xl text-muted-foreground">Your financial overview at a glance</p>
+          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+          <p className="mt-2 text-md sm:text-xl text-muted-foreground">{t('dashboard.subtitle')}</p>
         </div>
         
         {userCurrencies.length > 1 && (

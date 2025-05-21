@@ -1,10 +1,13 @@
 import Link from "next/link"
-import { ArrowRight, Menu, X } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import Header from "./components/Header"
+import { getI18n } from "@/locales/server"
+import { getScopedI18n } from "@/locales/server"
 
-export default function Home() {
+export default async function Home() {
+  const t = await getI18n()
   
   return (
     <div className="min-h-screen bg-background">
@@ -17,11 +20,10 @@ export default function Home() {
                 <div className="flex flex-col justify-center space-y-4">
                   <div className="space-y-2">
                     <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                      Track Your Financial Health
+                      {t('marketing.hero.title')}
                     </h1>
                     <p className="max-w-[600px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                      Get a clear picture of your assets, liabilities, and equity. Make informed decisions about your
-                      financial future.
+                      {t('marketing.hero.subtitle')}
                     </p>
                   </div>
                   <div className="flex flex-col gap-2 min-[400px]:flex-row">
