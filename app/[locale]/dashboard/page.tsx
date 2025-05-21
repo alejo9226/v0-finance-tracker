@@ -63,11 +63,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
-import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
+import { updateAsset, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
 import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
 import { useI18n } from "@/locales/client"
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/hooks/use-toast'
+import { Asset, CURRENCIES, CurrencyCode } from "@/domain/entities/Asset"
+import { EXCHANGE_RATES } from "@/lib/constants/exchangeRates"
+import { calculateTotalValue } from "@/application/useCases/assets/calculateTotalValue"
+import { fetchAssets } from "@/application/useCases/assets/fetchAssets"
 
 // Register Chart.js components
 Chart.register(
@@ -84,13 +88,6 @@ Chart.register(
 type UserCurrencyPreference = {
   code: CurrencyCode
   isPreferred: boolean
-}
-
-const EXCHANGE_RATES: Record<CurrencyCode, number> = {
-  USD: 1,
-  ARS: 1130,
-  BRL: 5.69,
-  COP: 4223,
 }
 
 // Add new types and state for per-currency totals
@@ -389,12 +386,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Calculate converted totals when display currency changes
-    const assetsTotal = assets.reduce((sum, asset) => {
-      if (displayCurrency) {
-        return sum + convertCurrency(Number(asset.value), asset.currency, displayCurrency)
-      }
-      return sum + Number(asset.value)
-    }, 0)
+    const assetsTotal = calculateTotalValue(assets, displayCurrency)
 
     const liabilitiesTotal = liabilities.reduce((sum, liability) => {
       if (displayCurrency) {

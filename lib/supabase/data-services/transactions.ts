@@ -1,6 +1,7 @@
+import { Asset } from '@/domain/entities/Asset'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import { Asset } from '@/lib/supabase/data-services/assets'
 import { Category } from '@/lib/supabase/data-services/categories'
+
 export interface Transaction {
   id: string
   amount: number
@@ -135,7 +136,7 @@ export async function updateTransaction(
   transaction: Pick<
     Transaction,
     'description' | 'amount' | 'date'
-    // category_id: Uncomment if you add category selection
+  // category_id: Uncomment if you add category selection
   >,
 ): Promise<void> {
   const { error } = await supabase.from('transactions').update(transaction).eq('id', id)

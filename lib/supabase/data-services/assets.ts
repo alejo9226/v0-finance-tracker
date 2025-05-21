@@ -1,22 +1,5 @@
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-
-export const CURRENCIES = [
-  { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'COP', symbol: '$', name: 'Colombian Peso' },
-  { code: 'ARS', symbol: '$', name: 'Argentine Peso' },
-  { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
-] as const
-
-export type CurrencyCode = (typeof CURRENCIES)[number]['code']
-
-export interface Asset {
-  id: string
-  type: string
-  name: string
-  value: number
-  currency: CurrencyCode
-  user_id: string
-}
+import { Asset } from '@/domain/entities/Asset'
 
 const supabase = getSupabaseBrowserClient()
 
