@@ -1,18 +1,19 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { Chart, LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, TooltipItem, PointElement, ArcElement } from 'chart.js'
+import currency from 'currency.js'
 import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns"
 import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon, Trash2Icon, Loader2 } from "lucide-react"
-import currency from 'currency.js'
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect, useState, useCallback } from "react"
 import { Bar } from 'react-chartjs-2'
-import { Chart, LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, TooltipItem, PointElement, ArcElement } from 'chart.js'
 
-import { useAuth } from "@/contexts/auth-context"
+import { AssetList } from "@/components/dashboard/AssetList"
+import { LiabilityList } from "@/components/dashboard/LiabilityList"
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { useToast } from "@/hooks/use-toast"
 import {
   Dialog,
   DialogContent,
@@ -30,12 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
-import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
+import { useAuth } from "@/contexts/auth-context"
+import { useToast } from "@/hooks/use-toast"
 import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
 import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
-import { AssetList } from "@/components/dashboard/AssetList"
-import { LiabilityList } from "@/components/dashboard/LiabilityList"
+import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
 
 // Register Chart.js components
 Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)

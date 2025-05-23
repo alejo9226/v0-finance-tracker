@@ -1,5 +1,6 @@
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Session, AuthError, User, AuthResponse } from "@supabase/supabase-js";
+
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 const supabase = getSupabaseBrowserClient()
 

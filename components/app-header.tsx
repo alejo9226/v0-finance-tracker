@@ -1,11 +1,12 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { MainNav } from "@/components/main-nav"
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Menu as MenuIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useState } from "react"
+
+import { MainNav } from "@/components/main-nav"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { signOutWrapper } from "@/lib/supabase/data-services/auth"
 
 type AppHeaderProps = {

@@ -1,9 +1,8 @@
 "use client"
 
-import type React from "react"
-
-import { useEffect, useState } from "react"
 import { PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
+import type React from "react"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,10 +17,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/contexts/auth-context"
-import { fetchCountTransactionsByCategory, removeCategoryFromTransactions } from "@/lib/supabase/data-services/transactions"
+import { useToast } from "@/hooks/use-toast"
 import { Category, createCategory, deleteCategory, fetchCategories, updateCategory } from "@/lib/supabase/data-services/categories"
+import { fetchCountTransactionsByCategory, removeCategoryFromTransactions } from "@/lib/supabase/data-services/transactions"
 
 export default function CategoriesPage() {
   const { toast } = useToast()

@@ -1,6 +1,6 @@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { Category } from "@/lib/supabase/data-services/categories"
 import { Asset } from "@/lib/supabase/data-services/assets"
+import { Category } from "@/lib/supabase/data-services/categories"
 export interface Transaction {
   id: string
   amount: number

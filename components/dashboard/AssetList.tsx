@@ -1,9 +1,10 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
-import { Asset, CurrencyCode } from "@/lib/supabase/data-services/assets"
 import React from "react"
+
 import { EntityListCard } from "@/components/dashboard/shared/EntityListCard"
+import { Button } from "@/components/ui/button"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Asset, CurrencyCode } from "@/lib/supabase/data-services/assets"
 
 type AssetListProps = {
   assets: Asset[]
