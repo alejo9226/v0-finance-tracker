@@ -18,11 +18,7 @@ const compat = new FlatCompat({
 export default defineConfig([
   {
     files: ['**/*.{js,jsx,ts,tsx}'],
-    ignores: [
-      'node_modules',
-      '.next',
-      'dist',
-    ],
+    ignores: ['node_modules', '.next', 'dist'],
     languageOptions: {
       parserOptions: {
         ecmaVersion: 2022,
@@ -38,10 +34,7 @@ export default defineConfig([
       'import/order': [
         'warn',
         {
-          groups: [
-            ['builtin', 'external'],
-            ['internal'],
-          ],
+          groups: [['builtin', 'external'], ['internal']],
           'newlines-between': 'always',
           alphabetize: {
             order: 'asc',

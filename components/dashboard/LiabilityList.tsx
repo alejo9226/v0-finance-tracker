@@ -1,17 +1,17 @@
-import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
-import React from "react"
+import { PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
+import React from 'react'
 
-import { EntityListCard } from "@/components/dashboard/shared/EntityListCard"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { CurrencyCode } from "@/lib/supabase/data-services/assets"
-import { Liability } from "@/lib/supabase/data-services/liabilities"
+import { EntityListCard } from '@/components/dashboard/shared/EntityListCard'
+import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
+import { CurrencyCode } from '@/lib/supabase/data-services/assets'
+import { Liability } from '@/lib/supabase/data-services/liabilities'
 
 type LiabilityListProps = {
   liabilities: Liability[]
-  displayCurrency: CurrencyCode | ""
-  formatCurrency: (amount: number, currency: CurrencyCode | "") => string
-  convertCurrency: (amount: number, from: CurrencyCode, to: CurrencyCode | "") => number
+  displayCurrency: CurrencyCode | ''
+  formatCurrency: (amount: number, currency: CurrencyCode | '') => string
+  convertCurrency: (amount: number, from: CurrencyCode, to: CurrencyCode | '') => number
   onAdd: () => void
   onEdit: (liability: Liability) => void
   onDelete: (id: string) => void
@@ -43,4 +43,4 @@ export function LiabilityList({
       getEntityIcon={getLiabilityIcon}
     />
   )
-} 
+}

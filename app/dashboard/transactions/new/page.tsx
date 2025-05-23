@@ -1,42 +1,58 @@
-"use client"
+'use client'
 
+import { format } from 'date-fns'
+import { ArrowLeft, CalendarIcon, PlusIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import type React from 'react'
 
-import { format } from "date-fns"
-import { ArrowLeft, CalendarIcon, PlusIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
-import type React from "react"
-
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { useAuth } from "@/contexts/auth-context"
-import { useToast } from "@/hooks/use-toast"
-import { Asset, fetchAssetCurrentValue, fetchAssets, updateAsset } from "@/lib/supabase/data-services/assets"
-import { fetchCategories } from "@/lib/supabase/data-services/categories"
-import { createTransaction, Transaction } from "@/lib/supabase/data-services/transactions"
-
+import { Button } from '@/components/ui/button'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { useAuth } from '@/contexts/auth-context'
+import { useToast } from '@/hooks/use-toast'
+import {
+  Asset,
+  fetchAssetCurrentValue,
+  fetchAssets,
+  updateAsset,
+} from '@/lib/supabase/data-services/assets'
+import { fetchCategories } from '@/lib/supabase/data-services/categories'
+import { createTransaction, Transaction } from '@/lib/supabase/data-services/transactions'
 
 export default function NewTransactionPage() {
   const router = useRouter()
   const { toast } = useToast()
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
-  const [transactionType, setTransactionType] = useState<"income" | "expense">("expense")
-  const [categories, setCategories] = useState<Transaction["category"][]>([])
+  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense')
+  const [categories, setCategories] = useState<Transaction['category'][]>([])
   const [assets, setAssets] = useState<Asset[]>([])
   const [date, setDate] = useState<Date>(new Date())
   const [formData, setFormData] = useState({
-    amount: "",
-    categoryId: "",
-    assetId: "",
-    description: "",
+    amount: '',
+    categoryId: '',
+    assetId: '',
+    description: '',
   })
 
   useEffect(() => {
@@ -51,14 +67,14 @@ export default function NewTransactionPage() {
 
       setCategories(categoriesData || [])
       // Reset category selection when type changes
-      setFormData((prev) => ({ ...prev, categoryId: "" }))
+      setFormData((prev) => ({ ...prev, categoryId: '' }))
 
-      setAssets(assetsData as Asset[] || [])
+      setAssets((assetsData as Asset[]) || [])
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to load data",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to load data',
+        variant: 'destructive',
       })
     }
   }
@@ -78,17 +94,17 @@ export default function NewTransactionPage() {
 
     try {
       if (!formData.amount || !formData.assetId || !formData.categoryId) {
-        throw new Error("Amount, account and category are required")
+        throw new Error('Amount, account and category are required')
       }
 
       const amount = Number.parseFloat(formData.amount)
       if (isNaN(amount) || amount <= 0) {
-        throw new Error("Please enter a valid amount")
+        throw new Error('Please enter a valid amount')
       }
 
       // First, insert the transaction
       await createTransaction({
-        amount: transactionType === "expense" ? -amount : amount,
+        amount: transactionType === 'expense' ? -amount : amount,
         type: transactionType,
         category_id: formData.categoryId!,
         asset_id: formData.assetId,
@@ -100,21 +116,22 @@ export default function NewTransactionPage() {
       // Then, update the asset balance
       const assetData: Asset = await fetchAssetCurrentValue(formData.assetId)
 
-      const newValue = Number.parseFloat(`${assetData.value}`) + (transactionType === "expense" ? -amount : amount)
+      const newValue =
+        Number.parseFloat(`${assetData.value}`) + (transactionType === 'expense' ? -amount : amount)
 
       await updateAsset(formData.assetId, { value: newValue })
 
       toast({
-        title: "Transaction added",
+        title: 'Transaction added',
         description: `Your ${transactionType} has been recorded successfully`,
       })
 
-      router.push("/dashboard/transactions")
+      router.push('/dashboard/transactions')
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add transaction",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to add transaction',
+        variant: 'destructive',
       })
     } finally {
       setIsLoading(false)
@@ -140,7 +157,7 @@ export default function NewTransactionPage() {
               <RadioGroup
                 defaultValue="expense"
                 value={transactionType}
-                onValueChange={(value) => setTransactionType(value as "income" | "expense")}
+                onValueChange={(value) => setTransactionType(value as 'income' | 'expense')}
                 className="flex"
               >
                 <div className="flex items-center space-x-2 mr-6">
@@ -178,18 +195,26 @@ export default function NewTransactionPage() {
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(date, "PPP")}
+                    {format(date, 'PPP')}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={date} onSelect={(date) => date && setDate(date)} initialFocus />
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={(date) => date && setDate(date)}
+                    initialFocus
+                  />
                 </PopoverContent>
               </Popover>
             </div>
 
             <div className="space-y-2">
               <Label>Category</Label>
-              <Select value={formData.categoryId} onValueChange={(value) => handleSelectChange("categoryId", value)}>
+              <Select
+                value={formData.categoryId}
+                onValueChange={(value) => handleSelectChange('categoryId', value)}
+              >
                 {categories.length === 0 ? (
                   <div className="flex items-center space-x-2">
                     <Input
@@ -197,10 +222,14 @@ export default function NewTransactionPage() {
                       name="category"
                       type="text"
                       placeholder="No categories found"
-                      value={""}
+                      value={''}
                       disabled
                     />
-                    <Button variant="secondary" size="icon" onClick={() => router.push("/dashboard/categories")}>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      onClick={() => router.push('/dashboard/categories')}
+                    >
                       <PlusIcon className="h-4 w-4" />
                     </Button>
                   </div>
@@ -211,11 +240,11 @@ export default function NewTransactionPage() {
                     </SelectTrigger>
                     {categories.length > 0 ? (
                       <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          <span className="mr-2">{category.icon}</span>
-                          {category.name}
-                        </SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            <span className="mr-2">{category.icon}</span>
+                            {category.name}
+                          </SelectItem>
                         ))}
                       </SelectContent>
                     ) : (
@@ -235,15 +264,18 @@ export default function NewTransactionPage() {
                     name="asset"
                     type="text"
                     placeholder="No accounts found"
-                    value={""}
+                    value={''}
                     disabled
                   />
-                  <Button variant="secondary" size="icon" onClick={() => router.push("/dashboard")}>
+                  <Button variant="secondary" size="icon" onClick={() => router.push('/dashboard')}>
                     <PlusIcon className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
-                <Select value={formData.assetId} onValueChange={(value) => handleSelectChange("assetId", value)}>
+                <Select
+                  value={formData.assetId}
+                  onValueChange={(value) => handleSelectChange('assetId', value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select an account" />
                   </SelectTrigger>
@@ -271,11 +303,11 @@ export default function NewTransactionPage() {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Adding..." : "Add Transaction"}
+              {isLoading ? 'Adding...' : 'Add Transaction'}
             </Button>
           </CardFooter>
         </form>
       </Card>
     </div>
   )
-} 
+}

@@ -1,20 +1,38 @@
-"use client"
+'use client'
 
-import { ArrowLeft, ArrowRight, Check, CreditCard, DollarSign, Landmark, Wallet } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CreditCard,
+  DollarSign,
+  Landmark,
+  Wallet,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-import { AuthCheck } from "@/components/auth-check"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/contexts/auth-context"
-import { useToast } from "@/hooks/use-toast"
-import { Asset, createMultipleAssets } from "@/lib/supabase/data-services/assets"
-import { createMultipleLiabilities, Liability } from "@/lib/supabase/data-services/liabilities"
-import { getProfileOnboardingStatus, updateProfileOnboardingStatus } from "@/lib/supabase/data-services/profiles"
+import { AuthCheck } from '@/components/auth-check'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Separator } from '@/components/ui/separator'
+import { useAuth } from '@/contexts/auth-context'
+import { useToast } from '@/hooks/use-toast'
+import { Asset, createMultipleAssets } from '@/lib/supabase/data-services/assets'
+import { createMultipleLiabilities, Liability } from '@/lib/supabase/data-services/liabilities'
+import {
+  getProfileOnboardingStatus,
+  updateProfileOnboardingStatus,
+} from '@/lib/supabase/data-services/profiles'
 
 export default function OnboardingPage() {
   const router = useRouter()
@@ -23,18 +41,18 @@ export default function OnboardingPage() {
   const [step, setStep] = useState(1)
   const [assets, setAssets] = useState<Omit<Asset, 'currency' | 'user_id'>[]>([])
   const [liabilities, setLiabilities] = useState<Omit<Liability, 'currency' | 'user_id'>[]>([])
-  const [newAsset, setNewAsset] = useState({ type: "bank", name: "", value: "" })
-  const [newLiability, setNewLiability] = useState({ type: "credit", name: "", value: "" })
+  const [newAsset, setNewAsset] = useState({ type: 'bank', name: '', value: '' })
+  const [newLiability, setNewLiability] = useState({ type: 'credit', name: '', value: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
     const checkOnboardingStatus = async () => {
       if (!user) return
 
-      const {data: profile} = await getProfileOnboardingStatus(user.id)
+      const { data: profile } = await getProfileOnboardingStatus(user.id)
 
       if (profile && profile.is_onboarded) {
-        router.push("/dashboard")
+        router.push('/dashboard')
       }
     }
 
@@ -52,7 +70,7 @@ export default function OnboardingPage() {
           value: Number.parseFloat(newAsset.value),
         },
       ])
-      setNewAsset({ type: "bank", name: "", value: "" })
+      setNewAsset({ type: 'bank', name: '', value: '' })
     }
   }
 
@@ -67,7 +85,7 @@ export default function OnboardingPage() {
           value: Number.parseFloat(newLiability.value),
         },
       ])
-      setNewLiability({ type: "credit", name: "", value: "" })
+      setNewLiability({ type: 'credit', name: '', value: '' })
     }
   }
 
@@ -114,17 +132,17 @@ export default function OnboardingPage() {
       await updateProfileOnboardingStatus(user.id, true)
 
       toast({
-        title: "Setup complete",
-        description: "Your financial profile has been set up successfully",
+        title: 'Setup complete',
+        description: 'Your financial profile has been set up successfully',
       })
 
       // Redirect to dashboard
-      router.push("/dashboard")
+      router.push('/dashboard')
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Something went wrong',
+        variant: 'destructive',
       })
     } finally {
       setIsSubmitting(false)
@@ -133,11 +151,11 @@ export default function OnboardingPage() {
 
   const getAssetIcon = (type: string) => {
     switch (type) {
-      case "bank":
+      case 'bank':
         return <Landmark className="h-4 w-4" />
-      case "investment":
+      case 'investment':
         return <DollarSign className="h-4 w-4" />
-      case "cash":
+      case 'cash':
         return <Wallet className="h-4 w-4" />
       default:
         return <DollarSign className="h-4 w-4" />
@@ -146,9 +164,9 @@ export default function OnboardingPage() {
 
   const getLiabilityIcon = (type: string) => {
     switch (type) {
-      case "credit":
+      case 'credit':
         return <CreditCard className="h-4 w-4" />
-      case "loan":
+      case 'loan':
         return <Landmark className="h-4 w-4" />
       default:
         return <CreditCard className="h-4 w-4" />
@@ -167,7 +185,7 @@ export default function OnboardingPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 1 ? "bg-green-500 text-white" : "bg-gray-200"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 1 ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
               >
                 {step > 1 ? <Check className="h-4 w-4" /> : 1}
               </div>
@@ -176,7 +194,7 @@ export default function OnboardingPage() {
             <Separator className="w-24" />
             <div className="flex items-center gap-2">
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 2 ? "bg-green-500 text-white" : "bg-gray-200"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 2 ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
               >
                 {step > 2 ? <Check className="h-4 w-4" /> : 2}
               </div>
@@ -185,7 +203,7 @@ export default function OnboardingPage() {
             <Separator className="w-24" />
             <div className="flex items-center gap-2">
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 3 ? "bg-green-500 text-white" : "bg-gray-200"}`}
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${step >= 3 ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
               >
                 {step > 3 ? <Check className="h-4 w-4" /> : 3}
               </div>
@@ -198,7 +216,9 @@ export default function OnboardingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Your Assets</CardTitle>
-              <CardDescription>Add your bank accounts, investments, cash, and other assets</CardDescription>
+              <CardDescription>
+                Add your bank accounts, investments, cash, and other assets
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-3 gap-4">
@@ -289,13 +309,15 @@ export default function OnboardingPage() {
                   </div>
                   <div className="flex items-center justify-between border-t p-4">
                     <p className="font-medium">Total Assets</p>
-                    <p className="font-bold">${assets.reduce((sum, asset) => sum + asset.value, 0).toLocaleString()}</p>
+                    <p className="font-bold">
+                      ${assets.reduce((sum, asset) => sum + asset.value, 0).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               )}
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button variant="outline" onClick={() => router.push("/")}>
+              <Button variant="outline" onClick={() => router.push('/')}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Cancel
               </Button>
@@ -347,7 +369,12 @@ export default function OnboardingPage() {
                   />
                 </div>
               </div>
-              <Button type="button" onClick={handleAddLiability} variant="outline" className="w-full">
+              <Button
+                type="button"
+                onClick={handleAddLiability}
+                variant="outline"
+                className="w-full"
+              >
                 Add Liability
               </Button>
 
@@ -402,7 +429,10 @@ export default function OnboardingPage() {
                   <div className="flex items-center justify-between border-t p-4">
                     <p className="font-medium">Total Liabilities</p>
                     <p className="font-bold">
-                      ${liabilities.reduce((sum, liability) => sum + liability.value, 0).toLocaleString()}
+                      $
+                      {liabilities
+                        .reduce((sum, liability) => sum + liability.value, 0)
+                        .toLocaleString()}
                     </p>
                   </div>
                 </div>
@@ -425,7 +455,9 @@ export default function OnboardingPage() {
           <Card>
             <CardHeader>
               <CardTitle>Financial Summary</CardTitle>
-              <CardDescription>Review your financial information before completing setup</CardDescription>
+              <CardDescription>
+                Review your financial information before completing setup
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="rounded-md border p-4">
@@ -446,7 +478,9 @@ export default function OnboardingPage() {
                     <Separator className="my-2" />
                     <div className="flex items-center justify-between font-bold">
                       <span>Total Assets</span>
-                      <span>${assets.reduce((sum, asset) => sum + asset.value, 0).toLocaleString()}</span>
+                      <span>
+                        ${assets.reduce((sum, asset) => sum + asset.value, 0).toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 ) : (
@@ -472,7 +506,12 @@ export default function OnboardingPage() {
                     <Separator className="my-2" />
                     <div className="flex items-center justify-between font-bold">
                       <span>Total Liabilities</span>
-                      <span>${liabilities.reduce((sum, liability) => sum + liability.value, 0).toLocaleString()}</span>
+                      <span>
+                        $
+                        {liabilities
+                          .reduce((sum, liability) => sum + liability.value, 0)
+                          .toLocaleString()}
+                      </span>
                     </div>
                   </div>
                 ) : (
@@ -502,7 +541,7 @@ export default function OnboardingPage() {
                 Back
               </Button>
               <Button onClick={handleComplete} disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Complete Setup"}
+                {isSubmitting ? 'Saving...' : 'Complete Setup'}
                 <Check className="ml-2 h-4 w-4" />
               </Button>
             </CardFooter>

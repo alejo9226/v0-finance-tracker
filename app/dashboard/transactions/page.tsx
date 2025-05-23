@@ -1,25 +1,25 @@
-"use client"
+'use client'
 
-import { format } from "date-fns"
-import { PlusIcon, FilterIcon } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+import { format } from 'date-fns'
+import { PlusIcon, FilterIcon } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/hooks/use-toast"
-import { fetchTransactions, Transaction } from "@/lib/supabase/data-services/transactions"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useToast } from '@/hooks/use-toast'
+import { fetchTransactions, Transaction } from '@/lib/supabase/data-services/transactions'
 
 export default function TransactionsPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("all")
-  const [searchQuery, setSearchQuery] = useState("")
+  const [activeTab, setActiveTab] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     fetchData()
@@ -29,14 +29,16 @@ export default function TransactionsPage() {
     try {
       setLoading(true)
 
-      const transactionsData = await fetchTransactions(activeTab === 'all' ? undefined : activeTab as "income" | "expense")
+      const transactionsData = await fetchTransactions(
+        activeTab === 'all' ? undefined : (activeTab as 'income' | 'expense'),
+      )
 
       setTransactions(transactionsData || [])
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to load transactions",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to load transactions',
+        variant: 'destructive',
       })
     } finally {
       setLoading(false)
@@ -58,7 +60,7 @@ export default function TransactionsPage() {
     <div className="container py-10">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold">Transactions</h1>
-        <Button onClick={() => router.push("/dashboard/transactions/new")}> 
+        <Button onClick={() => router.push('/dashboard/transactions/new')}>
           <PlusIcon className="h-5 w-5 md:mr-2" />
           <span className="hidden md:inline">New Transaction</span>
         </Button>
@@ -98,11 +100,15 @@ export default function TransactionsPage() {
           <Card>
             <CardHeader>
               <CardTitle>
-                {activeTab === "all" ? "All Transactions" : activeTab === "income" ? "Income" : "Expenses"}
+                {activeTab === 'all'
+                  ? 'All Transactions'
+                  : activeTab === 'income'
+                    ? 'Income'
+                    : 'Expenses'}
               </CardTitle>
               <CardDescription>
-                {filteredTransactions.length} {filteredTransactions.length === 1 ? "transaction" : "transactions"}{" "}
-                found
+                {filteredTransactions.length}{' '}
+                {filteredTransactions.length === 1 ? 'transaction' : 'transactions'} found
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -115,7 +121,9 @@ export default function TransactionsPage() {
               ) : filteredTransactions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8">
                   <p className="text-muted-foreground mb-4">No transactions found</p>
-                  <Button onClick={() => router.push("/dashboard/transactions/new")}>Add your first transaction</Button>
+                  <Button onClick={() => router.push('/dashboard/transactions/new')}>
+                    Add your first transaction
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -133,29 +141,31 @@ export default function TransactionsPage() {
                           style={{
                             backgroundColor: transaction.category?.color
                               ? `${transaction.category.color}20`
-                              : "#e2e8f0",
-                            color: transaction.category?.color || "#64748b",
+                              : '#e2e8f0',
+                            color: transaction.category?.color || '#64748b',
                           }}
                         >
                           <span className="text-lg">
-                            {transaction.category?.icon || (transaction.type === "income" ? "💰" : "💸")}
+                            {transaction.category?.icon ||
+                              (transaction.type === 'income' ? '💰' : '💸')}
                           </span>
                         </div>
                         <div>
                           <p className="font-medium">
-                            {transaction.description || (transaction.type === "income" ? "Income" : "Expense")}
+                            {transaction.description ||
+                              (transaction.type === 'income' ? 'Income' : 'Expense')}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {transaction.category?.name || "Uncategorized"} •{" "}
-                            {transaction.asset?.name || "No account"} •{" "}
-                            {format(new Date(transaction.date), "MMM d, yyyy")}
+                            {transaction.category?.name || 'Uncategorized'} •{' '}
+                            {transaction.asset?.name || 'No account'} •{' '}
+                            {format(new Date(transaction.date), 'MMM d, yyyy')}
                           </p>
                         </div>
                       </div>
                       <div
-                        className={`font-medium ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
+                        className={`font-medium ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}
                       >
-                        {transaction.type === "income" ? "+" : "-"}$
+                        {transaction.type === 'income' ? '+' : '-'}$
                         {Math.abs(Number(transaction.amount)).toLocaleString()}
                       </div>
                     </div>
@@ -168,4 +178,4 @@ export default function TransactionsPage() {
       </Tabs>
     </div>
   )
-} 
+}

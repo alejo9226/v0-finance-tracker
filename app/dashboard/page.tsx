@@ -1,19 +1,50 @@
-"use client"
+'use client'
 
-import { Chart, LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, TooltipItem, PointElement, ArcElement } from 'chart.js'
+import {
+  Chart,
+  LinearScale,
+  CategoryScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  TooltipItem,
+  PointElement,
+  ArcElement,
+} from 'chart.js'
 import currency from 'currency.js'
-import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from "date-fns"
-import { ArrowDown, ArrowUp, CreditCard, DollarSign, Landmark, PlusIcon, Wallet, PencilIcon, Trash2Icon, Loader2 } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { useEffect, useState, useCallback } from "react"
+import { format, startOfMonth, endOfMonth, isWithinInterval, parseISO } from 'date-fns'
+import {
+  ArrowDown,
+  ArrowUp,
+  CreditCard,
+  DollarSign,
+  Landmark,
+  PlusIcon,
+  Wallet,
+  PencilIcon,
+  Trash2Icon,
+  Loader2,
+} from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback } from 'react'
 import { Bar } from 'react-chartjs-2'
 
-import { AssetList } from "@/components/dashboard/AssetList"
-import { LiabilityList } from "@/components/dashboard/LiabilityList"
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AssetList } from '@/components/dashboard/AssetList'
+import { LiabilityList } from '@/components/dashboard/LiabilityList'
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -21,24 +52,52 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { useAuth } from "@/contexts/auth-context"
-import { useToast } from "@/hooks/use-toast"
-import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
-import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
-import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
+} from '@/components/ui/select'
+import { useAuth } from '@/contexts/auth-context'
+import { useToast } from '@/hooks/use-toast'
+import {
+  CurrencyCode,
+  Asset,
+  updateAsset,
+  CURRENCIES,
+  fetchAssets,
+  createAsset,
+  deleteAsset,
+} from '@/lib/supabase/data-services/assets'
+import {
+  createLiability,
+  deleteLiability,
+  fetchLiabilities,
+  Liability,
+  updateLiability,
+} from '@/lib/supabase/data-services/liabilities'
+import {
+  deleteTransaction,
+  fetchTransactions,
+  Transaction,
+  updateTransaction,
+} from '@/lib/supabase/data-services/transactions'
 
 // Register Chart.js components
-Chart.register(LinearScale, CategoryScale, BarElement, Title, Tooltip, Legend, PointElement, ArcElement)
+Chart.register(
+  LinearScale,
+  CategoryScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  PointElement,
+  ArcElement,
+)
 
 type UserCurrencyPreference = {
   code: CurrencyCode
@@ -49,50 +108,50 @@ const EXCHANGE_RATES: Record<CurrencyCode, number> = {
   USD: 1,
   ARS: 1130,
   BRL: 5.69,
-  COP: 4223
+  COP: 4223,
 }
 
 // Add new types and state for per-currency totals
 type CurrencyTotals = {
   [key in CurrencyCode]: {
-    assets: number;
-    liabilities: number;
+    assets: number
+    liabilities: number
   }
 }
 
 const calculateSpendingByCategory = (transactions: Transaction[]): Record<string, number> => {
-  const spendingByCategory: Record<string, number> = {};
+  const spendingByCategory: Record<string, number> = {}
   transactions.forEach((transaction) => {
     if (transaction.type === 'expense') {
-      const category = transaction.category.name;
+      const category = transaction.category.name
       if (!spendingByCategory[category]) {
-        spendingByCategory[category] = 0;
+        spendingByCategory[category] = 0
       }
-      spendingByCategory[category] += transaction.amount;
+      spendingByCategory[category] += transaction.amount
     }
-  });
-  return spendingByCategory;
-};
+  })
+  return spendingByCategory
+}
 
 // Helper to get unique months from transactions
 function getTransactionMonths(transactions: Transaction[]) {
-  const months = new Set<string>();
-  transactions.forEach(t => {
+  const months = new Set<string>()
+  transactions.forEach((t) => {
     if (t.type === 'expense') {
       const d = parseISO(t.date as unknown as string)
-      months.add(format(d, 'yyyy-MM'));
+      months.add(format(d, 'yyyy-MM'))
     }
-  });
+  })
   // Sort descending (most recent first)
   return Array.from(months)
     .sort((a, b) => b.localeCompare(a))
-    .map(ym => {
-      const date = parseISO(ym + '-01');
+    .map((ym) => {
+      const date = parseISO(ym + '-01')
       return {
         value: startOfMonth(date),
         label: format(date, 'MMMM yyyy'),
-      };
-    });
+      }
+    })
 }
 
 export default function DashboardPage() {
@@ -111,16 +170,19 @@ export default function DashboardPage() {
   const [selectedAsset, setSelectedAsset] = useState<Asset | null>(null)
   const [selectedLiability, setSelectedLiability] = useState<Liability | null>(null)
   const [editForm, setEditForm] = useState({
-    name: "",
-    type: "",
-    value: "",
-    currency: "USD" as CurrencyCode,
+    name: '',
+    type: '',
+    value: '',
+    currency: 'USD' as CurrencyCode,
   })
   const [isAddAssetOpen, setIsAddAssetOpen] = useState(false)
   const [isAddLiabilityOpen, setIsAddLiabilityOpen] = useState(false)
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: "asset" | "liability" } | null>(null)
-  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode | "">("")
+  const [itemToDelete, setItemToDelete] = useState<{
+    id: string
+    type: 'asset' | 'liability'
+  } | null>(null)
+  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode | ''>('')
   const [activeCurrencies, setActiveCurrencies] = useState<Set<CurrencyCode>>(new Set())
   const [userCurrencies, setUserCurrencies] = useState<UserCurrencyPreference[]>([])
   const [currencyTotals, setCurrencyTotals] = useState<CurrencyTotals>({} as CurrencyTotals)
@@ -128,10 +190,10 @@ export default function DashboardPage() {
   const [isDeleteTxOpen, setIsDeleteTxOpen] = useState(false)
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
   const [editTxForm, setEditTxForm] = useState({
-    description: "",
-    amount: "",
-    date: "",
-    categoryId: ""
+    description: '',
+    amount: '',
+    date: '',
+    categoryId: '',
   })
   const [editTxLoading, setEditTxLoading] = useState(false)
   const [deleteTxLoading, setDeleteTxLoading] = useState(false)
@@ -142,9 +204,10 @@ export default function DashboardPage() {
   // Filter transactions by selected month
   const monthStart = startOfMonth(selectedMonth)
   const monthEnd = endOfMonth(selectedMonth)
-  const filteredExpenses = recentTransactions.filter(t =>
-    t.type === 'expense' &&
-    isWithinInterval(parseISO(t.date as unknown as string), { start: monthStart, end: monthEnd })
+  const filteredExpenses = recentTransactions.filter(
+    (t) =>
+      t.type === 'expense' &&
+      isWithinInterval(parseISO(t.date as unknown as string), { start: monthStart, end: monthEnd }),
   )
   const spendingByCategory = calculateSpendingByCategory(filteredExpenses)
 
@@ -153,14 +216,14 @@ export default function DashboardPage() {
     datasets: [
       {
         data: Object.values(spendingByCategory).map(Math.abs),
-        backgroundColor: Object.keys(spendingByCategory).map(
-          (category) => {
-            const color = filteredExpenses.find(t => t.category.name === category)?.category.color || '#000'
-            return `${color}80` // Use pastel colors by adding transparency
-          }
-        ),
+        backgroundColor: Object.keys(spendingByCategory).map((category) => {
+          const color =
+            filteredExpenses.find((t) => t.category.name === category)?.category.color || '#000'
+          return `${color}80` // Use pastel colors by adding transparency
+        }),
         borderColor: Object.keys(spendingByCategory).map(
-          (category) => filteredExpenses.find(t => t.category.name === category)?.category.color || '#000'
+          (category) =>
+            filteredExpenses.find((t) => t.category.name === category)?.category.color || '#000',
         ),
         borderWidth: 1,
       },
@@ -182,17 +245,18 @@ export default function DashboardPage() {
         grid: { display: false, drawBorder: false },
         ticks: {
           color: '#6b7280',
-          font: { 
-            family: 'Inter, sans-serif', 
+          font: {
+            family: 'Inter, sans-serif',
             size: (context: any) => {
-              const width = context.chart.width;
-              return width < 360 ? 8 : 14;
-            }
+              const width = context.chart.width
+              return width < 360 ? 8 : 14
+            },
           },
-          callback: function(value: string | number, index: number) {
-            const category = Object.keys(spendingByCategory)[index];
-            const icon = filteredExpenses.find(t => t.category.name === category)?.category.icon || '';
-            return icon; // Only show icons
+          callback: function (value: string | number, index: number) {
+            const category = Object.keys(spendingByCategory)[index]
+            const icon =
+              filteredExpenses.find((t) => t.category.name === category)?.category.icon || ''
+            return icon // Only show icons
           },
           padding: 2,
           display: true,
@@ -209,11 +273,15 @@ export default function DashboardPage() {
         borderColor: '#e5e7eb',
         borderWidth: 1,
         callbacks: {
-          label: function(tooltipItem: TooltipItem<'bar'>) {
-            const category = tooltipItem.label;
-            const amount = tooltipItem.raw as number;
-            const currencyCode = assets.find(a => a.id === filteredExpenses.find(t => t.category.name === category)?.asset.id)?.currency || 'USD';
-            return `${formatCurrency(amount, currencyCode)}`;
+          label: function (tooltipItem: TooltipItem<'bar'>) {
+            const category = tooltipItem.label
+            const amount = tooltipItem.raw as number
+            const currencyCode =
+              assets.find(
+                (a) =>
+                  a.id === filteredExpenses.find((t) => t.category.name === category)?.asset.id,
+              )?.currency || 'USD'
+            return `${formatCurrency(amount, currencyCode)}`
           },
         },
         padding: 10,
@@ -235,7 +303,7 @@ export default function DashboardPage() {
   const fetchData = useCallback(async () => {
     try {
       if (!user) {
-        router.push("/login")
+        router.push('/login')
         return
       }
 
@@ -251,9 +319,9 @@ export default function DashboardPage() {
       const transformedTransactions = await fetchTransactions()
 
       // Set state with type assertions and transformations
-      setAssets(assetsData as Asset[] || [])
-      setLiabilities(liabilitiesData as Liability[] || [])
-      
+      setAssets((assetsData as Asset[]) || [])
+      setLiabilities((liabilitiesData as Liability[]) || [])
+
       // Transactions data comes transformed to ensure required fields
       setRecentTransactions(transformedTransactions)
 
@@ -261,28 +329,29 @@ export default function DashboardPage() {
       const newCurrencyTotals: CurrencyTotals = {} as CurrencyTotals
 
       // Initialize totals for each currency
-      CURRENCIES.forEach(currency => {
+      CURRENCIES.forEach((currency) => {
         newCurrencyTotals[currency.code] = {
           assets: 0,
-          liabilities: 0
+          liabilities: 0,
         }
       })
 
       // Calculate assets per currency with proper type assertion
-      const typedAssetsData = assetsData as Asset[] || []
+      const typedAssetsData = (assetsData as Asset[]) || []
       typedAssetsData.forEach((asset) => {
         newCurrencyTotals[asset.currency].assets += Number(asset.value)
       })
 
       // Calculate liabilities per currency with proper type assertion
-      const typedLiabilitiesData = liabilitiesData as Liability[] || []
+      const typedLiabilitiesData = (liabilitiesData as Liability[]) || []
       typedLiabilitiesData.forEach((liability) => {
         newCurrencyTotals[liability.currency as CurrencyCode].liabilities += Number(liability.value)
       })
 
       // Now filter for currencies with non-zero values
-      const filteredCurrencyTotals = Object.entries(newCurrencyTotals)
-        .filter(([currency, totals]) => totals.assets > 0 || totals.liabilities > 0);
+      const filteredCurrencyTotals = Object.entries(newCurrencyTotals).filter(
+        ([currency, totals]) => totals.assets > 0 || totals.liabilities > 0,
+      )
 
       // If there is only one currency with non-zero values, set it as the display currency
       if (filteredCurrencyTotals.length === 1) {
@@ -301,7 +370,14 @@ export default function DashboardPage() {
 
       const liabilitiesTotal = typedLiabilitiesData.reduce((sum, liability) => {
         if (displayCurrency) {
-          return sum + convertCurrency(Number(liability.value), liability.currency as CurrencyCode, displayCurrency)
+          return (
+            sum +
+            convertCurrency(
+              Number(liability.value),
+              liability.currency as CurrencyCode,
+              displayCurrency,
+            )
+          )
         }
         return sum + Number(liability.value)
       }, 0)
@@ -311,12 +387,15 @@ export default function DashboardPage() {
       setEquity(assetsTotal - liabilitiesTotal)
 
       // Calculate the total spending for the current month
-      const totalSpending = filteredExpenses.reduce((sum, transaction) => sum + transaction.amount, 0)
+      const totalSpending = filteredExpenses.reduce(
+        (sum, transaction) => sum + transaction.amount,
+        0,
+      )
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to load financial data",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to load financial data',
+        variant: 'destructive',
       })
     } finally {
       setLoading(false)
@@ -338,7 +417,14 @@ export default function DashboardPage() {
 
     const liabilitiesTotal = liabilities.reduce((sum, liability) => {
       if (displayCurrency) {
-        return sum + convertCurrency(Number(liability.value), liability.currency as CurrencyCode, displayCurrency)
+        return (
+          sum +
+          convertCurrency(
+            Number(liability.value),
+            liability.currency as CurrencyCode,
+            displayCurrency,
+          )
+        )
       }
       return sum + Number(liability.value)
     }, 0)
@@ -351,25 +437,25 @@ export default function DashboardPage() {
   useEffect(() => {
     // Get unique currencies from assets and liabilities
     const currencySet = new Set<CurrencyCode>()
-    assets.forEach(asset => currencySet.add(asset.currency))
-    liabilities.forEach(liability => currencySet.add(liability.currency as CurrencyCode))
+    assets.forEach((asset) => currencySet.add(asset.currency))
+    liabilities.forEach((liability) => currencySet.add(liability.currency as CurrencyCode))
     setActiveCurrencies(currencySet)
 
     // Create user currencies array with preference
-    const currencies = Array.from(currencySet).map(code => ({
+    const currencies = Array.from(currencySet).map((code) => ({
       code,
-      isPreferred: code === displayCurrency
+      isPreferred: code === displayCurrency,
     }))
     setUserCurrencies(currencies)
   }, [assets, liabilities, displayCurrency])
 
   const getAssetIcon = (type: string) => {
     switch (type) {
-      case "bank":
+      case 'bank':
         return <Landmark className="h-5 w-5" />
-      case "investment":
+      case 'investment':
         return <DollarSign className="h-5 w-5" />
-      case "cash":
+      case 'cash':
         return <Wallet className="h-5 w-5" />
       default:
         return <DollarSign className="h-5 w-5" />
@@ -378,44 +464,50 @@ export default function DashboardPage() {
 
   const getLiabilityIcon = (type: string) => {
     switch (type) {
-      case "credit":
+      case 'credit':
         return <CreditCard className="h-5 w-5" />
-      case "loan":
+      case 'loan':
         return <Landmark className="h-5 w-5" />
       default:
         return <CreditCard className="h-5 w-5" />
     }
   }
 
-  const formatCurrency = (amount: number, currencyCode: CurrencyCode | "") => {
-    let displayAmount = amount;
-    let suffix = '';
+  const formatCurrency = (amount: number, currencyCode: CurrencyCode | '') => {
+    let displayAmount = amount
+    let suffix = ''
 
     if (Math.abs(amount) >= 1_000_000) {
-      displayAmount = amount / 1_000_000;
-      suffix = 'M';
+      displayAmount = amount / 1_000_000
+      suffix = 'M'
     } else if (Math.abs(amount) >= 1_000) {
-      displayAmount = amount / 1_000;
-      suffix = 'k';
+      displayAmount = amount / 1_000
+      suffix = 'k'
     }
 
-    if (currencyCode === "") return `${displayAmount.toFixed(suffix ? 1 : 0)}${suffix}`;
-    const currencyInfo = CURRENCIES.find(c => c.code === currencyCode);
-    if (!currencyInfo) return `${displayAmount.toFixed(suffix ? 1 : 0)}${suffix}`;
+    if (currencyCode === '') return `${displayAmount.toFixed(suffix ? 1 : 0)}${suffix}`
+    const currencyInfo = CURRENCIES.find((c) => c.code === currencyCode)
+    if (!currencyInfo) return `${displayAmount.toFixed(suffix ? 1 : 0)}${suffix}`
 
-    return currency(displayAmount, {
-      symbol: currencyInfo.symbol,
-      precision: suffix ? 1 : 0,
-      pattern: '! #',
-      separator: ',',
-      decimal: '.'
-    }).format() + suffix;
+    return (
+      currency(displayAmount, {
+        symbol: currencyInfo.symbol,
+        precision: suffix ? 1 : 0,
+        pattern: '! #',
+        separator: ',',
+        decimal: '.',
+      }).format() + suffix
+    )
   }
 
-  const convertCurrency = (amount: number, fromCurrency: CurrencyCode, toCurrency: CurrencyCode | ""): number => {
-    if (toCurrency === "") return amount
+  const convertCurrency = (
+    amount: number,
+    fromCurrency: CurrencyCode,
+    toCurrency: CurrencyCode | '',
+  ): number => {
+    if (toCurrency === '') return amount
     if (fromCurrency === toCurrency) return amount
-    
+
     // Convert through USD as the base currency
     const amountInUsd = currency(amount).divide(EXCHANGE_RATES[fromCurrency])
     return amountInUsd.multiply(EXCHANGE_RATES[toCurrency]).value
@@ -424,7 +516,7 @@ export default function DashboardPage() {
   const handleEditAsset = async () => {
     try {
       if (!selectedAsset || !editForm.name || !editForm.value || !editForm.currency) {
-        throw new Error("All fields are required")
+        throw new Error('All fields are required')
       }
 
       await updateAsset(selectedAsset.id, {
@@ -435,8 +527,8 @@ export default function DashboardPage() {
       })
 
       toast({
-        title: "Asset updated",
-        description: "Your asset has been updated successfully",
+        title: 'Asset updated',
+        description: 'Your asset has been updated successfully',
       })
 
       setIsEditAssetOpen(false)
@@ -444,9 +536,9 @@ export default function DashboardPage() {
       fetchData()
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update asset",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update asset',
+        variant: 'destructive',
       })
     }
   }
@@ -454,7 +546,7 @@ export default function DashboardPage() {
   const handleEditLiability = async () => {
     try {
       if (!selectedLiability || !editForm.name || !editForm.value || !editForm.currency) {
-        throw new Error("All fields are required")
+        throw new Error('All fields are required')
       }
 
       await updateLiability(selectedLiability.id, {
@@ -465,8 +557,8 @@ export default function DashboardPage() {
       })
 
       toast({
-        title: "Liability updated",
-        description: "Your liability has been updated successfully",
+        title: 'Liability updated',
+        description: 'Your liability has been updated successfully',
       })
 
       setIsEditLiabilityOpen(false)
@@ -474,9 +566,9 @@ export default function DashboardPage() {
       fetchData()
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to update liability",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to update liability',
+        variant: 'destructive',
       })
     }
   }
@@ -506,7 +598,7 @@ export default function DashboardPage() {
   const handleAddAsset = async () => {
     try {
       if (!editForm.name || !editForm.type || !editForm.value || !editForm.currency) {
-        throw new Error("All fields are required")
+        throw new Error('All fields are required')
       }
 
       await createAsset({
@@ -518,18 +610,18 @@ export default function DashboardPage() {
       })
 
       toast({
-        title: "Asset added",
-        description: "Your asset has been added successfully",
+        title: 'Asset added',
+        description: 'Your asset has been added successfully',
       })
 
       setIsAddAssetOpen(false)
-      setEditForm({ name: "", type: "", value: "", currency: "USD" })
+      setEditForm({ name: '', type: '', value: '', currency: 'USD' })
       fetchData()
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add asset",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to add asset',
+        variant: 'destructive',
       })
     }
   }
@@ -537,7 +629,7 @@ export default function DashboardPage() {
   const handleAddLiability = async () => {
     try {
       if (!editForm.name || !editForm.type || !editForm.value || !editForm.currency) {
-        throw new Error("All fields are required")
+        throw new Error('All fields are required')
       }
 
       await createLiability({
@@ -549,18 +641,18 @@ export default function DashboardPage() {
       })
 
       toast({
-        title: "Liability added",
-        description: "Your liability has been added successfully",
+        title: 'Liability added',
+        description: 'Your liability has been added successfully',
       })
 
       setIsAddLiabilityOpen(false)
-      setEditForm({ name: "", type: "", value: "", currency: "COP" })
+      setEditForm({ name: '', type: '', value: '', currency: 'COP' })
       fetchData()
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to add liability",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to add liability',
+        variant: 'destructive',
       })
     }
   }
@@ -569,14 +661,14 @@ export default function DashboardPage() {
     try {
       if (!itemToDelete) return
 
-      if (itemToDelete.type === "asset") {
+      if (itemToDelete.type === 'asset') {
         await deleteAsset(itemToDelete.id)
       } else {
         await deleteLiability(itemToDelete.id)
       }
 
       toast({
-        title: `${itemToDelete.type === "asset" ? "Asset" : "Liability"} deleted`,
+        title: `${itemToDelete.type === 'asset' ? 'Asset' : 'Liability'} deleted`,
         description: `Your ${itemToDelete.type} has been deleted successfully`,
       })
 
@@ -585,25 +677,25 @@ export default function DashboardPage() {
       fetchData()
     } catch (error: any) {
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete item",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Failed to delete item',
+        variant: 'destructive',
       })
     }
   }
 
   const handleSetPreferredCurrency = (currencyCode: CurrencyCode) => {
     if (currencyCode === displayCurrency) {
-      setDisplayCurrency("") 
+      setDisplayCurrency('')
       return
     }
 
     setDisplayCurrency(currencyCode)
-    setUserCurrencies(prev => 
-      prev.map(c => ({
+    setUserCurrencies((prev) =>
+      prev.map((c) => ({
         ...c,
-        isPreferred: c.code === currencyCode
-      }))
+        isPreferred: c.code === currencyCode,
+      })),
     )
   }
 
@@ -619,12 +711,19 @@ export default function DashboardPage() {
         // category_id:  Uncomment if you add category selection
       })
 
-      toast({ title: "Transaction updated", description: "The transaction was updated successfully." })
+      toast({
+        title: 'Transaction updated',
+        description: 'The transaction was updated successfully.',
+      })
       setIsEditTxOpen(false)
       setSelectedTx(null)
       fetchData()
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to update transaction", variant: "destructive" })
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update transaction',
+        variant: 'destructive',
+      })
     } finally {
       setEditTxLoading(false)
     }
@@ -635,12 +734,19 @@ export default function DashboardPage() {
     setDeleteTxLoading(true)
     try {
       await deleteTransaction(selectedTx.id)
-      toast({ title: "Transaction deleted", description: "The transaction was deleted successfully." })
+      toast({
+        title: 'Transaction deleted',
+        description: 'The transaction was deleted successfully.',
+      })
       setIsDeleteTxOpen(false)
       setSelectedTx(null)
       fetchData()
     } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to delete transaction", variant: "destructive" })
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete transaction',
+        variant: 'destructive',
+      })
     } finally {
       setDeleteTxLoading(false)
     }
@@ -662,20 +768,22 @@ export default function DashboardPage() {
       <div className="mb-12 flex flex-row md:justify-between gap-6">
         <div>
           <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Financial Dashboard</h1>
-          <p className="mt-2 text-md sm:text-xl text-muted-foreground">Your financial overview at a glance</p>
+          <p className="mt-2 text-md sm:text-xl text-muted-foreground">
+            Your financial overview at a glance
+          </p>
         </div>
-        
+
         {userCurrencies.length > 1 && (
           <div className="flex gap-2">
             {userCurrencies.map((curr) => (
               <Button
                 key={curr.code}
                 size="sm"
-                variant={curr.isPreferred ? "default" : "outline"}
+                variant={curr.isPreferred ? 'default' : 'outline'}
                 className={`flex items-center gap-1.5`}
                 onClick={() => handleSetPreferredCurrency(curr.code)}
               >
-                <span>{CURRENCIES.find(c => c.code === curr.code)?.symbol}</span>
+                <span>{CURRENCIES.find((c) => c.code === curr.code)?.symbol}</span>
                 <span>{curr.code}</span>
               </Button>
             ))}
@@ -685,7 +793,9 @@ export default function DashboardPage() {
         <div className="hidden md:flex gap-4">
           {recentTransactions.length > 0 && (
             <Link href="/dashboard/transactions">
-              <Button variant="outline" size="lg">View All Transactions</Button>
+              <Button variant="outline" size="lg">
+                View All Transactions
+              </Button>
             </Link>
           )}
           <Link href="/dashboard/transactions/new">
@@ -699,30 +809,26 @@ export default function DashboardPage() {
 
       {/* Mobile view */}
       <div className="flex md:hidden justify-between w-full pb-8">
-      {recentTransactions.length > 0 && (
-        <Link href="/dashboard/transactions">
+        {recentTransactions.length > 0 && (
+          <Link href="/dashboard/transactions">
+            <Button className="p-2" variant="outline" size="sm">
+              View All Transactions
+            </Button>
+          </Link>
+        )}
+        <Link href={assets.length > 0 ? '/dashboard/transactions/new' : ''}>
           <Button
-            className="p-2" 
-            variant="outline" 
-            size="sm"
-          >View All Transactions</Button>
-        </Link>
-      )}
-        <Link 
-          href={assets.length > 0 ? "/dashboard/transactions/new" : ""}
-        >
-          <Button 
-            className="p-2" 
+            className="p-2"
             size="sm"
             onClick={() => {
               if (assets.length === 0) {
-                setEditForm({ name: "", type: "", value: "", currency: "COP" })
+                setEditForm({ name: '', type: '', value: '', currency: 'COP' })
                 setIsAddAssetOpen(true)
               }
             }}
           >
             <PlusIcon className="sm:mr-2 mr-0 h-5 w-5" />
-            {assets.length > 0 ? "New Transaction" : "Add Accounts"}
+            {assets.length > 0 ? 'New Transaction' : 'Add Accounts'}
           </Button>
         </Link>
       </div>
@@ -731,7 +837,9 @@ export default function DashboardPage() {
       <div className="grid gap-8 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Assets</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Assets
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
@@ -743,14 +851,18 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies).sort().map(currency => (
-                  <div key={currency} className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{currency}</span>
-                    <span className={`text-lg font-medium ${currencyTotals[currency].assets === 0 ? 'text-muted-foreground' : ''}`}>
-                      {formatCurrency(currencyTotals[currency].assets, currency)}
-                    </span>
-                  </div>
-                ))}
+                {Array.from(activeCurrencies)
+                  .sort()
+                  .map((currency) => (
+                    <div key={currency} className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">{currency}</span>
+                      <span
+                        className={`text-lg font-medium ${currencyTotals[currency].assets === 0 ? 'text-muted-foreground' : ''}`}
+                      >
+                        {formatCurrency(currencyTotals[currency].assets, currency)}
+                      </span>
+                    </div>
+                  ))}
               </div>
             )}
             <div className="mt-2 flex items-center text-sm text-green-500">
@@ -762,7 +874,9 @@ export default function DashboardPage() {
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Liabilities</CardTitle>
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Total Liabilities
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
@@ -774,14 +888,18 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies).sort().map(currency => (
-                  <div key={currency} className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{currency}</span>
-                    <span className={`text-lg font-medium ${currencyTotals[currency].liabilities === 0 ? 'text-muted-foreground' : ''}`}>
-                      {formatCurrency(currencyTotals[currency].liabilities, currency)}
-                    </span>
-                  </div>
-                ))}
+                {Array.from(activeCurrencies)
+                  .sort()
+                  .map((currency) => (
+                    <div key={currency} className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">{currency}</span>
+                      <span
+                        className={`text-lg font-medium ${currencyTotals[currency].liabilities === 0 ? 'text-muted-foreground' : ''}`}
+                      >
+                        {formatCurrency(currencyTotals[currency].liabilities, currency)}
+                      </span>
+                    </div>
+                  ))}
               </div>
             )}
             <div className="mt-2 flex items-center text-sm text-red-500">
@@ -805,20 +923,28 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies).sort().map(currency => {
-                  const netWorth = currencyTotals[currency].assets - currencyTotals[currency].liabilities;
-                  return (
-                    <div key={currency} className="flex justify-between items-center">
-                      <span className="text-sm text-green-700">{currency}</span>
-                      <span className={`text-lg font-medium ${
-                        netWorth === 0 ? 'text-muted-foreground' : 
-                        netWorth > 0 ? 'text-green-700' : 'text-red-700'
-                      }`}>
-                        {formatCurrency(netWorth, currency)}
-                      </span>
-                    </div>
-                  );
-                })}
+                {Array.from(activeCurrencies)
+                  .sort()
+                  .map((currency) => {
+                    const netWorth =
+                      currencyTotals[currency].assets - currencyTotals[currency].liabilities
+                    return (
+                      <div key={currency} className="flex justify-between items-center">
+                        <span className="text-sm text-green-700">{currency}</span>
+                        <span
+                          className={`text-lg font-medium ${
+                            netWorth === 0
+                              ? 'text-muted-foreground'
+                              : netWorth > 0
+                                ? 'text-green-700'
+                                : 'text-red-700'
+                          }`}
+                        >
+                          {formatCurrency(netWorth, currency)}
+                        </span>
+                      </div>
+                    )
+                  })}
               </div>
             )}
             <div className="mt-2 flex items-center text-sm text-green-700">
@@ -836,12 +962,12 @@ export default function DashboardPage() {
           formatCurrency={formatCurrency}
           convertCurrency={convertCurrency}
           onAdd={() => {
-            setEditForm({ name: "", type: "", value: "", currency: "USD" })
+            setEditForm({ name: '', type: '', value: '', currency: 'USD' })
             setIsAddAssetOpen(true)
           }}
           onEdit={openEditAsset}
-          onDelete={id => {
-            setItemToDelete({ id, type: "asset" })
+          onDelete={(id) => {
+            setItemToDelete({ id, type: 'asset' })
             setIsConfirmDeleteOpen(true)
           }}
           getAssetIcon={getAssetIcon}
@@ -853,12 +979,12 @@ export default function DashboardPage() {
           formatCurrency={formatCurrency}
           convertCurrency={convertCurrency}
           onAdd={() => {
-            setEditForm({ name: "", type: "", value: "", currency: "COP" })
+            setEditForm({ name: '', type: '', value: '', currency: 'COP' })
             setIsAddLiabilityOpen(true)
           }}
           onEdit={openEditLiability}
-          onDelete={id => {
-            setItemToDelete({ id, type: "liability" })
+          onDelete={(id) => {
+            setItemToDelete({ id, type: 'liability' })
             setIsConfirmDeleteOpen(true)
           }}
           getLiabilityIcon={getLiabilityIcon}
@@ -873,14 +999,18 @@ export default function DashboardPage() {
               <CardTitle className="text-xl sm:text-2xl">Spending Summary</CardTitle>
               {monthOptions.length > 0 && (
                 <CardDescription>
-                  Your spending by category for{" "}
+                  Your spending by category for{' '}
                   <select
                     className="border rounded px-1 py-1 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-                    value={format(selectedMonth, "yyyy-MM")}
-                    onChange={e => setSelectedMonth(startOfMonth(parseISO(e.target.value + "-01")))}
+                    value={format(selectedMonth, 'yyyy-MM')}
+                    onChange={(e) =>
+                      setSelectedMonth(startOfMonth(parseISO(e.target.value + '-01')))
+                    }
                   >
-                    {monthOptions.map(opt => (
-                      <option key={opt.label} value={format(opt.value, "yyyy-MM")}>{opt.label}</option>
+                    {monthOptions.map((opt) => (
+                      <option key={opt.label} value={format(opt.value, 'yyyy-MM')}>
+                        {opt.label}
+                      </option>
                     ))}
                   </select>
                 </CardDescription>
@@ -900,41 +1030,49 @@ export default function DashboardPage() {
             {/* Totals for selected month */}
             {(() => {
               // Filter income and expenses for the selected month
-              const filteredIncomes = recentTransactions.filter(t =>
-                t.type === 'income' &&
-                isWithinInterval(parseISO(t.date as unknown as string), { start: monthStart, end: monthEnd })
-              );
-              const filteredExpenses = recentTransactions.filter(t =>
-                t.type === 'expense' &&
-                isWithinInterval(parseISO(t.date as unknown as string), { start: monthStart, end: monthEnd })
-              );
+              const filteredIncomes = recentTransactions.filter(
+                (t) =>
+                  t.type === 'income' &&
+                  isWithinInterval(parseISO(t.date as unknown as string), {
+                    start: monthStart,
+                    end: monthEnd,
+                  }),
+              )
+              const filteredExpenses = recentTransactions.filter(
+                (t) =>
+                  t.type === 'expense' &&
+                  isWithinInterval(parseISO(t.date as unknown as string), {
+                    start: monthStart,
+                    end: monthEnd,
+                  }),
+              )
               // Sum by currency
-              const incomeTotals: { [key: string]: number } = {};
-              const expenseTotals: { [key: string]: number } = {};
-              filteredIncomes.forEach(t => {
-                const assetObj = assets.find(a => a.id === t.asset?.id);
-                const currency = assetObj?.currency || 'USD';
-                incomeTotals[currency] = (incomeTotals[currency] || 0) + t.amount;
-              });
-              filteredExpenses.forEach(t => {
-                const assetObj = assets.find(a => a.id === t.asset?.id);
-                const currency = assetObj?.currency || 'USD';
-                expenseTotals[currency] = (expenseTotals[currency] || 0) + t.amount;
-              });
+              const incomeTotals: { [key: string]: number } = {}
+              const expenseTotals: { [key: string]: number } = {}
+              filteredIncomes.forEach((t) => {
+                const assetObj = assets.find((a) => a.id === t.asset?.id)
+                const currency = assetObj?.currency || 'USD'
+                incomeTotals[currency] = (incomeTotals[currency] || 0) + t.amount
+              })
+              filteredExpenses.forEach((t) => {
+                const assetObj = assets.find((a) => a.id === t.asset?.id)
+                const currency = assetObj?.currency || 'USD'
+                expenseTotals[currency] = (expenseTotals[currency] || 0) + t.amount
+              })
               // If displayCurrency is set, convert and sum
-              let totalIncome = 0;
-              let totalExpense = 0;
+              let totalIncome = 0
+              let totalExpense = 0
               if (displayCurrency) {
                 totalIncome = filteredIncomes.reduce((sum: number, t) => {
-                  const assetObj = assets.find(a => a.id === t.asset?.id);
-                  const currency = assetObj?.currency || 'USD';
-                  return sum + convertCurrency(t.amount, currency, displayCurrency);
-                }, 0);
+                  const assetObj = assets.find((a) => a.id === t.asset?.id)
+                  const currency = assetObj?.currency || 'USD'
+                  return sum + convertCurrency(t.amount, currency, displayCurrency)
+                }, 0)
                 totalExpense = filteredExpenses.reduce((sum: number, t) => {
-                  const assetObj = assets.find(a => a.id === t.asset?.id);
-                  const currency = assetObj?.currency || 'USD';
-                  return sum + convertCurrency(t.amount, currency, displayCurrency);
-                }, 0);
+                  const assetObj = assets.find((a) => a.id === t.asset?.id)
+                  const currency = assetObj?.currency || 'USD'
+                  return sum + convertCurrency(t.amount, currency, displayCurrency)
+                }, 0)
               }
               return (
                 <>
@@ -943,33 +1081,53 @@ export default function DashboardPage() {
                       <div className="flex-1 flex flex-col items-center justify-center bg-green-50 rounded p-2">
                         <span className="text-xs text-green-700">Total Income</span>
                         {displayCurrency ? (
-                          <span className="text-lg font-bold text-green-700">{formatCurrency(totalIncome, displayCurrency)}</span>
+                          <span className="text-lg font-bold text-green-700">
+                            {formatCurrency(totalIncome, displayCurrency)}
+                          </span>
                         ) : (
                           <div className="flex flex-col gap-1">
-                            {Object.keys(incomeTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
+                            {Object.keys(incomeTotals).length === 0 ? (
+                              <span className="text-muted-foreground">-</span>
+                            ) : (
                               Object.entries(incomeTotals).map(([currency, amount]) => (
-                                <span key={currency} className="text-lg font-bold text-green-700 whitespace-nowrap">{formatCurrency(amount, currency as CurrencyCode)}</span>
-                              ))}
+                                <span
+                                  key={currency}
+                                  className="text-lg font-bold text-green-700 whitespace-nowrap"
+                                >
+                                  {formatCurrency(amount, currency as CurrencyCode)}
+                                </span>
+                              ))
+                            )}
                           </div>
                         )}
                       </div>
                       <div className="flex-1 flex flex-col items-center justify-center bg-red-50 rounded p-2">
                         <span className="text-xs text-red-700">Total Expenses</span>
                         {displayCurrency ? (
-                          <span className="text-lg font-bold text-red-700">{formatCurrency(Math.abs(totalExpense), displayCurrency)}</span>
+                          <span className="text-lg font-bold text-red-700">
+                            {formatCurrency(Math.abs(totalExpense), displayCurrency)}
+                          </span>
                         ) : (
                           <div className="flex flex-col gap-1">
-                            {Object.keys(expenseTotals).length === 0 ? <span className="text-muted-foreground">-</span> :
+                            {Object.keys(expenseTotals).length === 0 ? (
+                              <span className="text-muted-foreground">-</span>
+                            ) : (
                               Object.entries(expenseTotals).map(([currency, amount]) => (
-                                <span key={currency} className="text-lg font-bold text-red-700 whitespace-nowrap">{formatCurrency(Math.abs(amount), currency as CurrencyCode)}</span>
-                              ))}
+                                <span
+                                  key={currency}
+                                  className="text-lg font-bold text-red-700 whitespace-nowrap"
+                                >
+                                  {formatCurrency(Math.abs(amount), currency as CurrencyCode)}
+                                </span>
+                              ))
+                            )}
                           </div>
                         )}
                       </div>
                     </div>
                   )}
                 </>
-              );
+              )
             })()}
           </CardContent>
         </Card>
@@ -1000,76 +1158,85 @@ export default function DashboardPage() {
             ) : (
               <div className="space-y-4">
                 {/* Filter the transactions to only show the latest 5 */}
-                {recentTransactions.filter((t, i) => i < 5).map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex items-center justify-between py-2 px-2 sm:p-4 rounded-lg border group hover:bg-accent hover:cursor-pointer"
-                    role="group"
-                    tabIndex={0}
-                    onClick={e => {
-                      // Prevent navigation if clicking on edit/delete buttons
-                      if ((e.target as HTMLElement).closest('button')) return;
-                      router.push(`/dashboard/transactions/${transaction.id}`)
-                    }}
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center p-2 rounded-full"
-                        style={{
-                          backgroundColor: transaction.category?.color
-                            ? `${transaction.category.color}20`
-                            : "#e2e8f0",
-                          color: transaction.category?.color || "#64748b",
-                        }}
-                      >
-                        <span className="text-lg">
-                          {transaction.category?.icon || (transaction.type === "income" ? "💰" : "💸")}
-                        </span>
+                {recentTransactions
+                  .filter((t, i) => i < 5)
+                  .map((transaction) => (
+                    <div
+                      key={transaction.id}
+                      className="flex items-center justify-between py-2 px-2 sm:p-4 rounded-lg border group hover:bg-accent hover:cursor-pointer"
+                      role="group"
+                      tabIndex={0}
+                      onClick={(e) => {
+                        // Prevent navigation if clicking on edit/delete buttons
+                        if ((e.target as HTMLElement).closest('button')) return
+                        router.push(`/dashboard/transactions/${transaction.id}`)
+                      }}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div
+                          className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center p-2 rounded-full"
+                          style={{
+                            backgroundColor: transaction.category?.color
+                              ? `${transaction.category.color}20`
+                              : '#e2e8f0',
+                            color: transaction.category?.color || '#64748b',
+                          }}
+                        >
+                          <span className="text-lg">
+                            {transaction.category?.icon ||
+                              (transaction.type === 'income' ? '💰' : '💸')}
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-sm sm:text-md truncate whitespace-nowrap overflow-hidden w-36 sm:w-2/3 md:w-full">
+                            {transaction.description ||
+                              (transaction.type === 'income' ? 'Income' : 'Expense')}
+                          </p>
+                          <p className="text-sm text-muted-foreground w-3/3">
+                            {transaction.asset?.name || 'No account'} •{' '}
+                            {format(new Date(transaction.date), 'MMM d, yyyy')}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm sm:text-md truncate whitespace-nowrap overflow-hidden w-36 sm:w-2/3 md:w-full">
-                          {transaction.description || (transaction.type === "income" ? "Income" : "Expense")}
-                        </p>
-                        <p className="text-sm text-muted-foreground w-3/3">
-                          {transaction.asset?.name || "No account"} •{" "}
-                          {format(new Date(transaction.date), "MMM d, yyyy")}
-                        </p>
+                      <div className="flex items-center sm:gap-2 gap-1">
+                        <div
+                          className={`text-sm sm:text-md whitespace-nowrap ${transaction.type === 'income' ? 'text-green-600' : 'text-red-600'}`}
+                        >
+                          {`$ ${Math.abs(Number(transaction.amount)).toLocaleString()}`}
+                        </div>
+                        <div className="hidden sm:flex">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedTx(transaction)
+                              setEditTxForm({
+                                description: transaction.description,
+                                amount: transaction.amount.toString(),
+                                date: transaction.date.toString().slice(0, 10),
+                                categoryId: transaction.category?.id || '',
+                              })
+                              setIsEditTxOpen(true)
+                            }}
+                          >
+                            <PencilIcon className="h-1 w-1 sm:h-4 sm:w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedTx(transaction)
+                              setIsDeleteTxOpen(true)
+                            }}
+                          >
+                            <Trash2Icon className="h-4 w-4 text-black-600" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center sm:gap-2 gap-1">
-                      <div
-                        className={`text-sm sm:text-md whitespace-nowrap ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}
-                      >
-                        {`$ ${Math.abs(Number(transaction.amount)).toLocaleString()}`}
-                      </div>
-                      <div className="hidden sm:flex">
-                        <Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => {
-                            setSelectedTx(transaction)
-                            setEditTxForm({
-                              description: transaction.description,
-                              amount: transaction.amount.toString(),
-                              date: transaction.date.toString().slice(0, 10),
-                              categoryId: transaction.category?.id || ""
-                            })
-                            setIsEditTxOpen(true)
-                        }}>
-                          <PencilIcon className="h-1 w-1 sm:h-4 sm:w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => {
-                          setSelectedTx(transaction)
-                          setIsDeleteTxOpen(true)
-                        }}>
-                          <Trash2Icon className="h-4 w-4 text-black-600" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </CardContent>
@@ -1122,7 +1289,9 @@ export default function DashboardPage() {
                 <Label htmlFor="asset-currency">Currency</Label>
                 <Select
                   value={editForm.currency}
-                  onValueChange={(value: CurrencyCode) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                  onValueChange={(value: CurrencyCode) =>
+                    setEditForm((prev) => ({ ...prev, currency: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select currency" />
@@ -1192,7 +1361,9 @@ export default function DashboardPage() {
                 <Label htmlFor="liability-currency">Currency</Label>
                 <Select
                   value={editForm.currency}
-                  onValueChange={(value: CurrencyCode) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                  onValueChange={(value: CurrencyCode) =>
+                    setEditForm((prev) => ({ ...prev, currency: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select currency" />
@@ -1263,7 +1434,9 @@ export default function DashboardPage() {
                 <Label htmlFor="new-asset-currency">Currency</Label>
                 <Select
                   value={editForm.currency}
-                  onValueChange={(value: CurrencyCode) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                  onValueChange={(value: CurrencyCode) =>
+                    setEditForm((prev) => ({ ...prev, currency: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select currency" />
@@ -1333,7 +1506,9 @@ export default function DashboardPage() {
                 <Label htmlFor="liability-currency">Currency</Label>
                 <Select
                   value={editForm.currency}
-                  onValueChange={(value: CurrencyCode) => setEditForm((prev) => ({ ...prev, currency: value }))}
+                  onValueChange={(value: CurrencyCode) =>
+                    setEditForm((prev) => ({ ...prev, currency: value }))
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select currency" />
@@ -1364,7 +1539,8 @@ export default function DashboardPage() {
           <DialogHeader>
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this {itemToDelete?.type}? This action cannot be undone.
+              Are you sure you want to delete this {itemToDelete?.type}? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -1387,35 +1563,45 @@ export default function DashboardPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label htmlFor="tx-description" className="block text-sm font-medium">Description</label>
+              <label htmlFor="tx-description" className="block text-sm font-medium">
+                Description
+              </label>
               <Input
                 id="tx-description"
                 value={editTxForm.description}
-                onChange={e => setEditTxForm(f => ({ ...f, description: e.target.value }))}
+                onChange={(e) => setEditTxForm((f) => ({ ...f, description: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="tx-amount" className="block text-sm font-medium">Amount</label>
+              <label htmlFor="tx-amount" className="block text-sm font-medium">
+                Amount
+              </label>
               <Input
                 id="tx-amount"
                 type="number"
                 value={editTxForm.amount}
-                onChange={e => setEditTxForm(f => ({ ...f, amount: e.target.value }))}
+                onChange={(e) => setEditTxForm((f) => ({ ...f, amount: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="tx-date" className="block text-sm font-medium">Date</label>
+              <label htmlFor="tx-date" className="block text-sm font-medium">
+                Date
+              </label>
               <Input
                 id="tx-date"
                 type="date"
                 value={editTxForm.date}
-                onChange={e => setEditTxForm(f => ({ ...f, date: e.target.value }))}
+                onChange={(e) => setEditTxForm((f) => ({ ...f, date: e.target.value }))}
               />
             </div>
             {/* Category selection can be added here if you have categories list */}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditTxOpen(false)} disabled={editTxLoading}>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditTxOpen(false)}
+              disabled={editTxLoading}
+            >
               Cancel
             </Button>
             <Button onClick={handleEditTransaction} disabled={editTxLoading}>

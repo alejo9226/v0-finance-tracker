@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { useRouter } from "next/navigation"
-import type React from "react"
-import { useEffect } from "react"
+import { useRouter } from 'next/navigation'
+import type React from 'react'
+import { useEffect } from 'react'
 
-import { useAuth } from "@/contexts/auth-context"
+import { useAuth } from '@/contexts/auth-context'
 
 export function AuthCheck({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth()
@@ -12,7 +12,7 @@ export function AuthCheck({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push("/login")
+      router.push('/login')
     }
   }, [user, isLoading, router])
 

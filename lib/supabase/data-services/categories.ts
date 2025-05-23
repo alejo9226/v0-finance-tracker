@@ -1,10 +1,10 @@
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { Transaction } from "@/lib/supabase/data-services/transactions"
+import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { Transaction } from '@/lib/supabase/data-services/transactions'
 
 export interface Category {
   id: string
   name: string
-  type: "income" | "expense"
+  type: 'income' | 'expense'
   icon: string
   color: string
   user_id: string
@@ -19,14 +19,12 @@ const supabase = getSupabaseBrowserClient()
  * @returns {Promise<Category[]>} The categories data.
  * @throws Will throw an error if the Supabase query fails.
  */
-export async function fetchCategories(
-  transactionType: "income" | "expense"
-): Promise<Category[]> {
+export async function fetchCategories(transactionType: 'income' | 'expense'): Promise<Category[]> {
   const { data, error } = await supabase
-    .from("categories")
-    .select("*")
-    .eq("type", transactionType)
-    .order("name")
+    .from('categories')
+    .select('*')
+    .eq('type', transactionType)
+    .order('name')
     .returns<Category[]>()
 
   if (error) throw error
@@ -35,31 +33,28 @@ export async function fetchCategories(
 
 /**
  * Creates a new category in the database.
- * 
+ *
  * @param body - The data to create the category with.
  */
-export async function createCategory(
-  body: Omit<Category, "id">
-): Promise<void> {
-  const { error } = await supabase
-    .from("categories")
-    .insert(body)
+export async function createCategory(body: Omit<Category, 'id'>): Promise<void> {
+  const { error } = await supabase.from('categories').insert(body)
   if (error) throw error
 }
 
 /**
  * Updates an category in the database.
- * 
+ *
  * @param id - The ID of the category to update.
  * @param data - The data to update the category with.
  */
 export async function updateCategory(
-  id: string, body: Pick<Category, "name" | "icon" | "color">
+  id: string,
+  body: Pick<Category, 'name' | 'icon' | 'color'>,
 ): Promise<void> {
   const { error } = await supabase
-    .from("categories")
+    .from('categories')
     .update(body as Record<string, unknown>)
-    .eq("id", id)
+    .eq('id', id)
 
   if (error) {
     throw error
@@ -68,13 +63,10 @@ export async function updateCategory(
 
 /**
  * Deletes a category from the database.
- * 
+ *
  * @param id - The ID of the category to delete.
  */
 export async function deleteCategory(id: string): Promise<void> {
-  const { error } = await supabase
-    .from("categories")
-    .delete()
-    .eq("id", id)
+  const { error } = await supabase.from('categories').delete().eq('id', id)
   if (error) throw error
 }

@@ -1,27 +1,34 @@
-"use client"
+'use client'
 
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import type React from "react"
-import { useState } from "react"
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import type React from 'react'
+import { useState } from 'react'
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { signUpWrapper } from "@/lib/supabase/data-services/auth"
-import { createProfile } from "@/lib/supabase/data-services/profiles"
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/hooks/use-toast'
+import { signUpWrapper } from '@/lib/supabase/data-services/auth'
+import { createProfile } from '@/lib/supabase/data-services/profiles'
 
 export default function SignupPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
+    name: '',
+    email: '',
+    password: '',
   })
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
 
@@ -35,21 +42,19 @@ export default function SignupPage() {
     setIsLoading(true)
     setDebugInfo(null)
 
-     // Use client-side Supabase signup
-     try {
+    // Use client-side Supabase signup
+    try {
       // Attempt to sign up
-      const { data, error } = await signUpWrapper(
-        formData.email, 
-        formData.password, 
-        { data: { name: formData.name } }
-      )
+      const { data, error } = await signUpWrapper(formData.email, formData.password, {
+        data: { name: formData.name },
+      })
 
       if (error) {
         setDebugInfo(`Error: ${error.message}`)
         toast({
-          title: "Signup failed",
+          title: 'Signup failed',
           description: error.message,
-          variant: "destructive",
+          variant: 'destructive',
         })
         return
       }
@@ -58,35 +63,36 @@ export default function SignupPage() {
         // Create profile entry
         const { error: profileError } = await createProfile(data.user.id, formData.name)
 
-        if (profileError && 
-          typeof profileError === 'object' && 
-          'message' in profileError && 
+        if (
+          profileError &&
+          typeof profileError === 'object' &&
+          'message' in profileError &&
           typeof profileError.message === 'string'
         ) {
           setDebugInfo(`Profile creation error: ${profileError.message}`)
-          console.error("Profile creation error:", profileError)
+          console.error('Profile creation error:', profileError)
         }
 
         toast({
-          title: "Account created",
-          description: "You can now sign in with your credentials",
+          title: 'Account created',
+          description: 'You can now sign in with your credentials',
         })
 
-        router.push("/login")
+        router.push('/login')
       } else {
-        setDebugInfo("No user returned from signup. Check email confirmation requirements.")
+        setDebugInfo('No user returned from signup. Check email confirmation requirements.')
         toast({
-          title: "Check your email",
+          title: 'Check your email',
           description: "We've sent you a confirmation link to complete your signup",
         })
       }
     } catch (error: any) {
-      console.error("Signup error:", error)
+      console.error('Signup error:', error)
       setDebugInfo(`Exception: ${error.message}`)
       toast({
-        title: "Error",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
+        title: 'Error',
+        description: error.message || 'Something went wrong',
+        variant: 'destructive',
       })
     } finally {
       setIsLoading(false)
@@ -143,7 +149,9 @@ export default function SignupPage() {
                 value={formData.password}
                 onChange={handleChange}
               />
-              <p className="text-xs text-muted-foreground">Password must be at least 6 characters</p>
+              <p className="text-xs text-muted-foreground">
+                Password must be at least 6 characters
+              </p>
             </div>
 
             {debugInfo && (
@@ -155,10 +163,10 @@ export default function SignupPage() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading ? 'Creating account...' : 'Create account'}
             </Button>
             <div className="text-center text-sm">
-              Already have an account?{" "}
+              Already have an account?{' '}
               <Link href="/login" className="underline">
                 Sign in
               </Link>

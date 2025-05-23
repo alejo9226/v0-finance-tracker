@@ -1,5 +1,5 @@
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { Asset } from "@/lib/supabase/data-services/assets"
+import { getSupabaseBrowserClient } from '@/lib/supabase/client'
+import { Asset } from '@/lib/supabase/data-services/assets'
 
 export interface Liability {
   id: string
@@ -19,52 +19,48 @@ const supabase = getSupabaseBrowserClient()
  * @throws Will throw an error if the Supabase query fails.
  */
 export async function fetchLiabilities(): Promise<Liability[]> {
-  const { data, error } = await supabase
-    .from("liabilities")
-    .select("*")
-    .order("name")
+  const { data, error } = await supabase.from('liabilities').select('*').order('name')
   if (error) throw error
   return data as unknown as Liability[]
 }
 
 /**
  * Creates a new liability in the database.
- * 
+ *
  * @param body - The data to create the liability with.
  */
-export async function createLiability(body: Omit<Liability, "id">): Promise<void> {
-  const { error } = await supabase
-    .from("liabilities")
-    .insert(body)
+export async function createLiability(body: Omit<Liability, 'id'>): Promise<void> {
+  const { error } = await supabase.from('liabilities').insert(body)
   if (error) throw error
 }
 
 /**
  * Creates multiple liabilities in the database.
- * 
+ *
  * @param body[] - The data array to create the liabilities with.
  */
 export async function createMultipleLiabilities(
-  body: Omit<Liability, "id" | "currency">[]
+  body: Omit<Liability, 'id' | 'currency'>[],
 ): Promise<void> {
-  const { error } = await supabase
-    .from("liabilities")
-    .insert(body)
+  const { error } = await supabase.from('liabilities').insert(body)
 
   if (error) throw error
 }
 
 /**
  * Updates an liability in the database.
- * 
+ *
  * @param id - The ID of the liability to update.
  * @param data - The data to update the liability with.
  */
-export async function updateLiability(id: string, body: Omit<Liability, "id" | "user_id">): Promise<void> {
+export async function updateLiability(
+  id: string,
+  body: Omit<Liability, 'id' | 'user_id'>,
+): Promise<void> {
   const { error } = await supabase
-    .from("liabilities")
+    .from('liabilities')
     .update(body as Record<string, unknown>)
-    .eq("id", id)
+    .eq('id', id)
 
   if (error) {
     throw error
@@ -73,13 +69,10 @@ export async function updateLiability(id: string, body: Omit<Liability, "id" | "
 
 /**
  * Deletes a liability from the database.
- * 
+ *
  * @param id - The ID of the liability to delete.
  */
 export async function deleteLiability(id: string): Promise<void> {
-  const { error } = await supabase
-    .from("liabilities")
-    .delete()
-    .eq("id", id)
+  const { error } = await supabase.from('liabilities').delete().eq('id', id)
   if (error) throw error
 }
