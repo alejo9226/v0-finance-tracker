@@ -4,7 +4,6 @@ import type React from "react"
 
 import { useEffect, useState } from "react"
 import { PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,7 +24,6 @@ import { fetchCountTransactionsByCategory, removeCategoryFromTransactions } from
 import { Category, createCategory, deleteCategory, fetchCategories, updateCategory } from "@/lib/supabase/data-services/categories"
 
 export default function CategoriesPage() {
-  const router = useRouter()
   const { toast } = useToast()
   const { user } = useAuth()
   const [categories, setCategories] = useState<Category[]>([])
