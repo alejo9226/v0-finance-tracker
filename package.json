@@ -2,11 +2,13 @@
   "name": "my-v0-project",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:fix": "next lint --fix"
   },
   "installConfig": {
     "installCommand": "npm install --legacy-peer-deps"
@@ -67,11 +69,20 @@
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6"
   },
+  "overrides": {
+    "eslint-import-resolver-typescript": "3.8.0"
+  },
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "eslint": "^9.27.0",
+    "eslint-config-next": "^15.1.8",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-import-resolver-node": "^0.3.9",
+    "eslint-plugin-import": "^2.31.0",
     "postcss": "^8",
+    "prettier": "^3.5.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
   }

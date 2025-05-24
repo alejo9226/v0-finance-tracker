@@ -1,16 +1,38 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { format } from "date-fns"
-import { PencilIcon, Trash2Icon, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction, AlertDialogCancel } from "@/components/ui/alert-dialog"
-import { useToast } from "@/hooks/use-toast"
-import { deleteTransaction, fetchTransactionById, updateTransaction, Transaction } from "@/lib/supabase/data-services/transactions"
+import { format } from 'date-fns'
+import { PencilIcon, Trash2Icon, Loader2 } from 'lucide-react'
+import { useRouter, useParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
+
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/hooks/use-toast'
+import {
+  deleteTransaction,
+  fetchTransactionById,
+  updateTransaction,
+  Transaction,
+} from '@/lib/supabase/data-services/transactions'
 
 export default function TransactionDetailsPage() {
   const router = useRouter()
@@ -18,13 +40,13 @@ export default function TransactionDetailsPage() {
   const { toast } = useToast()
   const [transaction, setTransaction] = useState<Transaction | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
+  const [error, setError] = useState('')
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [editForm, setEditForm] = useState({
-    description: "",
-    amount: "",
-    date: "",
+    description: '',
+    amount: '',
+    date: '',
     // categoryId: ""
   })
   const [editLoading, setEditLoading] = useState(false)
@@ -33,18 +55,19 @@ export default function TransactionDetailsPage() {
   useEffect(() => {
     fetchTransaction()
     // eslint-disable-next-line
-  }, [params["tx-id"]])
+  }, [params['tx-id']])
 
   async function fetchTransaction() {
     try {
       setLoading(true)
-      setError("")
-      const id = params["tx-id"]
+      setError('')
+      const id = params['tx-id']
       const data = await fetchTransactionById(id as string)
       setTransaction(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       setTransaction(null)
-      setError(error.message || "Transaction not found.")
+      setError(errorMessage || 'Transaction not found.')
     } finally {
       setLoading(false)
     }
@@ -52,9 +75,9 @@ export default function TransactionDetailsPage() {
 
   const openEdit = () => {
     setEditForm({
-      description: transaction?.description || "",
-      amount: transaction?.amount.toString() || "",
-      date: format(transaction?.date || new Date(), "yyyy-MM-dd") || "",
+      description: transaction?.description || '',
+      amount: transaction?.amount.toString() || '',
+      date: format(transaction?.date || new Date(), 'yyyy-MM-dd') || '',
     })
     setIsEditOpen(true)
   }
@@ -69,11 +92,19 @@ export default function TransactionDetailsPage() {
         date: new Date(editForm.date),
         // category_id: editForm.categoryId,
       })
-      toast({ title: "Transaction updated", description: "The transaction was updated successfully." })
+      toast({
+        title: 'Transaction updated',
+        description: 'The transaction was updated successfully.',
+      })
       setIsEditOpen(false)
       fetchTransaction()
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to update transaction", variant: "destructive" })
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      toast({
+        title: 'Error',
+        description: errorMessage || 'Failed to update transaction',
+        variant: 'destructive',
+      })
     } finally {
       setEditLoading(false)
     }
@@ -85,11 +116,19 @@ export default function TransactionDetailsPage() {
     try {
       await deleteTransaction(transaction.id)
 
-      toast({ title: "Transaction deleted", description: "The transaction was deleted successfully." })
+      toast({
+        title: 'Transaction deleted',
+        description: 'The transaction was deleted successfully.',
+      })
       setIsDeleteOpen(false)
-      router.push("/dashboard/transactions")
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to delete transaction", variant: "destructive" })
+      router.push('/dashboard/transactions')
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      toast({
+        title: 'Error',
+        description: errorMessage || 'Failed to delete transaction',
+        variant: 'destructive',
+      })
     } finally {
       setDeleteLoading(false)
     }
@@ -104,7 +143,9 @@ export default function TransactionDetailsPage() {
   }
   if (error) {
     return (
-      <div className="flex h-96 items-center justify-center text-destructive font-semibold">{error}</div>
+      <div className="flex h-96 items-center justify-center text-destructive font-semibold">
+        {error}
+      </div>
     )
   }
 
@@ -132,19 +173,25 @@ export default function TransactionDetailsPage() {
             <span className="font-semibold">Description:</span> {transaction?.description}
           </div>
           <div>
-            <span className="font-semibold">Amount:</span> {transaction?.type === "income" ? "+" : "-"}${Math.abs(Number(transaction?.amount)).toLocaleString()}
+            <span className="font-semibold">Amount:</span>{' '}
+            {transaction?.type === 'income' ? '+' : '-'}$
+            {Math.abs(Number(transaction?.amount)).toLocaleString()}
           </div>
           <div>
-            <span className="font-semibold">Date:</span> {format(new Date(transaction?.date || ""), "MMM d, yyyy")}
+            <span className="font-semibold">Date:</span>{' '}
+            {format(new Date(transaction?.date || ''), 'MMM d, yyyy')}
           </div>
           <div>
-            <span className="font-semibold">Category:</span> {transaction?.category?.name || "Uncategorized"}
+            <span className="font-semibold">Category:</span>{' '}
+            {transaction?.category?.name || 'Uncategorized'}
           </div>
           <div>
-            <span className="font-semibold">Account:</span> {transaction?.asset?.name || "No account"}
+            <span className="font-semibold">Account:</span>{' '}
+            {transaction?.asset?.name || 'No account'}
           </div>
           <div>
-            <span className="font-semibold">Type:</span> {`${transaction?.type?.charAt(0).toUpperCase()}${transaction?.type?.slice(1)}`}
+            <span className="font-semibold">Type:</span>{' '}
+            {`${transaction?.type?.charAt(0).toUpperCase()}${transaction?.type?.slice(1)}`}
           </div>
         </CardContent>
       </Card>
@@ -158,29 +205,35 @@ export default function TransactionDetailsPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <label htmlFor="tx-description" className="block text-sm font-medium">Description</label>
+              <label htmlFor="tx-description" className="block text-sm font-medium">
+                Description
+              </label>
               <Input
                 id="tx-description"
                 value={editForm.description}
-                onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))}
+                onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="tx-amount" className="block text-sm font-medium">Amount</label>
+              <label htmlFor="tx-amount" className="block text-sm font-medium">
+                Amount
+              </label>
               <Input
                 id="tx-amount"
                 type="number"
                 value={editForm.amount}
-                onChange={e => setEditForm(f => ({ ...f, amount: e.target.value }))}
+                onChange={(e) => setEditForm((f) => ({ ...f, amount: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="tx-date" className="block text-sm font-medium">Date</label>
+              <label htmlFor="tx-date" className="block text-sm font-medium">
+                Date
+              </label>
               <Input
                 id="tx-date"
                 type="date"
                 value={editForm.date}
-                onChange={e => setEditForm(f => ({ ...f, date: e.target.value }))}
+                onChange={(e) => setEditForm((f) => ({ ...f, date: e.target.value }))}
               />
             </div>
             {/* Category selection can be added here if you have categories list */}

@@ -1,22 +1,24 @@
-"use client"
+'use client'
 
-import type React from "react"
+import type React from 'react'
 
-import { createContext, useContext, useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import type { Session, User } from "@supabase/supabase-js"
+import { createContext, useContext, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import type { Session, User } from '@supabase/supabase-js'
 
-import { getSessionWrapper, onAuthStateChangeWrapper, signInWithPasswordWrapper, signOutWrapper, signUpWrapper } from "@/lib/supabase/data-services/auth"
+import {
+  getSessionWrapper,
+  onAuthStateChangeWrapper,
+  signInWithPasswordWrapper,
+  signOutWrapper,
+  signUpWrapper,
+} from '@/lib/supabase/data-services/auth'
 
 type AuthContextType = {
   user: User | null
   session: Session | null
   isLoading: boolean
-  signUp: (
-    email: string, 
-    password: string, 
-    name: string
-  ) => Promise<{ error: any }>
+  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>
   signIn: (email: string, password: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
 }
@@ -31,7 +33,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const getSession = async () => {
-      const { data: { session }, error } = await getSessionWrapper()
+      const {
+        data: { session },
+        error,
+      } = await getSessionWrapper()
       setSession(session)
       setUser(session?.user ?? null)
       setIsLoading(false)
@@ -53,27 +58,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [getSessionWrapper, onAuthStateChangeWrapper])
 
   const signUp = async (email: string, password: string, name: string) => {
-    const { error } = await signUpWrapper(
-      email, 
-      password, 
-      { data: { name } }
-    )
+    const { error } = await signUpWrapper(email, password, { data: { name } })
 
     return { error }
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await signInWithPasswordWrapper(
-      email,
-      password
-    )
+    const { error } = await signInWithPasswordWrapper(email, password)
 
     return { error }
   }
 
   const signOut = async () => {
     await signOutWrapper()
-    router.push("/login")
+    router.push('/login')
   }
 
   const value = {
@@ -91,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 export const useAuth = () => {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider")
+    throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 }

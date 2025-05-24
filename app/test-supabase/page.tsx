@@ -1,47 +1,54 @@
-"use client"
+'use client'
 
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { testConnectivityToSupabase } from "@/lib/supabase/data-services/auth"
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { testConnectivityToSupabase } from '@/lib/supabase/data-services/auth'
 
 export default function TestSupabasePage() {
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
-  const [message, setMessage] = useState("")
-  const [details, setDetails] = useState<Record<string, any>>({})
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const [message, setMessage] = useState('')
+  const [details, setDetails] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
     async function testConnection() {
       try {
-
         // Test environment variables
         setDetails({
-          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || "Not set",
+          supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || 'Not set',
           supabaseAnonKeyLength: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
             ? `${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY.length} chars`
-            : "Not set",
+            : 'Not set',
         })
 
         // Test a simple query
         const { data, error } = await testConnectivityToSupabase()
 
         if (error) {
-          setStatus("error")
+          setStatus('error')
           setMessage(`Connection failed: ${error.message}`)
           setDetails((prev) => ({ ...prev, error: error.message }))
           return
         }
 
-        setStatus("success")
-        setMessage("Supabase connection successful!")
+        setStatus('success')
+        setMessage('Supabase connection successful!')
         setDetails((prev) => ({ ...prev, data }))
-      } catch (error: any) {
-        setStatus("error")
-        setMessage(`Connection error: ${error.message}`)
-        setDetails((prev) => ({ ...prev, error: error.message }))
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+        setStatus('error')
+        setMessage(`Connection error: ${errorMessage}`)
+        setDetails((prev) => ({ ...prev, error: errorMessage }))
       }
     }
 
@@ -65,26 +72,28 @@ export default function TestSupabasePage() {
         <CardContent className="space-y-4">
           <div
             className={`p-4 rounded-md ${
-              status === "loading"
-                ? "bg-blue-50 text-blue-700"
-                : status === "success"
-                  ? "bg-green-50 text-green-700"
-                  : "bg-red-50 text-red-700"
+              status === 'loading'
+                ? 'bg-blue-50 text-blue-700'
+                : status === 'success'
+                  ? 'bg-green-50 text-green-700'
+                  : 'bg-red-50 text-red-700'
             }`}
           >
             <p className="font-medium">
-              {status === "loading"
-                ? "Testing connection..."
-                : status === "success"
-                  ? "Connection successful!"
-                  : "Connection failed"}
+              {status === 'loading'
+                ? 'Testing connection...'
+                : status === 'success'
+                  ? 'Connection successful!'
+                  : 'Connection failed'}
             </p>
             <p className="text-sm mt-1">{message}</p>
           </div>
 
           <div className="space-y-2">
             <h3 className="text-sm font-medium">Connection Details:</h3>
-            <pre className="bg-gray-100 p-3 rounded-md text-xs overflow-auto">{JSON.stringify(details, null, 2)}</pre>
+            <pre className="bg-gray-100 p-3 rounded-md text-xs overflow-auto">
+              {JSON.stringify(details, null, 2)}
+            </pre>
           </div>
         </CardContent>
         <CardFooter>

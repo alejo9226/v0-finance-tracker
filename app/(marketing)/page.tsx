@@ -1,11 +1,10 @@
-import Link from "next/link"
-import { ArrowRight, Menu, X } from "lucide-react"
+import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
-import { Button } from "@/components/ui/button"
-import Header from "./components/Header"
+import Header from '@/app/(marketing)/components/Header'
+import { Button } from '@/components/ui/button'
 
 export default function Home() {
-  
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 md:px-6">
@@ -20,8 +19,8 @@ export default function Home() {
                       Track Your Financial Health
                     </h1>
                     <p className="max-w-[600px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                      Get a clear picture of your assets, liabilities, and equity. Make informed decisions about your
-                      financial future.
+                      Get a clear picture of your assets, liabilities, and equity. Make informed
+                      decisions about your financial future.
                     </p>
                   </div>
                   <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -101,7 +100,8 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold">Track Assets</h3>
                   <p className="text-gray-500 mt-2">
-                    Keep track of all your assets including bank accounts, investments, and property.
+                    Keep track of all your assets including bank accounts, investments, and
+                    property.
                   </p>
                 </div>
                 <div className="rounded-lg border bg-white p-6 shadow-sm">
@@ -149,7 +149,8 @@ export default function Home() {
                   </div>
                   <h3 className="text-xl font-bold">Calculate Equity</h3>
                   <p className="text-gray-500 mt-2">
-                    Understand your net worth by calculating the difference between your assets and liabilities.
+                    Understand your net worth by calculating the difference between your assets and
+                    liabilities.
                   </p>
                 </div>
               </div>

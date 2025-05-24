@@ -1,9 +1,10 @@
-"use client"
+'use client'
 
-import type React from "react"
-import { useAuth } from "@/contexts/auth-context"
-import { AppHeader } from "@/components/app-header"
-import { AuthCheck } from "@/components/auth-check"
+import type React from 'react'
+
+import { AppHeader } from '@/components/app-header'
+import { AuthCheck } from '@/components/auth-check'
+import { useAuth } from '@/contexts/auth-context'
 
 export default function DashboardLayout({
   children,
@@ -20,10 +21,8 @@ export default function DashboardLayout({
             <AppHeader user={user} />
           </div>
         </div>
-        <main className="container mx-auto px-4 md:px-6">
-          {children}
-        </main>
+        <main className="container mx-auto px-4 md:px-6">{children}</main>
       </div>
     </AuthCheck>
   )
-} 
+}

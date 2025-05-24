@@ -1,27 +1,33 @@
-"use client"
+'use client'
 
-import type React from "react"
+import { ArrowLeft } from 'lucide-react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import type React from 'react'
+import { useState } from 'react'
 
-import { useState } from "react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { ArrowLeft } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { useToast } from "@/hooks/use-toast"
-import { signInWithPasswordWrapper } from "@/lib/supabase/data-services/auth"
-import { getProfileOnboardingStatus } from "@/lib/supabase/data-services/profiles"
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/hooks/use-toast'
+import { signInWithPasswordWrapper } from '@/lib/supabase/data-services/auth'
+import { getProfileOnboardingStatus } from '@/lib/supabase/data-services/profiles'
 
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   })
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
 
@@ -36,21 +42,18 @@ export default function LoginPage() {
     setDebugInfo(null)
 
     try {
-      console.log("Login attempt for:", formData.email)
+      console.log('Login attempt for:', formData.email)
 
-      const { data, error } = await signInWithPasswordWrapper(
-        formData.email,
-        formData.password
-      )
+      const { data, error } = await signInWithPasswordWrapper(formData.email, formData.password)
 
-      console.log("Login response:", { data: !!data, error })
+      console.log('Login response:', { data: !!data, error })
 
       if (error) {
         setDebugInfo(`Error: ${error.message}`)
         toast({
-          title: "Login failed",
+          title: 'Login failed',
           description: error.message,
-          variant: "destructive",
+          variant: 'destructive',
         })
         return
       }
@@ -59,28 +62,30 @@ export default function LoginPage() {
         // Check if user is onboarded
         const { data: profile, error } = await getProfileOnboardingStatus(data.user.id)
 
-        if (error && 
-          typeof error === 'object' && 
-          'message' in error && 
+        if (
+          error &&
+          typeof error === 'object' &&
+          'message' in error &&
           typeof error.message === 'string'
         ) {
           setDebugInfo(`Profile fetch error: ${error.message}`)
-          console.error("Profile fetch error:", error)
+          console.error('Profile fetch error:', error)
         }
 
         if (profile?.is_onboarded) {
-          router.push("/dashboard")
+          router.push('/dashboard')
         } else {
-          router.push("/onboarding")
+          router.push('/onboarding')
         }
       }
-    } catch (error: any) {
-      console.error("Login error:", error)
-      setDebugInfo(`Exception: ${error.message}`)
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      console.error('Login error:', error)
+      setDebugInfo(`Exception: ${errorMessage}`)
       toast({
-        title: "Error",
-        description: error.message || "Something went wrong",
-        variant: "destructive",
+        title: 'Error',
+        description: errorMessage || 'Something went wrong',
+        variant: 'destructive',
       })
     } finally {
       setIsLoading(false)
@@ -144,10 +149,10 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
             <div className="text-center text-sm">
-              Don&apos;t have an account?{" "}
+              Don&apos;t have an account?{' '}
               <Link href="/signup" className="underline">
                 Sign up
               </Link>
