@@ -57,6 +57,7 @@ export default function NewTransactionPage() {
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionType])
 
   const fetchData = async () => {
@@ -70,10 +71,11 @@ export default function NewTransactionPage() {
       setFormData((prev) => ({ ...prev, categoryId: '' }))
 
       setAssets((assetsData as Asset[]) || [])
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to load data',
+        description: errorMessage || 'Failed to load data',
         variant: 'destructive',
       })
     }
@@ -110,7 +112,7 @@ export default function NewTransactionPage() {
         asset_id: formData.assetId,
         description: formData.description,
         date: date,
-        user_id: user?.id!,
+        user_id: user?.id || '',
       })
 
       // Then, update the asset balance
@@ -127,10 +129,11 @@ export default function NewTransactionPage() {
       })
 
       router.push('/dashboard/transactions')
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add transaction',
+        description: errorMessage || 'Failed to add transaction',
         variant: 'destructive',
       })
     } finally {

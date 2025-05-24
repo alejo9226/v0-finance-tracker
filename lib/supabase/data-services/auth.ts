@@ -1,4 +1,4 @@
-import { Session, AuthError, User, AuthResponse } from '@supabase/supabase-js'
+import { AuthChangeEvent, Session, AuthError, User, AuthResponse } from '@supabase/supabase-js'
 
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
@@ -61,7 +61,9 @@ export async function getSessionWrapper() {
  *
  * @param callback - The callback to listen for auth state changes.
  */
-export function onAuthStateChangeWrapper(callback: (event: any, session: any) => void) {
+export function onAuthStateChangeWrapper(
+  callback: (event: AuthChangeEvent, session: Session | null) => void,
+) {
   return supabase.auth.onAuthStateChange(callback)
 }
 

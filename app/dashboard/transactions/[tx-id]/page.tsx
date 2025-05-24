@@ -64,9 +64,10 @@ export default function TransactionDetailsPage() {
       const id = params['tx-id']
       const data = await fetchTransactionById(id as string)
       setTransaction(data)
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       setTransaction(null)
-      setError(error.message || 'Transaction not found.')
+      setError(errorMessage || 'Transaction not found.')
     } finally {
       setLoading(false)
     }
@@ -97,10 +98,11 @@ export default function TransactionDetailsPage() {
       })
       setIsEditOpen(false)
       fetchTransaction()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update transaction',
+        description: errorMessage || 'Failed to update transaction',
         variant: 'destructive',
       })
     } finally {
@@ -120,10 +122,11 @@ export default function TransactionDetailsPage() {
       })
       setIsDeleteOpen(false)
       router.push('/dashboard/transactions')
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete transaction',
+        description: errorMessage || 'Failed to delete transaction',
         variant: 'destructive',
       })
     } finally {

@@ -18,7 +18,7 @@ import { testConnectivityToSupabase } from '@/lib/supabase/data-services/auth'
 export default function TestSupabasePage() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
-  const [details, setDetails] = useState<Record<string, any>>({})
+  const [details, setDetails] = useState<Record<string, unknown>>({})
 
   useEffect(() => {
     async function testConnection() {
@@ -44,10 +44,11 @@ export default function TestSupabasePage() {
         setStatus('success')
         setMessage('Supabase connection successful!')
         setDetails((prev) => ({ ...prev, data }))
-      } catch (error: any) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
         setStatus('error')
-        setMessage(`Connection error: ${error.message}`)
-        setDetails((prev) => ({ ...prev, error: error.message }))
+        setMessage(`Connection error: ${errorMessage}`)
+        setDetails((prev) => ({ ...prev, error: errorMessage }))
       }
     }
 

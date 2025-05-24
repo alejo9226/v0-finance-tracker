@@ -64,6 +64,7 @@ export default function CategoriesPage() {
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
   const fetchData = async () => {
@@ -73,10 +74,11 @@ export default function CategoriesPage() {
       const data = await fetchCategories(activeTab as 'income' | 'expense')
 
       setCategories(data || [])
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to load categories',
+        description: errorMessage || 'Failed to load categories',
         variant: 'destructive',
       })
     } finally {
@@ -131,10 +133,11 @@ export default function CategoriesPage() {
         color: '#4CAF50',
       })
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add category',
+        description: errorMessage || 'Failed to add category',
         variant: 'destructive',
       })
     }
@@ -160,10 +163,11 @@ export default function CategoriesPage() {
       setIsEditDialogOpen(false)
       setSelectedCategory(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update category',
+        description: errorMessage || 'Failed to update category',
         variant: 'destructive',
       })
     }
@@ -194,10 +198,11 @@ export default function CategoriesPage() {
       setIsDeleteDialogOpen(false)
       setSelectedCategory(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete category',
+        description: errorMessage || 'Failed to delete category',
         variant: 'destructive',
       })
     }

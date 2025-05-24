@@ -1,5 +1,4 @@
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import { Asset } from '@/lib/supabase/data-services/assets'
 
 export interface Liability {
   id: string

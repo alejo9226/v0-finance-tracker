@@ -138,10 +138,11 @@ export default function OnboardingPage() {
 
       // Redirect to dashboard
       router.push('/dashboard')
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Something went wrong',
+        description: errorMessage || 'Something went wrong',
         variant: 'destructive',
       })
     } finally {

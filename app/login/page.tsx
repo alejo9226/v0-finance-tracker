@@ -78,12 +78,13 @@ export default function LoginPage() {
           router.push('/onboarding')
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       console.error('Login error:', error)
-      setDebugInfo(`Exception: ${error.message}`)
+      setDebugInfo(`Exception: ${errorMessage}`)
       toast({
         title: 'Error',
-        description: error.message || 'Something went wrong',
+        description: errorMessage || 'Something went wrong',
         variant: 'destructive',
       })
     } finally {

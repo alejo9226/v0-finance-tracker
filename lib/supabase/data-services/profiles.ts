@@ -1,5 +1,3 @@
-import { PostgrestSingleResponse } from '@supabase/supabase-js'
-
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 export interface Profile {

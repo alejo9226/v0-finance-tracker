@@ -1,5 +1,6 @@
 'use client'
 
+import { User } from '@supabase/supabase-js'
 import { Menu as MenuIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
@@ -10,7 +11,7 @@ import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/co
 import { signOutWrapper } from '@/lib/supabase/data-services/auth'
 
 type AppHeaderProps = {
-  user: any
+  user: User
 }
 
 export function AppHeader({ user }: AppHeaderProps) {

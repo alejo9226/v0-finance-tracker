@@ -247,7 +247,7 @@ export default function DashboardPage() {
           color: '#6b7280',
           font: {
             family: 'Inter, sans-serif',
-            size: (context: any) => {
+            size: (context: { chart: { width: number } }) => {
               const width = context.chart.width
               return width < 360 ? 8 : 14
             },
@@ -350,7 +350,8 @@ export default function DashboardPage() {
 
       // Now filter for currencies with non-zero values
       const filteredCurrencyTotals = Object.entries(newCurrencyTotals).filter(
-        ([currency, totals]) => totals.assets > 0 || totals.liabilities > 0,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        ([_, totals]) => totals.assets > 0 || totals.liabilities > 0,
       )
 
       // If there is only one currency with non-zero values, set it as the display currency
@@ -385,21 +386,17 @@ export default function DashboardPage() {
       setTotalAssets(assetsTotal)
       setTotalLiabilities(liabilitiesTotal)
       setEquity(assetsTotal - liabilitiesTotal)
-
-      // Calculate the total spending for the current month
-      const totalSpending = filteredExpenses.reduce(
-        (sum, transaction) => sum + transaction.amount,
-        0,
-      )
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to load financial data',
+        description: errorMessage || 'Failed to load financial data',
         variant: 'destructive',
       })
     } finally {
       setLoading(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router, user])
 
   useEffect(() => {
@@ -534,10 +531,11 @@ export default function DashboardPage() {
       setIsEditAssetOpen(false)
       setSelectedAsset(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update asset',
+        description: errorMessage || 'Failed to update asset',
         variant: 'destructive',
       })
     }
@@ -564,10 +562,11 @@ export default function DashboardPage() {
       setIsEditLiabilityOpen(false)
       setSelectedLiability(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update liability',
+        description: errorMessage || 'Failed to update liability',
         variant: 'destructive',
       })
     }
@@ -617,10 +616,11 @@ export default function DashboardPage() {
       setIsAddAssetOpen(false)
       setEditForm({ name: '', type: '', value: '', currency: 'USD' })
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add asset',
+        description: errorMessage || 'Failed to add asset',
         variant: 'destructive',
       })
     }
@@ -648,10 +648,11 @@ export default function DashboardPage() {
       setIsAddLiabilityOpen(false)
       setEditForm({ name: '', type: '', value: '', currency: 'COP' })
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add liability',
+        description: errorMessage || 'Failed to add liability',
         variant: 'destructive',
       })
     }
@@ -675,10 +676,11 @@ export default function DashboardPage() {
       setIsConfirmDeleteOpen(false)
       setItemToDelete(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete item',
+        description: errorMessage || 'Failed to delete item',
         variant: 'destructive',
       })
     }
@@ -718,10 +720,11 @@ export default function DashboardPage() {
       setIsEditTxOpen(false)
       setSelectedTx(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update transaction',
+        description: errorMessage || 'Failed to update transaction',
         variant: 'destructive',
       })
     } finally {
@@ -741,10 +744,11 @@ export default function DashboardPage() {
       setIsDeleteTxOpen(false)
       setSelectedTx(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to delete transaction',
+        description: errorMessage || 'Failed to delete transaction',
         variant: 'destructive',
       })
     } finally {

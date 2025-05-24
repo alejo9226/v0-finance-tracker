@@ -46,6 +46,7 @@ export async function fetchTransactions(type?: 'income' | 'expense'): Promise<Tr
   if (error) throw error
 
   // Transform to ensure category and asset always have the required shape
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data || []).map((t: any) => ({
     id: t.id,
     amount: Number(t.amount),

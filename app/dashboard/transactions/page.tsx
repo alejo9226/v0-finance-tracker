@@ -23,6 +23,7 @@ export default function TransactionsPage() {
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
   const fetchData = async () => {
@@ -34,10 +35,11 @@ export default function TransactionsPage() {
       )
 
       setTransactions(transactionsData || [])
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
-        description: error.message || 'Failed to load transactions',
+        description: errorMessage || 'Failed to load transactions',
         variant: 'destructive',
       })
     } finally {

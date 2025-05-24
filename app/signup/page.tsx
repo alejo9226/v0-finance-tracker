@@ -86,12 +86,13 @@ export default function SignupPage() {
           description: "We've sent you a confirmation link to complete your signup",
         })
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       console.error('Signup error:', error)
-      setDebugInfo(`Exception: ${error.message}`)
+      setDebugInfo(`Exception: ${errorMessage}`)
       toast({
         title: 'Error',
-        description: error.message || 'Something went wrong',
+        description: errorMessage || 'Something went wrong',
         variant: 'destructive',
       })
     } finally {
