@@ -3,8 +3,7 @@ import React from 'react'
 import { EntityListCard } from '@/components/dashboard/shared/EntityListCard'
 import { Asset, CurrencyCode } from '@/domain/entities/Asset'
 import { useI18n } from '@/locales/client'
-import { DollarSign, Wallet } from 'lucide-react'
-import { Landmark } from 'lucide-react'
+import { DollarSign, Landmark, Wallet } from 'lucide-react'
 
 type AssetListProps = {
   assets: Asset[]
@@ -30,11 +29,11 @@ export function AssetList({
 
   const getAssetIcon = (type: string) => {
     switch (type) {
-      case "bank":
+      case 'bank':
         return <Landmark className="h-5 w-5" />
-      case "investment":
+      case 'investment':
         return <DollarSign className="h-5 w-5" />
-      case "cash":
+      case 'cash':
         return <Wallet className="h-5 w-5" />
       default:
         return <DollarSign className="h-5 w-5" />

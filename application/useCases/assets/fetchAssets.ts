@@ -1,5 +1,5 @@
-import { Asset } from "@/domain/entities/Asset"
-import { assetRepositoryImpl } from "@/domain/repositories/AssetRepositoryImpl"
+import { Asset } from '@/domain/entities/Asset'
+import { assetRepositoryImpl } from '@/domain/repositories/AssetRepositoryImpl'
 /**
  * Use case: Fetch all assets from the repository.
  *

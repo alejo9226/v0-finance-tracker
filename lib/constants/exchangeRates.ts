@@ -1,4 +1,4 @@
-import { CurrencyCode } from "@/domain/entities/Asset"
+import { CurrencyCode } from '@/domain/entities/Asset'
 
 export const EXCHANGE_RATES: Record<CurrencyCode, number> = {
   USD: 1,

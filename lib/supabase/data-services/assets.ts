@@ -1,5 +1,5 @@
-import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Asset } from '@/domain/entities/Asset'
+import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 const supabase = getSupabaseBrowserClient()
 

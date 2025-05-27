@@ -31,6 +31,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { Bar } from 'react-chartjs-2'
 
+import { calculateTotalValue } from '@/application/useCases/assets/calculateTotalValue'
+import { calculateCurrencyTotals } from '@/application/useCases/balanceSheet/calculateCurrencyTotals'
+import { fetchAssets } from '@/application/useCases/assets/fetchAssets'
 import { AssetList } from '@/components/dashboard/AssetList'
 import { LiabilityList } from '@/components/dashboard/LiabilityList'
 import {
@@ -67,12 +70,9 @@ import { updateAsset, createAsset, deleteAsset } from "@/lib/supabase/data-servi
 import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
 import { useI18n } from "@/locales/client"
 import { useAuth } from '@/contexts/auth-context'
+import { Asset, CURRENCIES, CurrencyCode } from '@/domain/entities/Asset'
 import { useToast } from '@/hooks/use-toast'
-import { Asset, CURRENCIES, CurrencyCode } from "@/domain/entities/Asset"
-import { EXCHANGE_RATES } from "@/lib/constants/exchangeRates"
-import { calculateTotalValue } from "@/application/useCases/assets/calculateTotalValue"
-import { fetchAssets } from "@/application/useCases/assets/fetchAssets"
-import { calculateCurrencyTotals } from "@/application/useCases/balanceSheet/calculateCurrencyTotals"
+import { EXCHANGE_RATES } from '@/lib/constants/exchangeRates'
 
 // Register Chart.js components
 Chart.register(
@@ -164,7 +164,9 @@ export default function DashboardPage() {
   const [activeCurrencies, setActiveCurrencies] = useState<Set<CurrencyCode>>(new Set())
   // User currencies are the currencies that the user has selected as their preferred currency
   const [userCurrencies, setUserCurrencies] = useState<UserCurrencyPreference[]>([])
-  const [currencyTotals, setCurrencyTotals] = useState<Partial<CurrencyTotals>>({} as Partial<CurrencyTotals>)
+  const [currencyTotals, setCurrencyTotals] = useState<Partial<CurrencyTotals>>(
+    {} as Partial<CurrencyTotals>,
+  )
   const [isEditTxOpen, setIsEditTxOpen] = useState(false)
   const [isDeleteTxOpen, setIsDeleteTxOpen] = useState(false)
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
@@ -296,8 +298,8 @@ export default function DashboardPage() {
       const transformedTransactions = await fetchTransactions()
 
       // Set state with type assertions
-      setAssets(assetsData as Asset[] || [])
-      setLiabilities(liabilitiesData as Liability[] || [])
+      setAssets((assetsData as Asset[]) || [])
+      setLiabilities((liabilitiesData as Liability[]) || [])
       setRecentTransactions(transformedTransactions)
 
       // Calculate assets and liabilities per currency and set the display currency
@@ -353,8 +355,8 @@ export default function DashboardPage() {
     // Get unique currencies from assets and liabilities
     const currencySet = new Set<CurrencyCode>()
 
-    assets.forEach(asset => currencySet.add(asset.currency))
-    liabilities.forEach(liability => currencySet.add(liability.currency as CurrencyCode))
+    assets.forEach((asset) => currencySet.add(asset.currency))
+    liabilities.forEach((liability) => currencySet.add(liability.currency as CurrencyCode))
 
     setActiveCurrencies(currencySet)
 
@@ -781,8 +783,8 @@ export default function DashboardPage() {
               <ArrowUp className="mr-1 h-4 w-4" />
               <span>{t('dashboard.balance-sheet.asset-explanation')}</span>
             </div>
-          </CardContent >
-        </Card >
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader className="pb-3">
@@ -800,22 +802,26 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies).sort().map(currency => (
-                  <div key={currency} className="flex justify-between items-center">
-                    <span className="text-sm text-muted-foreground">{currency}</span>
-                    <span className={`text-lg font-medium ${currencyTotals[currency]?.liabilities === 0 ? 'text-muted-foreground' : ''}`}>
-                      {formatCurrency(currencyTotals[currency]?.liabilities || 0, currency)}
-                    </span>
-                  </div>
-                ))}
-              </div >
+                {Array.from(activeCurrencies)
+                  .sort()
+                  .map((currency) => (
+                    <div key={currency} className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">{currency}</span>
+                      <span
+                        className={`text-lg font-medium ${currencyTotals[currency]?.liabilities === 0 ? 'text-muted-foreground' : ''}`}
+                      >
+                        {formatCurrency(currencyTotals[currency]?.liabilities || 0, currency)}
+                      </span>
+                    </div>
+                  ))}
+              </div>
             )}
             <div className="mt-2 flex items-center text-sm text-red-500">
               <ArrowDown className="mr-1 h-4 w-4" />
               <span>{t('dashboard.balance-sheet.liability-explanation')}</span>
             </div>
-          </CardContent >
-        </Card >
+          </CardContent>
+        </Card>
 
         <Card className="bg-green-50">
           <CardHeader className="pb-3">
@@ -839,7 +845,7 @@ export default function DashboardPage() {
                     <div key={currency} className="flex justify-between items-center">
                       <span className="text-sm text-green-700">{currency}</span>
                       <span className={`text-lg font-medium ${netWorth === 0 ? 'text-muted-foreground' :
-                          netWorth > 0 ? 'text-green-700' : 'text-red-700'
+                        netWorth > 0 ? 'text-green-700' : 'text-red-700'
                         }`}>
                         {formatCurrency(netWorth, currency)}
                       </span>
@@ -1539,6 +1545,6 @@ export default function DashboardPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div >
+    </div>
   )
 }

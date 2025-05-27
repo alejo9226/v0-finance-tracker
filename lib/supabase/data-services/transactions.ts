@@ -136,7 +136,7 @@ export async function updateTransaction(
   transaction: Pick<
     Transaction,
     'description' | 'amount' | 'date'
-  // category_id: Uncomment if you add category selection
+    // category_id: Uncomment if you add category selection
   >,
 ): Promise<void> {
   const { error } = await supabase.from('transactions').update(transaction).eq('id', id)

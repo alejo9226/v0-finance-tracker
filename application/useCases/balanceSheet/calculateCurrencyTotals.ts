@@ -1,5 +1,5 @@
-import { Asset, CURRENCIES, CurrencyCode } from "@/domain/entities/Asset"
-import { Liability } from "@/lib/supabase/data-services/liabilities"
+import { Asset, CURRENCIES, CurrencyCode } from '@/domain/entities/Asset'
+import { Liability } from '@/lib/supabase/data-services/liabilities'
 
 export type CurrencyTotals = {
   [key in CurrencyCode]: {
@@ -18,15 +18,14 @@ export function calculateCurrencyTotals(
   assets: Asset[] = [],
   liabilities: Liability[] = [],
 ): Partial<CurrencyTotals> {
-
-  let newCurrencyTotals: CurrencyTotals = {} as CurrencyTotals
+  const newCurrencyTotals: CurrencyTotals = {} as CurrencyTotals
 
   // Initialize totals for each currency
-  CURRENCIES.forEach(currency => {
+  CURRENCIES.forEach((currency) => {
     // currency.code can be USD, BRL, COP, etc.
     newCurrencyTotals[currency.code] = {
       assets: 0,
-      liabilities: 0
+      liabilities: 0,
     }
   })
 
@@ -42,7 +41,10 @@ export function calculateCurrencyTotals(
 
   // Filter out currencies with no assets or liabilities
   Object.keys(newCurrencyTotals).forEach((currency) => {
-    if (newCurrencyTotals[currency as CurrencyCode].assets === 0 && newCurrencyTotals[currency as CurrencyCode].liabilities === 0) {
+    if (
+      newCurrencyTotals[currency as CurrencyCode].assets === 0 &&
+      newCurrencyTotals[currency as CurrencyCode].liabilities === 0
+    ) {
       delete newCurrencyTotals[currency as CurrencyCode]
     }
   })
