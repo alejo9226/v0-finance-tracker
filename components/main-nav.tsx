@@ -1,25 +1,25 @@
-"use client"
+'use client'
 
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { LayoutDashboard, CreditCard, PieChart } from "lucide-react"
+import { LayoutDashboard, CreditCard, PieChart } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 const navItems = [
   {
-    name: "Dashboard",
-    href: "/dashboard",
+    name: 'Dashboard',
+    href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    name: "Transactions",
-    href: "/dashboard/transactions",
+    name: 'Transactions',
+    href: '/dashboard/transactions',
     icon: CreditCard,
   },
   {
-    name: "Categories",
-    href: "/dashboard/categories",
+    name: 'Categories',
+    href: '/dashboard/categories',
     icon: PieChart,
   },
 ]
@@ -38,8 +38,8 @@ export function MainNav({ onNavigate }: MainNavProps) {
           key={item.href}
           href={item.href}
           className={cn(
-            "flex items-center text-sm font-medium transition-colors hover:text-primary",
-            pathname === item.href ? "text-primary" : "text-muted-foreground",
+            'flex items-center text-sm font-medium transition-colors hover:text-primary',
+            pathname === item.href ? 'text-primary' : 'text-muted-foreground',
           )}
           onClick={onNavigate}
         >

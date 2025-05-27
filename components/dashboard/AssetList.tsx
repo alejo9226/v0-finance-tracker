@@ -1,15 +1,13 @@
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react"
-import { Asset, CurrencyCode } from "@/lib/supabase/data-services/assets"
-import React from "react"
-import { EntityListCard } from "@/components/dashboard/shared/EntityListCard"
+import React from 'react'
+
+import { EntityListCard } from '@/components/dashboard/shared/EntityListCard'
+import { Asset, CurrencyCode } from '@/lib/supabase/data-services/assets'
 
 type AssetListProps = {
   assets: Asset[]
-  displayCurrency: CurrencyCode | ""
-  formatCurrency: (amount: number, currency: CurrencyCode | "") => string
-  convertCurrency: (amount: number, from: CurrencyCode, to: CurrencyCode | "") => number
+  displayCurrency: CurrencyCode | ''
+  formatCurrency: (amount: number, currency: CurrencyCode | '') => string
+  convertCurrency: (amount: number, from: CurrencyCode, to: CurrencyCode | '') => number
   onAdd: () => void
   onEdit: (asset: Asset) => void
   onDelete: (id: string) => void
@@ -36,7 +34,8 @@ export function AssetList({
       convertCurrency={convertCurrency}
       onAdd={onAdd}
       onEdit={(entity) => {
-        if ('type' in entity) { // Type guard to ensure it's an Asset
+        if ('type' in entity) {
+          // Type guard to ensure it's an Asset
           onEdit(entity as Asset)
         }
       }}
@@ -45,4 +44,4 @@ export function AssetList({
       getEntityIcon={getAssetIcon}
     />
   )
-} 
+}

@@ -1,13 +1,11 @@
-"use client"
+'use client'
 
-import type React from "react"
+import { PlusIcon, Trash2Icon, PencilIcon } from 'lucide-react'
+import type React from 'react'
+import { useEffect, useState } from 'react'
 
-import { useEffect, useState } from "react"
-import { PlusIcon, Trash2Icon, PencilIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
-
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
@@ -15,63 +13,73 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/hooks/use-toast"
-import { useAuth } from "@/contexts/auth-context"
-import { fetchCountTransactionsByCategory, removeCategoryFromTransactions } from "@/lib/supabase/data-services/transactions"
-import { Category, createCategory, deleteCategory, fetchCategories, updateCategory } from "@/lib/supabase/data-services/categories"
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useAuth } from '@/contexts/auth-context'
+import { useToast } from '@/hooks/use-toast'
+import {
+  Category,
+  createCategory,
+  deleteCategory,
+  fetchCategories,
+  updateCategory,
+} from '@/lib/supabase/data-services/categories'
+import {
+  fetchCountTransactionsByCategory,
+  removeCategoryFromTransactions,
+} from '@/lib/supabase/data-services/transactions'
 
 export default function CategoriesPage() {
-  const router = useRouter()
   const { toast } = useToast()
   const { user } = useAuth()
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState("expense")
+  const [activeTab, setActiveTab] = useState('expense')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [formData, setFormData] = useState({
-    name: "",
-    type: "" as "income" | "expense",
-    icon: "",
-    color: "#4CAF50",
+    name: '',
+    type: '' as 'income' | 'expense',
+    icon: '',
+    color: '#4CAF50',
   })
 
   // Color options
   const colorOptions = [
-    "#4CAF50",
-    "#F44336",
-    "#2196F3",
-    "#FF9800",
-    "#9C27B0",
-    "#607D8B",
-    "#E91E63",
-    "#00BCD4",
-    "#FFC107",
-    "#795548",
+    '#4CAF50',
+    '#F44336',
+    '#2196F3',
+    '#FF9800',
+    '#9C27B0',
+    '#607D8B',
+    '#E91E63',
+    '#00BCD4',
+    '#FFC107',
+    '#795548',
   ]
 
   useEffect(() => {
     fetchData()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab])
 
   const fetchData = async () => {
     try {
       setLoading(true)
 
-      const data = await fetchCategories(activeTab as "income" | "expense")
+      const data = await fetchCategories(activeTab as 'income' | 'expense')
 
       setCategories(data || [])
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
-        title: "Error",
-        description: error.message || "Failed to load categories",
-        variant: "destructive",
+        title: 'Error',
+        description: errorMessage || 'Failed to load categories',
+        variant: 'destructive',
       })
     } finally {
       setLoading(false)
@@ -81,16 +89,16 @@ export default function CategoriesPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
 
-    if (name === "icon") {
+    if (name === 'icon') {
       const emojiRegex = /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Extended_Pictographic})+$/u
 
-      if (emojiRegex.test(value) || value === "") {
+      if (emojiRegex.test(value) || value === '') {
         setFormData((prev) => ({ ...prev, icon: value }))
       } else {
         toast({
-          title: "Invalid emoji",
-          description: "Please enter a valid emoji",
-          variant: "destructive",
+          title: 'Invalid emoji',
+          description: 'Please enter a valid emoji',
+          variant: 'destructive',
         })
       }
     } else {
@@ -101,35 +109,36 @@ export default function CategoriesPage() {
   const handleAddCategory = async () => {
     try {
       if (!formData.name) {
-        throw new Error("Category name is required")
+        throw new Error('Category name is required')
       }
 
       await createCategory({
         name: formData.name,
-        type: activeTab as "income" | "expense",
+        type: activeTab as 'income' | 'expense',
         icon: formData.icon,
         color: formData.color,
         user_id: user?.id as string,
       })
 
       toast({
-        title: "Category added",
-        description: "Your category has been added successfully",
+        title: 'Category added',
+        description: 'Your category has been added successfully',
       })
 
       setIsAddDialogOpen(false)
       setFormData({
-        name: "",
-        type: activeTab as "income" | "expense",
-        icon: "💰",
-        color: "#4CAF50",
+        name: '',
+        type: activeTab as 'income' | 'expense',
+        icon: '💰',
+        color: '#4CAF50',
       })
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
-        title: "Error",
-        description: error.message || "Failed to add category",
-        variant: "destructive",
+        title: 'Error',
+        description: errorMessage || 'Failed to add category',
+        variant: 'destructive',
       })
     }
   }
@@ -137,7 +146,7 @@ export default function CategoriesPage() {
   const handleEditCategory = async () => {
     try {
       if (!selectedCategory || !formData.name) {
-        throw new Error("Category name is required")
+        throw new Error('Category name is required')
       }
 
       await updateCategory(selectedCategory.id, {
@@ -147,18 +156,19 @@ export default function CategoriesPage() {
       })
 
       toast({
-        title: "Category updated",
-        description: "Your category has been updated successfully",
+        title: 'Category updated',
+        description: 'Your category has been updated successfully',
       })
 
       setIsEditDialogOpen(false)
       setSelectedCategory(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
-        title: "Error",
-        description: error.message || "Failed to update category",
-        variant: "destructive",
+        title: 'Error',
+        description: errorMessage || 'Failed to update category',
+        variant: 'destructive',
       })
     }
   }
@@ -166,7 +176,7 @@ export default function CategoriesPage() {
   const handleDeleteCategory = async () => {
     try {
       if (!selectedCategory) {
-        throw new Error("No category selected")
+        throw new Error('No category selected')
       }
 
       // Check if category is used in transactions
@@ -181,18 +191,19 @@ export default function CategoriesPage() {
       await deleteCategory(selectedCategory.id)
 
       toast({
-        title: "Category deleted",
-        description: "Your category has been deleted successfully",
+        title: 'Category deleted',
+        description: 'Your category has been deleted successfully',
       })
 
       setIsDeleteDialogOpen(false)
       setSelectedCategory(null)
       fetchData()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete category",
-        variant: "destructive",
+        title: 'Error',
+        description: errorMessage || 'Failed to delete category',
+        variant: 'destructive',
       })
     }
   }
@@ -251,21 +262,28 @@ export default function CategoriesPage() {
             <TabsContent value={activeTab}>
               <Card>
                 <CardHeader>
-                  <CardTitle>{activeTab === "expense" ? "Expense Categories" : "Income Categories"}</CardTitle>
+                  <CardTitle>
+                    {activeTab === 'expense' ? 'Expense Categories' : 'Income Categories'}
+                  </CardTitle>
                   <CardDescription>
-                    Manage your {activeTab === "expense" ? "expense" : "income"} categories
+                    Manage your {activeTab === 'expense' ? 'expense' : 'income'} categories
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   {categories.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8">
                       <p className="text-muted-foreground mb-4">No categories found</p>
-                      <Button onClick={() => setIsAddDialogOpen(true)}>Add your first category</Button>
+                      <Button onClick={() => setIsAddDialogOpen(true)}>
+                        Add your first category
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-4">
                       {categories.map((category) => (
-                        <div key={category.id} className="flex items-center justify-between p-4 rounded-lg border">
+                        <div
+                          key={category.id}
+                          className="flex items-center justify-between p-4 rounded-lg border"
+                        >
                           <div className="flex items-center gap-4">
                             <div
                               className="flex h-10 w-10 items-center justify-center rounded-full"
@@ -281,11 +299,19 @@ export default function CategoriesPage() {
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => openEditDialog(category)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openEditDialog(category)}
+                            >
                               <PencilIcon className="h-4 w-4" />
                               <span className="sr-only">Edit</span>
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(category)}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => openDeleteDialog(category)}
+                            >
                               <Trash2Icon className="h-4 w-4" />
                               <span className="sr-only">Delete</span>
                             </Button>
@@ -340,7 +366,7 @@ export default function CategoriesPage() {
                     key={color}
                     type="button"
                     className={`h-8 w-8 rounded-md ${
-                      formData.color === color ? "ring-2 ring-offset-2 ring-primary" : ""
+                      formData.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
                     }`}
                     style={{ backgroundColor: color }}
                     onClick={() => setFormData((prev) => ({ ...prev, color }))}
@@ -397,7 +423,7 @@ export default function CategoriesPage() {
                     key={color}
                     type="button"
                     className={`h-8 w-8 rounded-md ${
-                      formData.color === color ? "ring-2 ring-offset-2 ring-primary" : ""
+                      formData.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
                     }`}
                     style={{ backgroundColor: color }}
                     onClick={() => setFormData((prev) => ({ ...prev, color }))}

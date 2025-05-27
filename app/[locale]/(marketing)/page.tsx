@@ -4,11 +4,10 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Header from "./components/Header"
 import { getI18n } from "@/locales/server"
-import { getScopedI18n } from "@/locales/server"
 
 export default async function Home() {
   const t = await getI18n()
-  
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 md:px-6">
@@ -24,8 +23,8 @@ export default async function Home() {
                     </h1>
                     <p className="max-w-[600px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                       {t('marketing.hero.subtitle')}
-                    </p>
-                  </div>
+                    </p >
+                  </div >
                   <div className="flex flex-col gap-2 min-[400px]:flex-row">
                     <Link href="/signup">
                       <Button size="lg" className="gap-1.5">
@@ -34,7 +33,7 @@ export default async function Home() {
                       </Button>
                     </Link>
                   </div>
-                </div>
+                </div >
                 <div className="flex items-center justify-center">
                   <div className="relative h-[350px] w-full max-w-[500px] rounded-lg bg-gradient-to-br from-green-100 to-green-50 p-6 shadow-lg">
                     <div className="space-y-6">
@@ -78,9 +77,9 @@ export default async function Home() {
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </section>
+              </div >
+            </div >
+          </section >
           <section className="bg-gray-50 py-16">
             <div className="container px-4 md:px-6">
               <div className="grid gap-10 md:grid-cols-3">
@@ -103,7 +102,8 @@ export default async function Home() {
                   </div>
                   <h3 className="text-xl font-bold">Track Assets</h3>
                   <p className="text-gray-500 mt-2">
-                    Keep track of all your assets including bank accounts, investments, and property.
+                    Keep track of all your assets including bank accounts, investments, and
+                    property.
                   </p>
                 </div>
                 <div className="rounded-lg border bg-white p-6 shadow-sm">
@@ -151,13 +151,14 @@ export default async function Home() {
                   </div>
                   <h3 className="text-xl font-bold">Calculate Equity</h3>
                   <p className="text-gray-500 mt-2">
-                    Understand your net worth by calculating the difference between your assets and liabilities.
+                    Understand your net worth by calculating the difference between your assets and
+                    liabilities.
                   </p>
                 </div>
               </div>
             </div>
           </section>
-        </main>
+        </main >
         <footer className="border-t py-6">
           <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
             <p className="text-sm text-gray-500">© 2025 FinanceTrack. All rights reserved.</p>
@@ -174,7 +175,7 @@ export default async function Home() {
             </div>
           </div>
         </footer>
-      </div>
-    </div>
+      </div >
+    </div >
   )
 }
