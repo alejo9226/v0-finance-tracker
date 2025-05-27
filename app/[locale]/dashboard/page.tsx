@@ -72,6 +72,7 @@ import { Asset, CURRENCIES, CurrencyCode } from "@/domain/entities/Asset"
 import { EXCHANGE_RATES } from "@/lib/constants/exchangeRates"
 import { calculateTotalValue } from "@/application/useCases/assets/calculateTotalValue"
 import { fetchAssets } from "@/application/useCases/assets/fetchAssets"
+import { calculateCurrencyTotals } from "@/application/useCases/balanceSheet/calculateCurrencyTotals"
 
 // Register Chart.js components
 Chart.register(
@@ -157,14 +158,13 @@ export default function DashboardPage() {
   const [isAddAssetOpen, setIsAddAssetOpen] = useState(false)
   const [isAddLiabilityOpen, setIsAddLiabilityOpen] = useState(false)
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<{
-    id: string
-    type: 'asset' | 'liability'
-  } | null>(null)
-  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode | ''>('')
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: "asset" | "liability" } | null>(null)
+  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode | "">("")
+  // Active currencies are the currencies that have non-zero assets or liabilities
   const [activeCurrencies, setActiveCurrencies] = useState<Set<CurrencyCode>>(new Set())
+  // User currencies are the currencies that the user has selected as their preferred currency
   const [userCurrencies, setUserCurrencies] = useState<UserCurrencyPreference[]>([])
-  const [currencyTotals, setCurrencyTotals] = useState<CurrencyTotals>({} as CurrencyTotals)
+  const [currencyTotals, setCurrencyTotals] = useState<Partial<CurrencyTotals>>({} as Partial<CurrencyTotals>)
   const [isEditTxOpen, setIsEditTxOpen] = useState(false)
   const [isDeleteTxOpen, setIsDeleteTxOpen] = useState(false)
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
@@ -290,84 +290,26 @@ export default function DashboardPage() {
 
       setLoading(true)
 
-      // Fetch assets
+      // Fetch assets, liabilities and recent transactions
       const assetsData = await fetchAssets()
-
-      // Fetch liabilities
       const liabilitiesData = await fetchLiabilities()
-
-      // Fetch recent transactions
       const transformedTransactions = await fetchTransactions()
 
-      // Set state with type assertions and transformations
-      setAssets((assetsData as Asset[]) || [])
-      setLiabilities((liabilitiesData as Liability[]) || [])
-
-      // Transactions data comes transformed to ensure required fields
+      // Set state with type assertions
+      setAssets(assetsData as Asset[] || [])
+      setLiabilities(liabilitiesData as Liability[] || [])
       setRecentTransactions(transformedTransactions)
 
-      // Calculate per-currency totals
-      const newCurrencyTotals: CurrencyTotals = {} as CurrencyTotals
-
-      // Initialize totals for each currency
-      CURRENCIES.forEach((currency) => {
-        newCurrencyTotals[currency.code] = {
-          assets: 0,
-          liabilities: 0,
-        }
-      })
-
-      // Calculate assets per currency with proper type assertion
-      const typedAssetsData = (assetsData as Asset[]) || []
-      typedAssetsData.forEach((asset) => {
-        newCurrencyTotals[asset.currency].assets += Number(asset.value)
-      })
-
-      // Calculate liabilities per currency with proper type assertion
-      const typedLiabilitiesData = (liabilitiesData as Liability[]) || []
-      typedLiabilitiesData.forEach((liability) => {
-        newCurrencyTotals[liability.currency as CurrencyCode].liabilities += Number(liability.value)
-      })
-
-      // Now filter for currencies with non-zero values
-      const filteredCurrencyTotals = Object.entries(newCurrencyTotals).filter(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ([_, totals]) => totals.assets > 0 || totals.liabilities > 0,
-      )
+      // Calculate assets and liabilities per currency and set the display currency
+      const balanceSheetCurrencyTotals = calculateCurrencyTotals(assetsData, liabilitiesData)
 
       // If there is only one currency with non-zero values, set it as the display currency
-      if (filteredCurrencyTotals.length === 1) {
-        setDisplayCurrency(filteredCurrencyTotals[0][0] as CurrencyCode)
+      if (Object.keys(balanceSheetCurrencyTotals).length === 1) {
+        setDisplayCurrency(Object.keys(balanceSheetCurrencyTotals)[0] as CurrencyCode)
       }
 
-      setCurrencyTotals(newCurrencyTotals)
-
-      // Calculate converted totals
-      const assetsTotal = typedAssetsData.reduce((sum, asset) => {
-        if (displayCurrency) {
-          return sum + convertCurrency(Number(asset.value), asset.currency, displayCurrency)
-        }
-        return sum + Number(asset.value)
-      }, 0)
-
-      const liabilitiesTotal = typedLiabilitiesData.reduce((sum, liability) => {
-        if (displayCurrency) {
-          return (
-            sum +
-            convertCurrency(
-              Number(liability.value),
-              liability.currency as CurrencyCode,
-              displayCurrency,
-            )
-          )
-        }
-        return sum + Number(liability.value)
-      }, 0)
-
-      setTotalAssets(assetsTotal)
-      setTotalLiabilities(liabilitiesTotal)
-      setEquity(assetsTotal - liabilitiesTotal)
-    } catch (error: unknown) {
+      setCurrencyTotals(balanceSheetCurrencyTotals)
+    } catch (error: any) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
@@ -410,8 +352,10 @@ export default function DashboardPage() {
   useEffect(() => {
     // Get unique currencies from assets and liabilities
     const currencySet = new Set<CurrencyCode>()
-    assets.forEach((asset) => currencySet.add(asset.currency))
-    liabilities.forEach((liability) => currencySet.add(liability.currency as CurrencyCode))
+
+    assets.forEach(asset => currencySet.add(asset.currency))
+    liabilities.forEach(liability => currencySet.add(liability.currency as CurrencyCode))
+
     setActiveCurrencies(currencySet)
 
     // Create user currencies array with preference
@@ -421,19 +365,6 @@ export default function DashboardPage() {
     }))
     setUserCurrencies(currencies)
   }, [assets, liabilities, displayCurrency])
-
-  const getAssetIcon = (type: string) => {
-    switch (type) {
-      case 'bank':
-        return <Landmark className="h-5 w-5" />
-      case 'investment':
-        return <DollarSign className="h-5 w-5" />
-      case 'cash':
-        return <Wallet className="h-5 w-5" />
-      default:
-        return <DollarSign className="h-5 w-5" />
-    }
-  }
 
   const getLiabilityIcon = (type: string) => {
     switch (type) {
@@ -820,6 +751,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Zero State */}
             {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
               <div className="text-3xl font-bold">$0,0</div>
             )}
@@ -829,26 +761,28 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies)
-                  .sort()
-                  .map((currency) => (
-                    <div key={currency} className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">{currency}</span>
-                      <span
-                        className={`text-lg font-medium ${currencyTotals[currency].assets === 0 ? 'text-muted-foreground' : ''}`}
-                      >
-                        {formatCurrency(currencyTotals[currency].assets, currency)}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            )}
+                {Array.from(activeCurrencies).sort().map(currency => (
+                  <div key={currency} className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{currency}</span>
+                    <span
+                      className={`
+                        text-lg font-medium 
+                        ${currencyTotals[currency]?.assets === 0 ? 'text-muted-foreground' : ''}
+                        ${currencyTotals[currency]?.assets === 0 ? 'text-muted-foreground' : ''}
+                      `}>
+                      {formatCurrency(currencyTotals[currency]!.assets, currency)}
+                    </span>
+                  </div>
+                ))}
+              </div >
+            )
+            }
             <div className="mt-2 flex items-center text-sm text-green-500">
               <ArrowUp className="mr-1 h-4 w-4" />
               <span>{t('dashboard.balance-sheet.asset-explanation')}</span>
             </div>
-          </CardContent>
-        </Card>
+          </CardContent >
+        </Card >
 
         <Card>
           <CardHeader className="pb-3">
@@ -866,26 +800,22 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies)
-                  .sort()
-                  .map((currency) => (
-                    <div key={currency} className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">{currency}</span>
-                      <span
-                        className={`text-lg font-medium ${currencyTotals[currency].liabilities === 0 ? 'text-muted-foreground' : ''}`}
-                      >
-                        {formatCurrency(currencyTotals[currency].liabilities, currency)}
-                      </span>
-                    </div>
-                  ))}
-              </div>
+                {Array.from(activeCurrencies).sort().map(currency => (
+                  <div key={currency} className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{currency}</span>
+                    <span className={`text-lg font-medium ${currencyTotals[currency]?.liabilities === 0 ? 'text-muted-foreground' : ''}`}>
+                      {formatCurrency(currencyTotals[currency]?.liabilities || 0, currency)}
+                    </span>
+                  </div>
+                ))}
+              </div >
             )}
             <div className="mt-2 flex items-center text-sm text-red-500">
               <ArrowDown className="mr-1 h-4 w-4" />
               <span>{t('dashboard.balance-sheet.liability-explanation')}</span>
             </div>
-          </CardContent>
-        </Card>
+          </CardContent >
+        </Card >
 
         <Card className="bg-green-50">
           <CardHeader className="pb-3">
@@ -903,35 +833,27 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies)
-                  .sort()
-                  .map((currency) => {
-                    const netWorth =
-                      currencyTotals[currency].assets - currencyTotals[currency].liabilities
-                    return (
-                      <div key={currency} className="flex justify-between items-center">
-                        <span className="text-sm text-green-700">{currency}</span>
-                        <span
-                          className={`text-lg font-medium ${netWorth === 0
-                            ? 'text-muted-foreground'
-                            : netWorth > 0
-                              ? 'text-green-700'
-                              : 'text-red-700'
-                            }`}
-                        >
-                          {formatCurrency(netWorth, currency)}
-                        </span>
-                      </div>
-                    )
-                  })}
-              </div>
+                {Array.from(activeCurrencies).sort().map(currency => {
+                  const netWorth = (currencyTotals[currency]?.assets || 0) - (currencyTotals[currency]?.liabilities || 0);
+                  return (
+                    <div key={currency} className="flex justify-between items-center">
+                      <span className="text-sm text-green-700">{currency}</span>
+                      <span className={`text-lg font-medium ${netWorth === 0 ? 'text-muted-foreground' :
+                          netWorth > 0 ? 'text-green-700' : 'text-red-700'
+                        }`}>
+                        {formatCurrency(netWorth, currency)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div >
             )}
             <div className="mt-2 flex items-center text-sm text-green-700">
               <span>{t('dashboard.balance-sheet.equity-explanation')}</span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </CardContent >
+        </Card >
+      </div >
 
       <div className="mt-12 grid gap-8 md:grid-cols-2">
         {/* Assets */}
@@ -949,7 +871,6 @@ export default function DashboardPage() {
             setItemToDelete({ id, type: 'asset' })
             setIsConfirmDeleteOpen(true)
           }}
-          getAssetIcon={getAssetIcon}
         />
         {/* Liabilities */}
         <LiabilityList
@@ -1618,6 +1539,6 @@ export default function DashboardPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </div >
   )
 }
