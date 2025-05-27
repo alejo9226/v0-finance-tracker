@@ -780,14 +780,14 @@ export default function DashboardPage() {
           {recentTransactions.length > 0 && (
             <Link href="/dashboard/transactions">
               <Button variant="outline" size="lg">
-                View All Transactions
+                {t('dashboard.buttons.secondary.view-all-transactions')}
               </Button>
             </Link>
           )}
           <Link href="/dashboard/transactions/new">
             <Button size="lg">
               <PlusIcon className="sm:mr-2 mr-0 h-5 w-5" />
-              New Transaction
+              {t('dashboard.buttons.cta.add-transaction')}
             </Button>
           </Link>
         </div>
@@ -798,7 +798,7 @@ export default function DashboardPage() {
         {recentTransactions.length > 0 && (
           <Link href="/dashboard/transactions">
             <Button className="p-2" variant="outline" size="sm">
-              View All Transactions
+              {t('dashboard.buttons.secondary.view-all-transactions')}
             </Button>
           </Link>
         )}
@@ -814,7 +814,7 @@ export default function DashboardPage() {
             }}
           >
             <PlusIcon className="sm:mr-2 mr-0 h-5 w-5" />
-            {assets.length > 0 ? 'New Transaction' : 'Add Accounts'}
+            {assets.length > 0 ? t('dashboard.buttons.cta.add-transaction') : t('dashboard.buttons.cta.add-asset')}
           </Button>
         </Link>
       </div>
@@ -824,7 +824,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Assets
+              {t('dashboard.balance-sheet.total-assets')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -853,7 +853,7 @@ export default function DashboardPage() {
             )}
             <div className="mt-2 flex items-center text-sm text-green-500">
               <ArrowUp className="mr-1 h-4 w-4" />
-              <span>What you own</span>
+              <span>{t('dashboard.balance-sheet.asset-explanation')}</span>
             </div>
           </CardContent>
         </Card>
@@ -861,7 +861,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Liabilities
+              {t('dashboard.balance-sheet.total-liabilities')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -890,14 +890,16 @@ export default function DashboardPage() {
             )}
             <div className="mt-2 flex items-center text-sm text-red-500">
               <ArrowDown className="mr-1 h-4 w-4" />
-              <span>What you owe</span>
+              <span>{t('dashboard.balance-sheet.liability-explanation')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-green-50">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-green-800">Net Worth (Equity)</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-800">
+              {t('dashboard.balance-sheet.equity-title')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
@@ -919,10 +921,10 @@ export default function DashboardPage() {
                         <span className="text-sm text-green-700">{currency}</span>
                         <span
                           className={`text-lg font-medium ${netWorth === 0
-                              ? 'text-muted-foreground'
-                              : netWorth > 0
-                                ? 'text-green-700'
-                                : 'text-red-700'
+                            ? 'text-muted-foreground'
+                            : netWorth > 0
+                              ? 'text-green-700'
+                              : 'text-red-700'
                             }`}
                         >
                           {formatCurrency(netWorth, currency)}
@@ -933,7 +935,7 @@ export default function DashboardPage() {
               </div>
             )}
             <div className="mt-2 flex items-center text-sm text-green-700">
-              <span>Assets - Liabilities</span>
+              <span>{t('dashboard.balance-sheet.equity-explanation')}</span>
             </div>
           </CardContent>
         </Card>
