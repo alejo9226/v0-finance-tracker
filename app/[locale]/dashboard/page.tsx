@@ -18,10 +18,8 @@ import {
   ArrowDown,
   ArrowUp,
   CreditCard,
-  DollarSign,
   Landmark,
   PlusIcon,
-  Wallet,
   PencilIcon,
   Trash2Icon,
   Loader2,
@@ -32,8 +30,9 @@ import { useEffect, useState, useCallback } from 'react'
 import { Bar } from 'react-chartjs-2'
 
 import { calculateTotalValue } from '@/application/useCases/assets/calculateTotalValue'
-import { calculateCurrencyTotals } from '@/application/useCases/balanceSheet/calculateCurrencyTotals'
-import { fetchAssets } from '@/application/useCases/assets/fetchAssets'
+import { getAssets } from '@/application/useCases/assets/get'
+import { updateAsset } from '@/application/useCases/assets/update'
+import { calculateCurrencyTotals, CurrencyTotals } from '@/application/useCases/balanceSheet/calculateCurrencyTotals'
 import { AssetList } from '@/components/dashboard/AssetList'
 import { LiabilityList } from '@/components/dashboard/LiabilityList'
 import {
@@ -65,14 +64,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
-import { updateAsset, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
-import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
-import { useI18n } from "@/locales/client"
 import { useAuth } from '@/contexts/auth-context'
 import { Asset, CURRENCIES, CurrencyCode } from '@/domain/entities/Asset'
 import { useToast } from '@/hooks/use-toast'
 import { EXCHANGE_RATES } from '@/lib/constants/exchangeRates'
+import { createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
+import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
+import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
+import { useI18n } from "@/locales/client"
 
 // Register Chart.js components
 Chart.register(
@@ -89,14 +88,6 @@ Chart.register(
 type UserCurrencyPreference = {
   code: CurrencyCode
   isPreferred: boolean
-}
-
-// Add new types and state for per-currency totals
-type CurrencyTotals = {
-  [key in CurrencyCode]: {
-    assets: number
-    liabilities: number
-  }
 }
 
 const calculateSpendingByCategory = (transactions: Transaction[]): Record<string, number> => {
@@ -293,7 +284,7 @@ export default function DashboardPage() {
       setLoading(true)
 
       // Fetch assets, liabilities and recent transactions
-      const assetsData = await fetchAssets()
+      const assetsData = await getAssets()
       const liabilitiesData = await fetchLiabilities()
       const transformedTransactions = await fetchTransactions()
 
@@ -311,7 +302,7 @@ export default function DashboardPage() {
       }
 
       setCurrencyTotals(balanceSheetCurrencyTotals)
-    } catch (error: any) {
+    } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
         title: 'Error',
@@ -839,20 +830,29 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies).sort().map(currency => {
-                  const netWorth = (currencyTotals[currency]?.assets || 0) - (currencyTotals[currency]?.liabilities || 0);
-                  return (
-                    <div key={currency} className="flex justify-between items-center">
-                      <span className="text-sm text-green-700">{currency}</span>
-                      <span className={`text-lg font-medium ${netWorth === 0 ? 'text-muted-foreground' :
-                        netWorth > 0 ? 'text-green-700' : 'text-red-700'
-                        }`}>
-                        {formatCurrency(netWorth, currency)}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div >
+                {Array.from(activeCurrencies)
+                  .sort()
+                  .map((currency) => {
+                    const netWorth =
+                      (currencyTotals[currency]?.assets || 0) -
+                      (currencyTotals[currency]?.liabilities || 0)
+                    return (
+                      <div key={currency} className="flex justify-between items-center">
+                        <span className="text-sm text-green-700">{currency}</span>
+                        <span
+                          className={`text-lg font-medium ${netWorth === 0
+                            ? 'text-muted-foreground'
+                            : netWorth > 0
+                              ? 'text-green-700'
+                              : 'text-red-700'
+                            }`}
+                        >
+                          {formatCurrency(netWorth, currency)}
+                        </span>
+                      </div>
+                    )
+                  })}
+              </div>
             )}
             <div className="mt-2 flex items-center text-sm text-green-700">
               <span>{t('dashboard.balance-sheet.equity-explanation')}</span>

@@ -52,23 +52,6 @@ export async function createMultipleAssets(body: Omit<Asset, 'id' | 'currency'>[
 }
 
 /**
- * Updates an asset in the database.
- *
- * @param id - The ID of the asset to update.
- * @param data - The data to update the asset with.
- */
-export async function updateAsset(
-  id: string,
-  body: Partial<Omit<Asset, 'id' | 'user_id'>>,
-): Promise<void> {
-  const { error } = await supabase.from('assets').update(body).eq('id', id)
-
-  if (error) {
-    throw error
-  }
-}
-
-/**
  * Deletes an asset from the database.
  *
  * @param id - The ID of the asset to delete.

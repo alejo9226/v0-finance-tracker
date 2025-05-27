@@ -1,7 +1,7 @@
 // Infrastructure layer
-import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Asset } from '@/domain/entities/Asset'
 import { AssetRepository } from '@/domain/repositories/AssetRepository'
+import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 const supabase = getSupabaseBrowserClient()
 
@@ -40,7 +40,7 @@ export const assetRepositoryImpl: AssetRepository = {
    *
    * @param body - The data to create the asset with.
    */
-  createAsset: async (body: Omit<Asset, 'id'>): Promise<void> => {
+  async createAsset(body: Omit<Asset, 'id'>): Promise<void> {
     const { error } = await supabase.from('assets').insert(body)
 
     if (error) throw error
@@ -51,7 +51,7 @@ export const assetRepositoryImpl: AssetRepository = {
    *
    * @param body[] - The data array to create the assets with.
    */
-  createMultipleAssets: async (body: Omit<Asset, 'id' | 'currency'>[]): Promise<void> => {
+  async createMultipleAssets(body: Omit<Asset, 'id' | 'currency'>[]): Promise<void> {
     const { error } = await supabase.from('assets').insert(body)
 
     if (error) throw error
@@ -63,7 +63,7 @@ export const assetRepositoryImpl: AssetRepository = {
    * @param id - The ID of the asset to update.
    * @param data - The data to update the asset with.
    */
-  updateAsset: async (id: string, body: Partial<Omit<Asset, 'id' | 'user_id'>>): Promise<void> => {
+  async updateAsset(id: string, body: Partial<Omit<Asset, 'id' | 'user_id'>>): Promise<void> {
     const { error } = await supabase.from('assets').update(body).eq('id', id)
 
     if (error) throw error
@@ -74,7 +74,7 @@ export const assetRepositoryImpl: AssetRepository = {
    *
    * @param id - The ID of the asset to delete.
    */
-  deleteAsset: async (id: string): Promise<void> => {
+  async deleteAsset(id: string): Promise<void> {
     const { error } = await supabase.from('assets').delete().eq('id', id)
 
     if (error) throw error
