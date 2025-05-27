@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import { addMultipleAssets } from '@/application/useCases/assets/add'
 import { AuthCheck } from '@/components/auth-check'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,8 +27,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/contexts/auth-context'
+import { Asset } from '@/domain/entities/Asset'
 import { useToast } from '@/hooks/use-toast'
-import { Asset, createMultipleAssets } from '@/lib/supabase/data-services/assets'
 import { createMultipleLiabilities, Liability } from '@/lib/supabase/data-services/liabilities'
 import {
   getProfileOnboardingStatus,
@@ -105,7 +106,7 @@ export default function OnboardingPage() {
     try {
       // Save assets to Supabase
       if (assets.length > 0) {
-        await createMultipleAssets(
+        await addMultipleAssets(
           assets.map((asset) => ({
             user_id: user.id,
             type: asset.type,

@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import type React from 'react'
 
+import { getAssetCurrentValue, getAssets } from '@/application/useCases/assets/get'
+import { updateAsset } from '@/application/useCases/assets/update'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -29,13 +31,8 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/contexts/auth-context'
+import { Asset } from '@/domain/entities/Asset'
 import { useToast } from '@/hooks/use-toast'
-import {
-  Asset,
-  fetchAssetCurrentValue,
-  fetchAssets,
-  updateAsset,
-} from '@/lib/supabase/data-services/assets'
 import { fetchCategories } from '@/lib/supabase/data-services/categories'
 import { createTransaction, Transaction } from '@/lib/supabase/data-services/transactions'
 import { useI18n } from '@/locales/client'
@@ -64,7 +61,7 @@ export default function NewTransactionPage() {
 
   const fetchData = async () => {
     try {
-      const assetsData = await fetchAssets()
+      const assetsData = await getAssets()
 
       const categoriesData = await fetchCategories(transactionType)
 
@@ -118,7 +115,7 @@ export default function NewTransactionPage() {
       })
 
       // Then, update the asset balance
-      const assetData: Asset = await fetchAssetCurrentValue(formData.assetId)
+      const assetData: Asset = await getAssetCurrentValue(formData.assetId)
 
       const newValue =
         Number.parseFloat(`${assetData.value}`) + (transactionType === 'expense' ? -amount : amount)

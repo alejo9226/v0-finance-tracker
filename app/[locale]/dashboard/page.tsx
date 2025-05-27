@@ -29,9 +29,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { Bar } from 'react-chartjs-2'
 
-import { calculateTotalValue } from '@/application/useCases/assets/calculateTotalValue'
-import { getAssets } from '@/application/useCases/assets/get'
-import { updateAsset } from '@/application/useCases/assets/update'
+import { addAsset, calculateTotalValue, getAssets, removeAsset, updateAsset } from '@/application/useCases/assets'
 import { calculateCurrencyTotals, CurrencyTotals } from '@/application/useCases/balanceSheet/calculateCurrencyTotals'
 import { AssetList } from '@/components/dashboard/AssetList'
 import { LiabilityList } from '@/components/dashboard/LiabilityList'
@@ -68,10 +66,20 @@ import { useAuth } from '@/contexts/auth-context'
 import { Asset, CURRENCIES, CurrencyCode } from '@/domain/entities/Asset'
 import { useToast } from '@/hooks/use-toast'
 import { EXCHANGE_RATES } from '@/lib/constants/exchangeRates'
-import { createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
-import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
-import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
-import { useI18n } from "@/locales/client"
+import {
+  createLiability,
+  deleteLiability,
+  fetchLiabilities,
+  Liability,
+  updateLiability,
+} from '@/lib/supabase/data-services/liabilities'
+import {
+  deleteTransaction,
+  fetchTransactions,
+  Transaction,
+  updateTransaction,
+} from '@/lib/supabase/data-services/transactions'
+import { useI18n } from '@/locales/client'
 
 // Register Chart.js components
 Chart.register(
@@ -500,7 +508,7 @@ export default function DashboardPage() {
         throw new Error('All fields are required')
       }
 
-      await createAsset({
+      await addAsset({
         name: editForm.name,
         type: editForm.type,
         value: Number(editForm.value),
@@ -563,7 +571,7 @@ export default function DashboardPage() {
       if (!itemToDelete) return
 
       if (itemToDelete.type === 'asset') {
-        await deleteAsset(itemToDelete.id)
+        await removeAsset(itemToDelete.id)
       } else {
         await deleteLiability(itemToDelete.id)
       }

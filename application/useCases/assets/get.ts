@@ -10,3 +10,14 @@ import { assetRepositoryImpl } from '@/domain/repositories/AssetRepositoryImpl'
 export async function getAssets(): Promise<Asset[]> {
   return await assetRepositoryImpl.fetchAssets()
 }
+
+/**
+ * Use case: Fetch the current value of an asset from the repository.
+ *
+ * @param id - The id of the asset to fetch.
+ * @returns The current value of the asset.
+ * @throws Will throw if the repository fails to fetch the data.
+ */
+export async function getAssetCurrentValue(id: string): Promise<Asset> {
+  return await assetRepositoryImpl.fetchAssetCurrentValue(id)
+}
