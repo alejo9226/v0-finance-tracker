@@ -61,31 +61,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select"
+import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
+import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
+import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
+import { useI18n } from "@/locales/client"
 import { useAuth } from '@/contexts/auth-context'
 import { useToast } from '@/hooks/use-toast'
-import {
-  CurrencyCode,
-  Asset,
-  updateAsset,
-  CURRENCIES,
-  fetchAssets,
-  createAsset,
-  deleteAsset,
-} from '@/lib/supabase/data-services/assets'
-import {
-  createLiability,
-  deleteLiability,
-  fetchLiabilities,
-  Liability,
-  updateLiability,
-} from '@/lib/supabase/data-services/liabilities'
-import {
-  deleteTransaction,
-  fetchTransactions,
-  Transaction,
-  updateTransaction,
-} from '@/lib/supabase/data-services/transactions'
 
 // Register Chart.js components
 Chart.register(
@@ -198,6 +180,8 @@ export default function DashboardPage() {
   const [editTxLoading, setEditTxLoading] = useState(false)
   const [deleteTxLoading, setDeleteTxLoading] = useState(false)
   const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()))
+
+  const t = useI18n()
 
   const monthOptions = getTransactionMonths(recentTransactions)
 
@@ -760,7 +744,7 @@ export default function DashboardPage() {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold">Loading...</h2>
+          <h2 className="text-xl font-semibold">{t('common.loading')}</h2>
           <p className="text-muted-foreground">Please wait while we load your dashboard</p>
         </div>
       </div>
@@ -771,10 +755,8 @@ export default function DashboardPage() {
     <div className="py-8">
       <div className="mb-12 flex flex-row md:justify-between gap-6">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">Financial Dashboard</h1>
-          <p className="mt-2 text-md sm:text-xl text-muted-foreground">
-            Your financial overview at a glance
-          </p>
+          <h1 className="text-2xl sm:text-4xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+          <p className="mt-2 text-md sm:text-xl text-muted-foreground">{t('dashboard.subtitle')}</p>
         </div>
 
         {userCurrencies.length > 1 && (
@@ -798,14 +780,14 @@ export default function DashboardPage() {
           {recentTransactions.length > 0 && (
             <Link href="/dashboard/transactions">
               <Button variant="outline" size="lg">
-                View All Transactions
+                {t('dashboard.buttons.secondary.view-all-transactions')}
               </Button>
             </Link>
           )}
           <Link href="/dashboard/transactions/new">
             <Button size="lg">
               <PlusIcon className="sm:mr-2 mr-0 h-5 w-5" />
-              New Transaction
+              {t('dashboard.buttons.cta.add-transaction')}
             </Button>
           </Link>
         </div>
@@ -816,7 +798,7 @@ export default function DashboardPage() {
         {recentTransactions.length > 0 && (
           <Link href="/dashboard/transactions">
             <Button className="p-2" variant="outline" size="sm">
-              View All Transactions
+              {t('dashboard.buttons.secondary.view-all-transactions')}
             </Button>
           </Link>
         )}
@@ -832,7 +814,7 @@ export default function DashboardPage() {
             }}
           >
             <PlusIcon className="sm:mr-2 mr-0 h-5 w-5" />
-            {assets.length > 0 ? 'New Transaction' : 'Add Accounts'}
+            {assets.length > 0 ? t('dashboard.buttons.cta.add-transaction') : t('dashboard.buttons.cta.add-asset')}
           </Button>
         </Link>
       </div>
@@ -842,7 +824,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Assets
+              {t('dashboard.balance-sheet.total-assets')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -871,7 +853,7 @@ export default function DashboardPage() {
             )}
             <div className="mt-2 flex items-center text-sm text-green-500">
               <ArrowUp className="mr-1 h-4 w-4" />
-              <span>What you own</span>
+              <span>{t('dashboard.balance-sheet.asset-explanation')}</span>
             </div>
           </CardContent>
         </Card>
@@ -879,7 +861,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total Liabilities
+              {t('dashboard.balance-sheet.total-liabilities')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -908,14 +890,16 @@ export default function DashboardPage() {
             )}
             <div className="mt-2 flex items-center text-sm text-red-500">
               <ArrowDown className="mr-1 h-4 w-4" />
-              <span>What you owe</span>
+              <span>{t('dashboard.balance-sheet.liability-explanation')}</span>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-green-50">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-green-800">Net Worth (Equity)</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-800">
+              {t('dashboard.balance-sheet.equity-title')}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
@@ -936,13 +920,12 @@ export default function DashboardPage() {
                       <div key={currency} className="flex justify-between items-center">
                         <span className="text-sm text-green-700">{currency}</span>
                         <span
-                          className={`text-lg font-medium ${
-                            netWorth === 0
-                              ? 'text-muted-foreground'
-                              : netWorth > 0
-                                ? 'text-green-700'
-                                : 'text-red-700'
-                          }`}
+                          className={`text-lg font-medium ${netWorth === 0
+                            ? 'text-muted-foreground'
+                            : netWorth > 0
+                              ? 'text-green-700'
+                              : 'text-red-700'
+                            }`}
                         >
                           {formatCurrency(netWorth, currency)}
                         </span>
@@ -952,7 +935,7 @@ export default function DashboardPage() {
               </div>
             )}
             <div className="mt-2 flex items-center text-sm text-green-700">
-              <span>Assets - Liabilities</span>
+              <span>{t('dashboard.balance-sheet.equity-explanation')}</span>
             </div>
           </CardContent>
         </Card>
@@ -1000,10 +983,10 @@ export default function DashboardPage() {
         <Card className="flex flex-col sm:flex-row items-center">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-xl sm:text-2xl">Spending Summary</CardTitle>
+              <CardTitle className="text-xl sm:text-2xl">{t('dashboard.income-expenses.title')}</CardTitle>
               {monthOptions.length > 0 && (
                 <CardDescription>
-                  Your spending by category for{' '}
+                  {t('dashboard.income-expenses.subtitle')}{' '}
                   <select
                     className="border rounded px-1 py-1 text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary"
                     value={format(selectedMonth, 'yyyy-MM')}
@@ -1024,7 +1007,7 @@ export default function DashboardPage() {
           <CardContent className="py-0 sm:p-6 w-max sm:w-1/3">
             {Object.keys(spendingByCategory).length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-muted-foreground">No spending data available</p>
+                <p className="text-muted-foreground">{t('dashboard.income-expenses.no-data')}</p>
               </div>
             ) : (
               <Bar data={data} options={options} />
@@ -1083,7 +1066,7 @@ export default function DashboardPage() {
                   {Object.keys(spendingByCategory).length > 0 && (
                     <div className="flex flex-col flex-col md:flex-row gap-4 mb-4 sm:mb-0 py-6 sm:py-0">
                       <div className="flex-1 flex flex-col items-center justify-center bg-green-50 rounded p-2">
-                        <span className="text-xs text-green-700">Total Income</span>
+                        <span className="text-xs text-green-700">{t('dashboard.income-expenses.total-income')}</span>
                         {displayCurrency ? (
                           <span className="text-lg font-bold text-green-700">
                             {formatCurrency(totalIncome, displayCurrency)}
@@ -1106,7 +1089,7 @@ export default function DashboardPage() {
                         )}
                       </div>
                       <div className="flex-1 flex flex-col items-center justify-center bg-red-50 rounded p-2">
-                        <span className="text-xs text-red-700">Total Expenses</span>
+                        <span className="text-xs text-red-700">{t('dashboard.income-expenses.total-expenses')}</span>
                         {displayCurrency ? (
                           <span className="text-lg font-bold text-red-700">
                             {formatCurrency(Math.abs(totalExpense), displayCurrency)}
@@ -1140,23 +1123,23 @@ export default function DashboardPage() {
       {/* Recent Transactions */}
       <div className="mt-8">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-start justify-between">
             <div>
-              <CardTitle className="text-xl sm:text-2xl">Recent Transactions</CardTitle>
-              <CardDescription>Your latest financial activities</CardDescription>
+              <CardTitle className="text-xl sm:text-2xl">{t('dashboard.transactions.title')}</CardTitle>
+              <CardDescription>{t('dashboard.transactions.subtitle')}</CardDescription>
             </div>
             <Link href="/dashboard/transactions">
               <Button variant="outline" size="sm">
-                View All
+                {t('dashboard.transactions.buttons.see-all')}
               </Button>
             </Link>
           </CardHeader>
           <CardContent>
             {recentTransactions.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-center">
-                <p className="text-muted-foreground mb-4">No transactions yet</p>
+                <p className="text-muted-foreground mb-4">{t('dashboard.transactions.no-data')}</p>
                 <Link href="/dashboard/transactions/new">
-                  <Button>Add Your First Transaction</Button>
+                  <Button>{t('dashboard.transactions.add-transaction')}</Button>
                 </Link>
               </div>
             ) : (
@@ -1251,12 +1234,12 @@ export default function DashboardPage() {
       <Dialog open={isEditAssetOpen} onOpenChange={setIsEditAssetOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Asset</DialogTitle>
-            <DialogDescription>Update your asset details</DialogDescription>
+            <DialogTitle>{t('common.assets.edit.title')}</DialogTitle>
+            <DialogDescription>{t('common.assets.edit.subtitle')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="asset-name">Asset Name</Label>
+              <Label htmlFor="asset-name">{t('common.assets.edit.name')}</Label>
               <Input
                 id="asset-name"
                 value={editForm.name}
@@ -1264,13 +1247,13 @@ export default function DashboardPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="asset-type">Type</Label>
+              <Label htmlFor="asset-type">{t('common.type.translation')}</Label>
               <Select
                 value={editForm.type}
                 onValueChange={(value) => setEditForm((prev) => ({ ...prev, type: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t('common.type.select')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bank">Bank Account</SelectItem>
@@ -1281,7 +1264,7 @@ export default function DashboardPage() {
             </div>
             <div className="grid gap-4 grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="asset-value">Value</Label>
+                <Label htmlFor="asset-value">{t('common.value')}</Label>
                 <Input
                   id="asset-value"
                   type="number"
@@ -1290,7 +1273,7 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="asset-currency">Currency</Label>
+                <Label htmlFor="asset-currency">{t('common.currency.translation')}</Label>
                 <Select
                   value={editForm.currency}
                   onValueChange={(value: CurrencyCode) =>
@@ -1313,9 +1296,9 @@ export default function DashboardPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditAssetOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleEditAsset}>Save Changes</Button>
+            <Button onClick={handleEditAsset}>{t('common.save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1324,12 +1307,12 @@ export default function DashboardPage() {
       <Dialog open={isEditLiabilityOpen} onOpenChange={setIsEditLiabilityOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Liability</DialogTitle>
-            <DialogDescription>Update your liability details</DialogDescription>
+            <DialogTitle>{t('common.liabilities.edit.title')}</DialogTitle>
+            <DialogDescription>{t('common.liabilities.edit.subtitle')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="liability-name">Liability Name</Label>
+              <Label htmlFor="liability-name">{t('common.liabilities.edit.name')}</Label>
               <Input
                 id="liability-name"
                 value={editForm.name}
@@ -1337,13 +1320,13 @@ export default function DashboardPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="liability-type">Type</Label>
+              <Label htmlFor="liability-type">{t('common.type.translation')}</Label>
               <Select
                 value={editForm.type}
                 onValueChange={(value) => setEditForm((prev) => ({ ...prev, type: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t('common.type.select')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="credit">Credit Card</SelectItem>
@@ -1353,7 +1336,7 @@ export default function DashboardPage() {
             </div>
             <div className="grid gap-4 grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="liability-value">Value</Label>
+                <Label htmlFor="liability-value">{t('common.value')}</Label>
                 <Input
                   id="liability-value"
                   type="number"
@@ -1362,7 +1345,7 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="liability-currency">Currency</Label>
+                <Label htmlFor="liability-currency">{t('common.currency.translation')}</Label>
                 <Select
                   value={editForm.currency}
                   onValueChange={(value: CurrencyCode) =>
@@ -1370,7 +1353,7 @@ export default function DashboardPage() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select currency" />
+                    <SelectValue placeholder={t('common.currency.select')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CURRENCIES.map((currency) => (
@@ -1385,9 +1368,9 @@ export default function DashboardPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditLiabilityOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleEditLiability}>Save Changes</Button>
+            <Button onClick={handleEditLiability}>{t('common.save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1396,12 +1379,12 @@ export default function DashboardPage() {
       <Dialog open={isAddAssetOpen} onOpenChange={setIsAddAssetOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Asset</DialogTitle>
-            <DialogDescription>Add a new asset to track</DialogDescription>
+            <DialogTitle>{t('common.assets.add.title')}</DialogTitle>
+            <DialogDescription>{t('common.assets.add.subtitle')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="new-asset-name">Asset Name</Label>
+              <Label htmlFor="new-asset-name">{t('common.assets.add.name')}</Label>
               <Input
                 id="new-asset-name"
                 value={editForm.name}
@@ -1409,13 +1392,13 @@ export default function DashboardPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="new-asset-type">Type</Label>
+              <Label htmlFor="new-asset-type">{t('common.type.translation')}</Label>
               <Select
                 value={editForm.type}
                 onValueChange={(value) => setEditForm((prev) => ({ ...prev, type: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t('common.type.select')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="bank">Bank Account</SelectItem>
@@ -1426,7 +1409,7 @@ export default function DashboardPage() {
             </div>
             <div className="grid gap-4 grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="new-asset-value">Value</Label>
+                <Label htmlFor="new-asset-value">{t('common.value')}</Label>
                 <Input
                   id="new-asset-value"
                   type="number"
@@ -1435,7 +1418,7 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-asset-currency">Currency</Label>
+                <Label htmlFor="new-asset-currency">{t('common.currency.translation')}</Label>
                 <Select
                   value={editForm.currency}
                   onValueChange={(value: CurrencyCode) =>
@@ -1443,7 +1426,7 @@ export default function DashboardPage() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select currency" />
+                    <SelectValue placeholder={t('common.currency.select')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CURRENCIES.map((currency) => (
@@ -1458,9 +1441,9 @@ export default function DashboardPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddAssetOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleAddAsset}>Add Asset</Button>
+            <Button onClick={handleAddAsset}>{t('common.assets.add.title')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1469,12 +1452,12 @@ export default function DashboardPage() {
       <Dialog open={isAddLiabilityOpen} onOpenChange={setIsAddLiabilityOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Liability</DialogTitle>
-            <DialogDescription>Add a new liability to track</DialogDescription>
+            <DialogTitle>{t('common.liabilities.add.title')}</DialogTitle>
+            <DialogDescription>{t('common.liabilities.add.subtitle')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="liability-name">Liability Name</Label>
+              <Label htmlFor="liability-name">{t('common.liabilities.add.name')}</Label>
               <Input
                 id="liability-name"
                 value={editForm.name}
@@ -1482,13 +1465,13 @@ export default function DashboardPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="liability-type">Type</Label>
+              <Label htmlFor="liability-type">{t('common.type.translation')}</Label>
               <Select
                 value={editForm.type}
                 onValueChange={(value) => setEditForm((prev) => ({ ...prev, type: value }))}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t('common.type.select')} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="credit">Credit Card</SelectItem>
@@ -1498,7 +1481,7 @@ export default function DashboardPage() {
             </div>
             <div className="grid gap-4 grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="liability-value">Value</Label>
+                <Label htmlFor="liability-value">{t('common.value')}</Label>
                 <Input
                   id="liability-value"
                   type="number"
@@ -1507,7 +1490,7 @@ export default function DashboardPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="liability-currency">Currency</Label>
+                <Label htmlFor="liability-currency">{t('common.currency.translation')}</Label>
                 <Select
                   value={editForm.currency}
                   onValueChange={(value: CurrencyCode) =>
@@ -1515,7 +1498,7 @@ export default function DashboardPage() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select currency" />
+                    <SelectValue placeholder={t('common.currency.select')} />
                   </SelectTrigger>
                   <SelectContent>
                     {CURRENCIES.map((currency) => (
@@ -1530,9 +1513,9 @@ export default function DashboardPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddLiabilityOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleAddLiability}>Add Liability</Button>
+            <Button onClick={handleAddLiability}>{t('common.liabilities.add.title')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1541,18 +1524,19 @@ export default function DashboardPage() {
       <Dialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogTitle>{t('common.delete.title')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this {itemToDelete?.type}? This action cannot be
-              undone.
+              {t('common.delete.subtitle', {
+                type: t(`common.${itemToDelete?.type === 'asset' ? 'asset' : 'liability'}`).toLowerCase(),
+              })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsConfirmDeleteOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="destructive" onClick={handleDelete}>
-              Delete
+              {t('common.delete.translation')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1562,13 +1546,13 @@ export default function DashboardPage() {
       <Dialog open={isEditTxOpen} onOpenChange={setIsEditTxOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Transaction</DialogTitle>
-            <DialogDescription>Update your transaction details</DialogDescription>
+            <DialogTitle>{t('common.transactions.edit.title')}</DialogTitle>
+            <DialogDescription>{t('common.transactions.edit.subtitle')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label htmlFor="tx-description" className="block text-sm font-medium">
-                Description
+                {t('common.description')}
               </label>
               <Input
                 id="tx-description"
@@ -1578,7 +1562,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               <label htmlFor="tx-amount" className="block text-sm font-medium">
-                Amount
+                {t('common.amount')}
               </label>
               <Input
                 id="tx-amount"
@@ -1589,7 +1573,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               <label htmlFor="tx-date" className="block text-sm font-medium">
-                Date
+                {t('common.date')}
               </label>
               <Input
                 id="tx-date"
@@ -1606,11 +1590,11 @@ export default function DashboardPage() {
               onClick={() => setIsEditTxOpen(false)}
               disabled={editTxLoading}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleEditTransaction} disabled={editTxLoading}>
               {editTxLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-              Save Changes
+              {t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1620,16 +1604,24 @@ export default function DashboardPage() {
       <AlertDialog open={isDeleteTxOpen} onOpenChange={setIsDeleteTxOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t('common.delete.title')}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this transaction? This action cannot be undone.
+              {t('common.delete.subtitle', {
+                type: t('common.transaction').toLowerCase(),
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteTxLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel
+              disabled={deleteTxLoading}
+            >
+              {t('common.cancel')}
+            </AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteTransaction} disabled={deleteTxLoading}>
               {deleteTxLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-              Delete
+              {t('common.delete.translation')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

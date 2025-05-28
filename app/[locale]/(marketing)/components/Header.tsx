@@ -2,8 +2,11 @@ import { Menu, X } from 'lucide-react'
 import Link from 'next/link'
 
 import { Button } from '@/components/ui/button'
+import { getI18n } from '@/locales/server'
 
-export default function Header() {
+export default async function Header() {
+  const t = await getI18n()
+
   return (
     <header className="border-b">
       <div className="container mx-auto px-4 md:px-6">
@@ -30,10 +33,10 @@ export default function Header() {
                 </Button>
               </Link>
               <Link href="/login">
-                <Button variant="ghost">Login</Button>
+                <Button variant="ghost">{t('marketing.header.login')}</Button>
               </Link>
               <Link href="/signup">
-                <Button>Sign Up</Button>
+                <Button>{t('marketing.header.signup')}</Button>
               </Link>
             </div>
 
@@ -57,11 +60,11 @@ export default function Header() {
                 </Link>
                 <Link href="/login" className="w-full">
                   <Button variant="ghost" className="w-full">
-                    Login
+                    {t('marketing.header.login')}
                   </Button>
                 </Link>
                 <Link href="/signup" className="w-full">
-                  <Button className="w-full">Sign Up</Button>
+                  <Button className="w-full">{t('marketing.header.signup')}</Button>
                 </Link>
               </div>
             </details>

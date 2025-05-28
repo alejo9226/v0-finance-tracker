@@ -2,6 +2,7 @@ import React from 'react'
 
 import { EntityListCard } from '@/components/dashboard/shared/EntityListCard'
 import { Asset, CurrencyCode } from '@/lib/supabase/data-services/assets'
+import { useI18n, useScopedI18n } from '@/locales/client'
 
 type AssetListProps = {
   assets: Asset[]
@@ -24,11 +25,14 @@ export function AssetList({
   onDelete,
   getAssetIcon,
 }: AssetListProps) {
+
+  const t = useI18n()
+
   return (
     <EntityListCard
       entityType="asset"
-      title="Assets"
-      description="What you own"
+      title={t('dashboard.balance-sheet.assets')}
+      description={t('dashboard.balance-sheet.asset-explanation')}
       displayCurrency={displayCurrency}
       formatCurrency={formatCurrency}
       convertCurrency={convertCurrency}

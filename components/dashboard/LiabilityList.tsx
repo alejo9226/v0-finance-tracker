@@ -3,6 +3,7 @@ import React from 'react'
 import { EntityListCard } from '@/components/dashboard/shared/EntityListCard'
 import { CurrencyCode } from '@/lib/supabase/data-services/assets'
 import { Liability } from '@/lib/supabase/data-services/liabilities'
+import { useI18n } from '@/locales/client'
 
 type LiabilityListProps = {
   liabilities: Liability[]
@@ -25,11 +26,14 @@ export function LiabilityList({
   onDelete,
   getLiabilityIcon,
 }: LiabilityListProps) {
+
+  const t = useI18n()
+
   return (
     <EntityListCard
       entityType="liability"
-      title="Liabilities"
-      description="What you owe"
+      title={t('dashboard.balance-sheet.liabilities')}
+      description={t('dashboard.balance-sheet.liability-explanation')}
       displayCurrency={displayCurrency}
       formatCurrency={formatCurrency}
       convertCurrency={convertCurrency}

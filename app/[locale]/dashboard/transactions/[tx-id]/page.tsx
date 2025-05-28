@@ -33,6 +33,7 @@ import {
   updateTransaction,
   Transaction,
 } from '@/lib/supabase/data-services/transactions'
+import { useI18n } from '@/locales/client'
 
 export default function TransactionDetailsPage() {
   const router = useRouter()
@@ -51,6 +52,7 @@ export default function TransactionDetailsPage() {
   })
   const [editLoading, setEditLoading] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const t = useI18n()
 
   useEffect(() => {
     fetchTransaction()
@@ -150,12 +152,12 @@ export default function TransactionDetailsPage() {
   }
 
   return (
-    <div className="container py-10 max-w-xl">
+    <div className="py-8 max-w-4xl mx-auto">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-xl">Transaction Details</CardTitle>
-            <CardDescription>View and manage this transaction</CardDescription>
+            <CardTitle className="text-xl">{t('common.transactions.view.title')}</CardTitle>
+            <CardDescription>{t('common.transactions.view.subtitle')}</CardDescription>
           </div>
           <div className="flex gap-2">
             <Button variant="ghost" size="icon" onClick={openEdit}>
@@ -170,27 +172,27 @@ export default function TransactionDetailsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <span className="font-semibold">Description:</span> {transaction?.description}
+            <span className="font-semibold">{t('common.description')}:</span> {transaction?.description}
           </div>
           <div>
-            <span className="font-semibold">Amount:</span>{' '}
+            <span className="font-semibold">{t('common.amount')}:</span>{' '}
             {transaction?.type === 'income' ? '+' : '-'}$
             {Math.abs(Number(transaction?.amount)).toLocaleString()}
           </div>
           <div>
-            <span className="font-semibold">Date:</span>{' '}
+            <span className="font-semibold">{t('common.date')}:</span>{' '}
             {format(new Date(transaction?.date || ''), 'MMM d, yyyy')}
           </div>
           <div>
-            <span className="font-semibold">Category:</span>{' '}
+            <span className="font-semibold">{t('common.category')}:</span>{' '}
             {transaction?.category?.name || 'Uncategorized'}
           </div>
           <div>
-            <span className="font-semibold">Account:</span>{' '}
+            <span className="font-semibold">{t('common.asset')}:</span>{' '}
             {transaction?.asset?.name || 'No account'}
           </div>
           <div>
-            <span className="font-semibold">Type:</span>{' '}
+            <span className="font-semibold">{t('common.type.translation')}:</span>{' '}
             {`${transaction?.type?.charAt(0).toUpperCase()}${transaction?.type?.slice(1)}`}
           </div>
         </CardContent>
@@ -200,13 +202,13 @@ export default function TransactionDetailsPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Transaction</DialogTitle>
-            <DialogDescription>Update your transaction details</DialogDescription>
+            <DialogTitle>{t('common.transactions.edit.title')}</DialogTitle>
+            <DialogDescription>{t('common.transactions.edit.subtitle')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <label htmlFor="tx-description" className="block text-sm font-medium">
-                Description
+                {t('common.description')}
               </label>
               <Input
                 id="tx-description"
@@ -216,7 +218,7 @@ export default function TransactionDetailsPage() {
             </div>
             <div className="space-y-2">
               <label htmlFor="tx-amount" className="block text-sm font-medium">
-                Amount
+                {t('common.amount')}
               </label>
               <Input
                 id="tx-amount"
@@ -227,7 +229,7 @@ export default function TransactionDetailsPage() {
             </div>
             <div className="space-y-2">
               <label htmlFor="tx-date" className="block text-sm font-medium">
-                Date
+                {t('common.date')}
               </label>
               <Input
                 id="tx-date"
@@ -240,11 +242,11 @@ export default function TransactionDetailsPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={editLoading}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button onClick={handleEdit} disabled={editLoading}>
               {editLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-              Save Changes
+              {t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -254,16 +256,16 @@ export default function TransactionDetailsPage() {
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Transaction</AlertDialogTitle>
+            <AlertDialogTitle>{t('common.delete.title')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this transaction? This action cannot be undone.
+              {t('common.delete.subtitle', { type: t('common.transaction').toLowerCase() })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleteLoading}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleteLoading}>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={deleteLoading}>
               {deleteLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-              Delete
+              {t('common.delete.translation')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

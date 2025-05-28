@@ -30,6 +30,7 @@ import {
   fetchCountTransactionsByCategory,
   removeCategoryFromTransactions,
 } from '@/lib/supabase/data-services/transactions'
+import { useI18n } from '@/locales/client'
 
 export default function CategoriesPage() {
   const { toast } = useToast()
@@ -47,6 +48,7 @@ export default function CategoriesPage() {
     icon: '',
     color: '#4CAF50',
   })
+  const t = useI18n()
 
   // Color options
   const colorOptions = [
@@ -228,7 +230,7 @@ export default function CategoriesPage() {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold">Loading...</h2>
+          <h2 className="text-xl font-semibold">{t('common.loading')}</h2>
           <p className="text-muted-foreground">Please wait while we load your categories</p>
         </div>
       </div>
@@ -237,48 +239,51 @@ export default function CategoriesPage() {
 
   return (
     <div className="py-8 max-w-4xl mx-auto">
-      <div className="mb-8 space-y-4">
-        <h1 className="text-3xl font-bold">Categories</h1>
-        <p className="text-muted-foreground">Manage your income and expense categories</p>
+      <div className="flex items-start justify-between mb-6">
+        <div className="mb-8 space-y-2">
+          <h1 className="text-3xl font-bold">{t('categories.title')}</h1>
+          <p className="text-muted-foreground">{t('categories.subtitle')}</p>
+        </div>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+          <PlusIcon className="h-5 w-5 md:mr-2" />
+          <span
+            className="hidden md:inline"
+          >
+            {t('categories.categories.buttons.add-category')}
+          </span>
+        </Button>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Manage Categories</CardTitle>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <PlusIcon className="mr-2 h-4 w-4" />
-              Add Category
-            </Button>
+            <div className="flex flex-col gap-2">
+              <CardTitle>{t('categories.categories.title', { type: activeTab.charAt(0).toUpperCase() + activeTab.slice(1) })}</CardTitle>
+              <CardDescription>
+                {t('categories.categories.subtitle', { type: activeTab })}
+              </CardDescription>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
-              <TabsTrigger value="expense">Expenses</TabsTrigger>
-              <TabsTrigger value="income">Income</TabsTrigger>
+              <TabsTrigger value="expense">{t('categories.categories.filters.expense')}</TabsTrigger>
+              <TabsTrigger value="income">{t('categories.categories.filters.income')}</TabsTrigger>
             </TabsList>
 
             <TabsContent value={activeTab}>
               <Card>
-                <CardHeader>
-                  <CardTitle>
-                    {activeTab === 'expense' ? 'Expense Categories' : 'Income Categories'}
-                  </CardTitle>
-                  <CardDescription>
-                    Manage your {activeTab === 'expense' ? 'expense' : 'income'} categories
-                  </CardDescription>
-                </CardHeader>
                 <CardContent>
                   {categories.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8">
-                      <p className="text-muted-foreground mb-4">No categories found</p>
+                      <p className="text-muted-foreground mb-4">{t('common.categories.no-data')}</p>
                       <Button onClick={() => setIsAddDialogOpen(true)}>
-                        Add your first category
+                        {t('common.categories.first-category')}
                       </Button>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 pt-4 sm:pt-0">
                       {categories.map((category) => (
                         <div
                           key={category.id}
@@ -331,27 +336,27 @@ export default function CategoriesPage() {
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add Category</DialogTitle>
-            <DialogDescription>Add your category details</DialogDescription>
+            <DialogTitle>{t('common.categories.add.title')}</DialogTitle>
+            <DialogDescription>{t('common.categories.add.subtitle')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="add-name">Category Name</Label>
+              <Label htmlFor="add-name">{t('common.categories.add.name.translation')}</Label>
               <Input
                 id="add-name"
                 name="name"
-                placeholder="e.g., Groceries"
+                placeholder={t('common.categories.add.name.placeholder')}
                 value={formData.name}
                 onChange={handleChange}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="icon-input">Icon</Label>
+              <Label htmlFor="icon-input">{t('common.categories.add.icon.translation')}</Label>
               <Input
                 id="icon-input"
                 name="icon"
-                placeholder="e.g., 🍔"
+                placeholder={t('common.categories.add.icon.placeholder')}
                 type="text"
                 value={formData.icon}
                 onChange={handleChange}
@@ -359,15 +364,14 @@ export default function CategoriesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Color</Label>
+              <Label>{t('common.categories.add.color')}</Label>
               <div className="grid grid-cols-10 gap-2">
                 {colorOptions.map((color) => (
                   <button
                     key={color}
                     type="button"
-                    className={`h-8 w-8 rounded-md ${
-                      formData.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
-                    }`}
+                    className={`h-8 w-8 rounded-md ${formData.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
+                      }`}
                     style={{ backgroundColor: color }}
                     onClick={() => setFormData((prev) => ({ ...prev, color }))}
                   />
@@ -377,9 +381,9 @@ export default function CategoriesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleAddCategory}>Save Changes</Button>
+            <Button onClick={handleAddCategory}>{t('common.save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -388,27 +392,27 @@ export default function CategoriesPage() {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Category</DialogTitle>
-            <DialogDescription>Update your category details</DialogDescription>
+            <DialogTitle>{t('common.categories.edit.title')}</DialogTitle>
+            <DialogDescription>{t('common.categories.edit.subtitle')}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">Category Name</Label>
+              <Label htmlFor="edit-name">{t('common.categories.edit.name.translation')}</Label>
               <Input
                 id="edit-name"
                 name="name"
-                placeholder="e.g., Groceries"
+                placeholder={t('common.categories.edit.name.placeholder')}
                 value={formData.name}
                 onChange={handleChange}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="icon-input">Icon</Label>
+              <Label htmlFor="icon-input">{t('common.categories.edit.icon.translation')}</Label>
               <Input
                 id="icon-input"
                 name="icon"
-                placeholder="e.g., 🍔"
+                placeholder={t('common.categories.edit.icon.placeholder')}
                 type="text"
                 value={formData.icon}
                 onChange={handleChange}
@@ -416,15 +420,14 @@ export default function CategoriesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Color</Label>
+              <Label>{t('common.categories.edit.color')}</Label>
               <div className="grid grid-cols-10 gap-2">
                 {colorOptions.map((color) => (
                   <button
                     key={color}
                     type="button"
-                    className={`h-8 w-8 rounded-md ${
-                      formData.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
-                    }`}
+                    className={`h-8 w-8 rounded-md ${formData.color === color ? 'ring-2 ring-offset-2 ring-primary' : ''
+                      }`}
                     style={{ backgroundColor: color }}
                     onClick={() => setFormData((prev) => ({ ...prev, color }))}
                   />
@@ -434,9 +437,9 @@ export default function CategoriesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
-            <Button onClick={handleEditCategory}>Save Changes</Button>
+            <Button onClick={handleEditCategory}>{t('common.save')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -445,9 +448,9 @@ export default function CategoriesPage() {
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete Category</DialogTitle>
+            <DialogTitle>{t('common.delete.title')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this category? This action cannot be undone.
+              {t('common.delete.subtitle', { type: t('common.category').toLowerCase() })}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -468,10 +471,10 @@ export default function CategoriesPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button variant="destructive" onClick={handleDeleteCategory}>
-              Delete
+              {t('common.delete.translation')}
             </Button>
           </DialogFooter>
         </DialogContent>

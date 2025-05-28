@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useToast } from '@/hooks/use-toast'
 import { fetchTransactions, Transaction } from '@/lib/supabase/data-services/transactions'
+import { useI18n } from '@/locales/client'
 
 export default function TransactionsPage() {
   const router = useRouter()
@@ -20,6 +21,7 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const t = useI18n()
 
   useEffect(() => {
     fetchData()
@@ -59,12 +61,16 @@ export default function TransactionsPage() {
   })
 
   return (
-    <div className="container py-10">
+    <div className="py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold">Transactions</h1>
+        <h1 className="text-3xl font-bold">{t('common.transactions.translation')}</h1>
         <Button onClick={() => router.push('/dashboard/transactions/new')}>
           <PlusIcon className="h-5 w-5 md:mr-2" />
-          <span className="hidden md:inline">New Transaction</span>
+          <span
+            className="hidden md:inline"
+          >
+            {t('transactions.buttons.new-transaction')}
+          </span>
         </Button>
       </div>
 
@@ -74,7 +80,7 @@ export default function TransactionsPage() {
             {transactions.length > 0 && (
               <>
                 <Input
-                  placeholder="Search transactions..."
+                  placeholder={t('transactions.search.placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -86,16 +92,16 @@ export default function TransactionsPage() {
         </div>
         <div>
           <Link href="/dashboard/categories">
-            <Button variant="outline">Manage Categories</Button>
+            <Button variant="outline">{t('transactions.search.buttons.manage-categories')}</Button>
           </Link>
         </div>
       </div>
 
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="mb-6">
-          <TabsTrigger value="all">All</TabsTrigger>
-          <TabsTrigger value="income">Income</TabsTrigger>
-          <TabsTrigger value="expense">Expenses</TabsTrigger>
+          <TabsTrigger value="all">{t('transactions.filters.all')}</TabsTrigger>
+          <TabsTrigger value="income">{t('transactions.filters.income')}</TabsTrigger>
+          <TabsTrigger value="expense">{t('transactions.filters.expense')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab}>
@@ -103,28 +109,34 @@ export default function TransactionsPage() {
             <CardHeader>
               <CardTitle>
                 {activeTab === 'all'
-                  ? 'All Transactions'
+                  ? t('transactions.transactions.all')
                   : activeTab === 'income'
-                    ? 'Income'
-                    : 'Expenses'}
+                    ? t('transactions.filters.income')
+                    : t('transactions.filters.expense')}
               </CardTitle>
               <CardDescription>
                 {filteredTransactions.length}{' '}
-                {filteredTransactions.length === 1 ? 'transaction' : 'transactions'} found
+                {filteredTransactions.length === 1 ?
+                  t('common.transaction').toLowerCase() :
+                  t('common.transactions.translation').toLowerCase()} {t('transactions.transactions.found')}
               </CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
                 <div className="flex justify-center py-8">
                   <div className="text-center">
-                    <p className="text-muted-foreground">Loading transactions...</p>
+                    <p className="text-muted-foreground">{t('common.loading')} transactions...</p>
                   </div>
                 </div>
               ) : filteredTransactions.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-8">
-                  <p className="text-muted-foreground mb-4">No transactions found</p>
+                  <p
+                    className="text-muted-foreground mb-4"
+                  >
+                    {t('transactions.transactions.no-transactions')}
+                  </p>
                   <Button onClick={() => router.push('/dashboard/transactions/new')}>
-                    Add your first transaction
+                    {t('transactions.transactions.add-transaction')}
                   </Button>
                 </div>
               ) : (

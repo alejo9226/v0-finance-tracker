@@ -9,6 +9,7 @@ import { MainNav } from '@/components/main-nav'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { signOutWrapper } from '@/lib/supabase/data-services/auth'
+import { useI18n } from '@/locales/client'
 
 type AppHeaderProps = {
   user: User
@@ -17,6 +18,7 @@ type AppHeaderProps = {
 export function AppHeader({ user }: AppHeaderProps) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const t = useI18n()
 
   const handleSignOut = async () => {
     await signOutWrapper()
@@ -42,10 +44,10 @@ export function AppHeader({ user }: AppHeaderProps) {
         </div>
         <div className="hidden md:flex items-center gap-4 ml-auto">
           <span className="text-sm text-muted-foreground">
-            Welcome, {user?.user_metadata?.name || 'User'}
+            {t('dashboard.navigation.welcome', { name: user?.user_metadata?.name || 'User' })}
           </span>
           <Button variant="outline" size="sm" onClick={handleSignOut}>
-            Logout
+            {t('dashboard.navigation.logout')}
           </Button>
         </div>
         {/* Mobile hamburger and drawer */}
@@ -64,10 +66,10 @@ export function AppHeader({ user }: AppHeaderProps) {
               <div className="flex-1 overflow-y-auto flex flex-col gap-6 p-6 pt-2">
                 <MainNav onNavigate={() => setOpen(false)} />
                 <span className="text-sm text-muted-foreground">
-                  Welcome, {user?.user_metadata?.name || 'User'}
+                  {t('dashboard.navigation.welcome', { name: user?.user_metadata?.name || 'User' })}
                 </span>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
-                  Logout
+                  {t('dashboard.navigation.logout')}
                 </Button>
               </div>
             </SheetContent>

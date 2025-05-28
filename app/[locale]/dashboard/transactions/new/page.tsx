@@ -38,6 +38,7 @@ import {
 } from '@/lib/supabase/data-services/assets'
 import { fetchCategories } from '@/lib/supabase/data-services/categories'
 import { createTransaction, Transaction } from '@/lib/supabase/data-services/transactions'
+import { useI18n } from '@/locales/client'
 
 export default function NewTransactionPage() {
   const router = useRouter()
@@ -54,6 +55,7 @@ export default function NewTransactionPage() {
     assetId: '',
     description: '',
   })
+  const t = useI18n()
 
   useEffect(() => {
     fetchData()
@@ -145,18 +147,18 @@ export default function NewTransactionPage() {
     <div className="container max-w-2xl py-10 mx-auto">
       <Button variant="ghost" className="mb-6" onClick={() => router.back()}>
         <ArrowLeft className="mr-2 h-4 w-4" />
-        Back
+        {t('common.back')}
       </Button>
 
       <Card>
         <CardHeader>
-          <CardTitle>New Transaction</CardTitle>
-          <CardDescription>Record a new income or expense</CardDescription>
+          <CardTitle>{t('common.transactions.add.title-v2')}</CardTitle>
+          <CardDescription>{t('common.transactions.add.subtitle-v2')}</CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-6">
             <div className="space-y-2">
-              <Label>Transaction Type</Label>
+              <Label>{t('common.transactions.add.type.translation')}</Label>
               <RadioGroup
                 defaultValue="expense"
                 value={transactionType}
@@ -166,20 +168,20 @@ export default function NewTransactionPage() {
                 <div className="flex items-center space-x-2 mr-6">
                   <RadioGroupItem value="expense" id="expense" />
                   <Label htmlFor="expense" className="cursor-pointer">
-                    Expense
+                    {t('common.transactions.add.type.expense')}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="income" id="income" />
                   <Label htmlFor="income" className="cursor-pointer">
-                    Income
+                    {t('common.transactions.add.type.income')}
                   </Label>
                 </div>
               </RadioGroup>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="amount">Amount</Label>
+              <Label htmlFor="amount">{t('common.amount')}</Label>
               <Input
                 id="amount"
                 name="amount"
@@ -193,7 +195,7 @@ export default function NewTransactionPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Date</Label>
+              <Label>{t('common.date')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start text-left font-normal">
@@ -213,7 +215,7 @@ export default function NewTransactionPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Category</Label>
+              <Label>{t('common.category')}</Label>
               <Select
                 value={formData.categoryId}
                 onValueChange={(value) => handleSelectChange('categoryId', value)}
@@ -239,7 +241,7 @@ export default function NewTransactionPage() {
                 ) : (
                   <>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder={t('common.transactions.add.category-placeholder')} />
                     </SelectTrigger>
                     {categories.length > 0 ? (
                       <SelectContent>
@@ -259,7 +261,7 @@ export default function NewTransactionPage() {
             </div>
 
             <div className="space-y-2">
-              <Label>Account</Label>
+              <Label>{t('common.asset')}</Label>
               {assets.length === 0 ? (
                 <div className="flex items-center space-x-2">
                   <Input
@@ -280,7 +282,7 @@ export default function NewTransactionPage() {
                   onValueChange={(value) => handleSelectChange('assetId', value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select an account" />
+                    <SelectValue placeholder={t('common.transactions.add.asset-placeholder')} />
                   </SelectTrigger>
                   <SelectContent>
                     {assets.map((asset) => (
@@ -294,11 +296,11 @@ export default function NewTransactionPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t('common.description')}</Label>
               <Textarea
                 id="description"
                 name="description"
-                placeholder="Add a note about this transaction"
+                placeholder={t('common.transactions.add.description-placeholder')}
                 value={formData.description}
                 onChange={handleChange}
               />
@@ -306,7 +308,7 @@ export default function NewTransactionPage() {
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? 'Adding...' : 'Add Transaction'}
+              {isLoading ? t('common.transactions.add.loading') : t('common.transactions.add.submit')}
             </Button>
           </CardFooter>
         </form>

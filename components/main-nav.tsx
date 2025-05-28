@@ -5,20 +5,21 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/locales/client'
 
-const navItems = [
+const navItems = (t: any) => [
   {
-    name: 'Dashboard',
+    name: t('dashboard.navigation.dashboard'),
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    name: 'Transactions',
+    name: t('dashboard.navigation.transactions'),
     href: '/dashboard/transactions',
     icon: CreditCard,
   },
   {
-    name: 'Categories',
+    name: t('dashboard.navigation.categories'),
     href: '/dashboard/categories',
     icon: PieChart,
   },
@@ -30,10 +31,10 @@ type MainNavProps = {
 
 export function MainNav({ onNavigate }: MainNavProps) {
   const pathname = usePathname()
-
+  const t = useI18n()
   return (
     <nav className="flex flex-col lg:flex-row items-start lg:items-center gap-2 lg:gap-6">
-      {navItems.map((item) => (
+      {navItems(t).map((item) => (
         <Link
           key={item.href}
           href={item.href}
