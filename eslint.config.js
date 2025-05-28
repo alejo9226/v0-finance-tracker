@@ -1,8 +1,8 @@
 import { FlatCompat } from '@eslint/eslintrc'
 import js from '@eslint/js'
 import { defineConfig } from 'eslint/config'
-import prettierPlugin from 'eslint-config-prettier'
 import importPlugin from 'eslint-plugin-import'
+import prettierPlugin from 'eslint-plugin-prettier/recommended'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -42,7 +42,7 @@ export default defineConfig([
           },
         },
       ],
-      'prettier/prettier': 'warn',
+      'prettier/prettier': 'warn'
     },
     extends: compat.extends('next/core-web-vitals', 'next/typescript', 'next', 'prettier'),
   },
