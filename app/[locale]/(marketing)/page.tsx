@@ -28,7 +28,7 @@ export default async function Home() {
                   <div className="flex flex-col gap-2 min-[400px]:flex-row">
                     <Link href="/signup">
                       <Button size="lg" className="gap-1.5">
-                        Get Started
+                        {t('marketing.hero.cta')}
                         <ArrowRight className="h-4 w-4" />
                       </Button>
                     </Link>
@@ -38,13 +38,13 @@ export default async function Home() {
                   <div className="relative h-[350px] w-full max-w-[500px] rounded-lg bg-gradient-to-br from-green-100 to-green-50 p-6 shadow-lg">
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <h3 className="text-xl font-bold">Financial Overview</h3>
+                        <h3 className="text-xl font-bold">{t('marketing.hero.overview')}</h3>
                         <div className="h-2 w-24 rounded-full bg-green-200" />
                       </div>
                       <div className="space-y-4">
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium">Assets</div>
+                            <div className="text-sm font-medium">{t('marketing.hero.assets')}</div>
                             <div className="font-semibold">$120,000</div>
                           </div>
                           <div className="h-2 w-full rounded-full bg-gray-100">
@@ -53,7 +53,7 @@ export default async function Home() {
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium">Liabilities</div>
+                            <div className="text-sm font-medium">{t('marketing.hero.liabilities')}</div>
                             <div className="font-semibold">$40,000</div>
                           </div>
                           <div className="h-2 w-full rounded-full bg-gray-100">
@@ -62,7 +62,7 @@ export default async function Home() {
                         </div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium">Equity</div>
+                            <div className="text-sm font-medium">{t('marketing.hero.equity')}</div>
                             <div className="font-semibold">$80,000</div>
                           </div>
                           <div className="h-2 w-full rounded-full bg-gray-100">
@@ -71,7 +71,7 @@ export default async function Home() {
                         </div>
                       </div>
                       <div className="rounded-lg bg-white p-4 shadow">
-                        <div className="text-sm font-medium">Net Worth</div>
+                        <div className="text-sm font-medium">{t('marketing.hero.net-worth')}</div>
                         <div className="text-2xl font-bold text-green-600">$80,000</div>
                       </div>
                     </div>
@@ -100,10 +100,9 @@ export default async function Home() {
                       <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold">Track Assets</h3>
+                  <h3 className="text-xl font-bold">{t('marketing.features.assets')}</h3>
                   <p className="text-gray-500 mt-2">
-                    Keep track of all your assets including bank accounts, investments, and
-                    property.
+                    {t('marketing.features.assets-subtitle')}
                   </p>
                 </div>
                 <div className="rounded-lg border bg-white p-6 shadow-sm">
@@ -126,9 +125,9 @@ export default async function Home() {
                       <path d="M13 11v2" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold">Manage Liabilities</h3>
+                  <h3 className="text-xl font-bold">{t('marketing.features.liabilities')}</h3>
                   <p className="text-gray-500 mt-2">
-                    Monitor your debts and liabilities to understand your financial obligations.
+                    {t('marketing.features.liabilities-subtitle')}
                   </p>
                 </div>
                 <div className="rounded-lg border bg-white p-6 shadow-sm">
@@ -149,10 +148,9 @@ export default async function Home() {
                       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold">Calculate Equity</h3>
+                  <h3 className="text-xl font-bold">{t('marketing.features.equity')}</h3>
                   <p className="text-gray-500 mt-2">
-                    Understand your net worth by calculating the difference between your assets and
-                    liabilities.
+                    {t('marketing.features.equity-subtitle')}
                   </p>
                 </div>
               </div>
@@ -161,16 +159,16 @@ export default async function Home() {
         </main >
         <footer className="border-t py-6">
           <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-sm text-gray-500">© 2025 FinanceTrack. All rights reserved.</p>
+            <p className="text-sm text-gray-500">{t('marketing.footer.copyright')}</p>
             <div className="flex gap-4">
               <Link href="#" className="text-sm text-gray-500 hover:underline">
-                Terms
+                {t('marketing.footer.terms')}
               </Link>
               <Link href="#" className="text-sm text-gray-500 hover:underline">
-                Privacy
+                {t('marketing.footer.privacy')}
               </Link>
               <Link href="#" className="text-sm text-gray-500 hover:underline">
-                Contact
+                {t('marketing.footer.contact')}
               </Link>
             </div>
           </div>

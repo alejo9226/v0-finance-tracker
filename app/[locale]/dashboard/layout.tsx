@@ -5,6 +5,7 @@ import type React from 'react'
 import { AppHeader } from '@/components/app-header'
 import { AuthCheck } from '@/components/auth-check'
 import { useAuth } from '@/contexts/auth-context'
+import { User } from '@supabase/supabase-js'
 
 export default function DashboardLayout({
   children,
@@ -18,7 +19,7 @@ export default function DashboardLayout({
       <div className="w-screen min-h-screen bg-background">
         <div className="sticky top-0 z-50 bg-background/80 backdrop-blur border-b">
           <div className="container mx-auto">
-            <AppHeader user={user} />
+            <AppHeader user={user || ({} as User)} />
           </div>
         </div>
         <main className="container mx-auto px-4 md:px-6">{children}</main>

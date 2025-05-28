@@ -1,8 +1,150 @@
 export default {
+  'common': {
+    'back': 'Volver',
+    'loading': 'Cargando...',
+    'cancel': 'Cancelar',
+    'save': 'Guardar',
+    'type': {
+      'translation': 'Tipo',
+      'select': 'Seleccionar Tipo',
+    },
+    'value': 'Valor',
+    'currency': {
+      'translation': 'Moneda',
+      'select': 'Seleccionar Moneda',
+    },
+    'delete': {
+      'translation': 'Eliminar',
+      'title': 'Confirmación',
+      'subtitle': '¿Estás seguro de querer eliminar este/a {type}? Esta acción no se puede deshacer.',
+    },
+    'description': 'Descripción',
+    'amount': 'Cantidad',
+    'date': 'Fecha',
+    'asset': 'Activo',
+    'assets': {
+      'translation': 'Activos',
+      'add': {
+        'title': 'Agregar Activo',
+        'subtitle': 'Agregar un nuevo activo para rastrear',
+        'name': 'Nombre del Activo',
+      },
+      'edit': {
+        'title': 'Editar Activo',
+        'subtitle': 'Actualizar los detalles del activo',
+        'name': 'Nombre del Activo',
+      },
+      'delete': {
+        'translation': 'Eliminar',
+        'title': 'Confirmación',
+        'subtitle': '¿Estás seguro de querer eliminar este activo? Esta acción no se puede deshacer.',
+      },
+    },
+    'liability': 'Pasivo',
+    'liabilities': {
+      'translation': 'Pasivos',
+      'add': {
+        'title': 'Agregar Pasivo',
+        'subtitle': 'Agregar un nuevo pasivo para rastrear',
+        'name': 'Nombre del Pasivo',
+      },
+      'edit': {
+        'title': 'Editar Pasivo',
+        'subtitle': 'Actualizar los detalles del pasivo',
+        'name': 'Nombre del Pasivo',
+      },
+    },
+    'transaction': 'Transacción',
+    'transactions': {
+      'translation': 'Transacciones',
+      'add': {
+        'title': 'Agregar Transacción',
+        'title-v2': 'Nueva Transacción',
+        'subtitle': 'Agregar una nueva transacción',
+        'subtitle-v2': 'Registrar un nuevo ingreso o gasto',
+        'type': {
+          'translation': 'Tipo de Transacción',
+          'income': 'Ingreso',
+          'expense': 'Gasto',
+        },
+        'name': 'Nombre de la Transacción',
+        'category-placeholder': 'Selecciona una categoría',
+        'no-categories': 'No se encontraron categorías',
+        'asset-placeholder': 'Selecciona una cuenta',
+        'description-placeholder': 'Añade una nota sobre esta transacción',
+        'submit': 'Agregar Transacción',
+        'loading': 'Agregando...',
+      },
+      'edit': {
+        'title': 'Editar Transacción',
+        'subtitle': 'Actualizar los detalles de la transacción',
+      },
+      'view': {
+        'title': 'Detalles de la Transacción',
+        'subtitle': 'Ver y gestionar esta transacción',
+      }
+    },
+    'category': 'Categoría',
+    'categories': {
+      'translation': 'Categorías',
+      'no-data': 'No se encontraron categorías',
+      'first-category': 'Agregar tu primera categoría',
+      'add': {
+        'title': 'Agregar Categoría',
+        'subtitle': 'Agregar los detalles de la categoría',
+        'name': {
+          'translation': 'Nombre de la Categoría',
+          'placeholder': 'e.g., Comida',
+        },
+        'icon': {
+          'translation': 'Ícono',
+          'placeholder': 'e.g., 🍎',
+        },
+        'color': 'Color',
+      },
+      'edit': {
+        'title': 'Editar Categoría',
+        'subtitle': 'Actualizar los detalles de la categoría',
+        'name': {
+          'translation': 'Nombre de la Categoría',
+          'placeholder': 'e.g., Comida',
+        },
+        'icon': {
+          'translation': 'Ícono',
+          'placeholder': 'e.g., 🍎',
+        },
+        'color': 'Color',
+      },
+    }
+  },
   'marketing': {
+    'header': {
+      'login': 'Iniciar sesión',
+      'signup': 'Registrarse',
+    },
     'hero': {
       'title': 'Rastrea tu Salud Financiera',
-      'subtitle': 'Obtén una visión clara de tus activos, deudas y patrimonio. Toma decisiones informadas sobre tu futuro financiero.'
+      'subtitle': 'Obtén una visión clara de tus activos, deudas y patrimonio. Toma decisiones informadas sobre tu futuro financiero.',
+      'cta': 'Comenzar',
+      'overview': 'Resumen Financiero',
+      'assets': 'Activos',
+      'liabilities': 'Deudas',
+      'equity': 'Patrimonio',
+      'net-worth': 'Patrimonio Neto',
+    },
+    'features': {
+      'assets': 'Rastrear Activos',
+      'assets-subtitle': 'Mantén un seguimiento de todos tus activos, incluyendo cuentas bancarias, inversiones y propiedad.',
+      'liabilities': 'Gestionar Deudas',
+      'liabilities-subtitle': 'Monitorea tus deudas y obligaciones financieras para entender tus responsabilidades.',
+      'equity': 'Calcular Patrimonio',
+      'equity-subtitle': 'Entiende tu patrimonio neto calculando la diferencia entre tus activos y deudas.',
+    },
+    'footer': {
+      'copyright': '© 2025 FinanceTrack. Todos los derechos reservados.',
+      'terms': 'Términos',
+      'privacy': 'Privacidad',
+      'contact': 'Contacto',
     },
   },
   'dashboard': {
@@ -42,6 +184,74 @@ export default {
       'add-asset': 'Agregar Activo',
       'add-liability': 'Agregar Pasivo',
       'add-transaction': 'Agregar Transacción',
+    },
+    'income-expenses': {
+      'title': 'Resumen de Gastos',
+      'subtitle': 'Tus gastos por categoría para',
+      'months': {
+        'january': 'Enero',
+        'february': 'Febrero',
+        'march': 'Marzo',
+        'april': 'Abril',
+        'may': 'Mayo',
+        'june': 'Junio',
+        'july': 'Julio',
+        'august': 'Agosto',
+        'september': 'Septiembre',
+        'october': 'Octubre',
+        'november': 'Noviembre',
+        'december': 'Diciembre',
+      },
+      'no-data': 'No hay datos de gastos disponibles',
+      'total-income': 'Total de Ingresos',
+      'total-expenses': 'Total de Gastos',
+    },
+    'transactions': {
+      'title': 'Transacciones Recientes',
+      'subtitle': 'Tus últimas actividades financieras',
+      'buttons': {
+        'see-all': 'Ver Todas',
+      },
+      'no-data': 'No hay transacciones aún',
+      'add-transaction': 'Agregar Tu Primera Transacción',
     }
   },
+  'transactions': {
+    'title': 'Transacciones',
+    'buttons': {
+      'new-transaction': 'Nueva Transacción',
+    },
+    'search': {
+      'placeholder': 'Buscar transacciones...',
+      'buttons': {
+        'manage-categories': 'Gestionar Categorías',
+      },
+    },
+    'filters': {
+      'all': 'Todos',
+      'income': 'Ingresos',
+      'expense': 'Gastos',
+    },
+    'transactions': {
+      'all': 'Todas las Transacciones',
+      'found': 'encontradas',
+      'no-transactions': 'No se encontraron transacciones',
+      'add-transaction': 'Agregar Tu Primera Transacción',
+    },
+  },
+  'categories': {
+    'title': 'Categorías',
+    'subtitle': 'Gestiona tus categorías de ingresos y gastos',
+    'categories': {
+      'title': 'Categorías de {type}',
+      'subtitle': 'Gestiona tus categorías de {type}',
+      'buttons': {
+        'add-category': 'Agregar Categoría',
+      },
+      'filters': {
+        'income': 'Ingresos',
+        'expense': 'Gastos',
+      },
+    }
+  }
 } as const
