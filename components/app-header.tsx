@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { signOutWrapper } from '@/lib/supabase/data-services/auth'
 import { useI18n } from '@/locales/client'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 type AppHeaderProps = {
   user: User
@@ -26,7 +27,7 @@ export function AppHeader({ user }: AppHeaderProps) {
   }
 
   return (
-    <header className="bg-white border-b px-4">
+    <header className="bg-background border-b px-4">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo and title */}
         <div
@@ -46,6 +47,7 @@ export function AppHeader({ user }: AppHeaderProps) {
           <span className="text-sm text-muted-foreground">
             {t('dashboard.navigation.welcome', { name: user?.user_metadata?.name || 'User' })}
           </span>
+          <ThemeToggle />
           <Button variant="outline" size="sm" onClick={handleSignOut}>
             {t('dashboard.navigation.logout')}
           </Button>
@@ -68,6 +70,7 @@ export function AppHeader({ user }: AppHeaderProps) {
                 <span className="text-sm text-muted-foreground">
                   {t('dashboard.navigation.welcome', { name: user?.user_metadata?.name || 'User' })}
                 </span>
+                <ThemeToggle />
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   {t('dashboard.navigation.logout')}
                 </Button>
