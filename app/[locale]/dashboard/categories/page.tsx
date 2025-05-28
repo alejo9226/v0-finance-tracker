@@ -258,9 +258,9 @@ export default function CategoriesPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
-              <CardTitle>{t('categories.categories.title', { type: activeTab.charAt(0).toUpperCase() + activeTab.slice(1) })}</CardTitle>
+              <CardTitle>{t('categories.categories.title', { type: t(`categories.categories.filters.${activeTab as 'income' | 'expense'}`) })}</CardTitle>
               <CardDescription>
-                {t('categories.categories.subtitle', { type: activeTab })}
+                {t('categories.categories.subtitle', { type: t(`categories.categories.filters.${activeTab as 'income' | 'expense'}`).toLowerCase() })}
               </CardDescription>
             </div>
           </div>
