@@ -18,10 +18,8 @@ import {
   ArrowDown,
   ArrowUp,
   CreditCard,
-  DollarSign,
   Landmark,
   PlusIcon,
-  Wallet,
   PencilIcon,
   Trash2Icon,
   Loader2,
@@ -31,6 +29,9 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState, useCallback } from 'react'
 import { Bar } from 'react-chartjs-2'
 
+import { addAsset, calculateTotalValue, getAssets, removeAsset, updateAsset } from '@/application/useCases/assets'
+import { calculateCurrencyTotals, CurrencyTotals } from '@/application/useCases/balanceSheet/calculateCurrencyTotals'
+import { updateTransactionAndAssetBalance } from '@/application/useCases/transactions/updateWithAsset'
 import { AssetList } from '@/components/dashboard/AssetList'
 import { LiabilityList } from '@/components/dashboard/LiabilityList'
 import {
@@ -62,12 +63,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { deleteTransaction, fetchTransactions, Transaction, updateTransaction } from "@/lib/supabase/data-services/transactions"
-import { CurrencyCode, Asset, updateAsset, CURRENCIES, fetchAssets, createAsset, deleteAsset } from "@/lib/supabase/data-services/assets"
-import { createLiability, deleteLiability, fetchLiabilities, Liability, updateLiability } from "@/lib/supabase/data-services/liabilities"
-import { useI18n } from "@/locales/client"
 import { useAuth } from '@/contexts/auth-context'
+import { Asset, CURRENCIES, CurrencyCode } from '@/domain/entities/Asset'
 import { useToast } from '@/hooks/use-toast'
+import {
+  createLiability,
+  deleteLiability,
+  fetchLiabilities,
+  Liability,
+  updateLiability,
+} from '@/lib/supabase/data-services/liabilities'
+import {
+  deleteTransaction,
+  fetchTransactions,
+  Transaction,
+} from '@/lib/supabase/data-services/transactions'
+import { convertCurrency } from '@/lib/utils/currency'
+import { useI18n } from '@/locales/client'
 
 // Register Chart.js components
 Chart.register(
@@ -84,21 +96,6 @@ Chart.register(
 type UserCurrencyPreference = {
   code: CurrencyCode
   isPreferred: boolean
-}
-
-const EXCHANGE_RATES: Record<CurrencyCode, number> = {
-  USD: 1,
-  ARS: 1130,
-  BRL: 5.69,
-  COP: 4223,
-}
-
-// Add new types and state for per-currency totals
-type CurrencyTotals = {
-  [key in CurrencyCode]: {
-    assets: number
-    liabilities: number
-  }
 }
 
 const calculateSpendingByCategory = (transactions: Transaction[]): Record<string, number> => {
@@ -160,14 +157,15 @@ export default function DashboardPage() {
   const [isAddAssetOpen, setIsAddAssetOpen] = useState(false)
   const [isAddLiabilityOpen, setIsAddLiabilityOpen] = useState(false)
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false)
-  const [itemToDelete, setItemToDelete] = useState<{
-    id: string
-    type: 'asset' | 'liability'
-  } | null>(null)
-  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode | ''>('')
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; type: "asset" | "liability" } | null>(null)
+  const [displayCurrency, setDisplayCurrency] = useState<CurrencyCode | "">("")
+  // Active currencies are the currencies that have non-zero assets or liabilities
   const [activeCurrencies, setActiveCurrencies] = useState<Set<CurrencyCode>>(new Set())
+  // User currencies are the currencies that the user has selected as their preferred currency
   const [userCurrencies, setUserCurrencies] = useState<UserCurrencyPreference[]>([])
-  const [currencyTotals, setCurrencyTotals] = useState<CurrencyTotals>({} as CurrencyTotals)
+  const [currencyTotals, setCurrencyTotals] = useState<Partial<CurrencyTotals>>(
+    {} as Partial<CurrencyTotals>,
+  )
   const [isEditTxOpen, setIsEditTxOpen] = useState(false)
   const [isDeleteTxOpen, setIsDeleteTxOpen] = useState(false)
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
@@ -293,83 +291,25 @@ export default function DashboardPage() {
 
       setLoading(true)
 
-      // Fetch assets
-      const assetsData = await fetchAssets()
-
-      // Fetch liabilities
+      // Fetch assets, liabilities and recent transactions
+      const assetsData = await getAssets()
       const liabilitiesData = await fetchLiabilities()
-
-      // Fetch recent transactions
       const transformedTransactions = await fetchTransactions()
 
-      // Set state with type assertions and transformations
+      // Set state with type assertions
       setAssets((assetsData as Asset[]) || [])
       setLiabilities((liabilitiesData as Liability[]) || [])
-
-      // Transactions data comes transformed to ensure required fields
       setRecentTransactions(transformedTransactions)
 
-      // Calculate per-currency totals
-      const newCurrencyTotals: CurrencyTotals = {} as CurrencyTotals
-
-      // Initialize totals for each currency
-      CURRENCIES.forEach((currency) => {
-        newCurrencyTotals[currency.code] = {
-          assets: 0,
-          liabilities: 0,
-        }
-      })
-
-      // Calculate assets per currency with proper type assertion
-      const typedAssetsData = (assetsData as Asset[]) || []
-      typedAssetsData.forEach((asset) => {
-        newCurrencyTotals[asset.currency].assets += Number(asset.value)
-      })
-
-      // Calculate liabilities per currency with proper type assertion
-      const typedLiabilitiesData = (liabilitiesData as Liability[]) || []
-      typedLiabilitiesData.forEach((liability) => {
-        newCurrencyTotals[liability.currency as CurrencyCode].liabilities += Number(liability.value)
-      })
-
-      // Now filter for currencies with non-zero values
-      const filteredCurrencyTotals = Object.entries(newCurrencyTotals).filter(
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        ([_, totals]) => totals.assets > 0 || totals.liabilities > 0,
-      )
+      // Calculate assets and liabilities per currency and set the display currency
+      const balanceSheetCurrencyTotals = calculateCurrencyTotals(assetsData, liabilitiesData)
 
       // If there is only one currency with non-zero values, set it as the display currency
-      if (filteredCurrencyTotals.length === 1) {
-        setDisplayCurrency(filteredCurrencyTotals[0][0] as CurrencyCode)
+      if (Object.keys(balanceSheetCurrencyTotals).length === 1) {
+        setDisplayCurrency(Object.keys(balanceSheetCurrencyTotals)[0] as CurrencyCode)
       }
 
-      setCurrencyTotals(newCurrencyTotals)
-
-      // Calculate converted totals
-      const assetsTotal = typedAssetsData.reduce((sum, asset) => {
-        if (displayCurrency) {
-          return sum + convertCurrency(Number(asset.value), asset.currency, displayCurrency)
-        }
-        return sum + Number(asset.value)
-      }, 0)
-
-      const liabilitiesTotal = typedLiabilitiesData.reduce((sum, liability) => {
-        if (displayCurrency) {
-          return (
-            sum +
-            convertCurrency(
-              Number(liability.value),
-              liability.currency as CurrencyCode,
-              displayCurrency,
-            )
-          )
-        }
-        return sum + Number(liability.value)
-      }, 0)
-
-      setTotalAssets(assetsTotal)
-      setTotalLiabilities(liabilitiesTotal)
-      setEquity(assetsTotal - liabilitiesTotal)
+      setCurrencyTotals(balanceSheetCurrencyTotals)
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
       toast({
@@ -389,12 +329,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     // Calculate converted totals when display currency changes
-    const assetsTotal = assets.reduce((sum, asset) => {
-      if (displayCurrency) {
-        return sum + convertCurrency(Number(asset.value), asset.currency, displayCurrency)
-      }
-      return sum + Number(asset.value)
-    }, 0)
+    const assetsTotal = calculateTotalValue(assets, displayCurrency)
 
     const liabilitiesTotal = liabilities.reduce((sum, liability) => {
       if (displayCurrency) {
@@ -418,8 +353,10 @@ export default function DashboardPage() {
   useEffect(() => {
     // Get unique currencies from assets and liabilities
     const currencySet = new Set<CurrencyCode>()
+
     assets.forEach((asset) => currencySet.add(asset.currency))
     liabilities.forEach((liability) => currencySet.add(liability.currency as CurrencyCode))
+
     setActiveCurrencies(currencySet)
 
     // Create user currencies array with preference
@@ -429,19 +366,6 @@ export default function DashboardPage() {
     }))
     setUserCurrencies(currencies)
   }, [assets, liabilities, displayCurrency])
-
-  const getAssetIcon = (type: string) => {
-    switch (type) {
-      case 'bank':
-        return <Landmark className="h-5 w-5" />
-      case 'investment':
-        return <DollarSign className="h-5 w-5" />
-      case 'cash':
-        return <Wallet className="h-5 w-5" />
-      default:
-        return <DollarSign className="h-5 w-5" />
-    }
-  }
 
   const getLiabilityIcon = (type: string) => {
     switch (type) {
@@ -479,19 +403,6 @@ export default function DashboardPage() {
         decimal: '.',
       }).format() + suffix
     )
-  }
-
-  const convertCurrency = (
-    amount: number,
-    fromCurrency: CurrencyCode,
-    toCurrency: CurrencyCode | '',
-  ): number => {
-    if (toCurrency === '') return amount
-    if (fromCurrency === toCurrency) return amount
-
-    // Convert through USD as the base currency
-    const amountInUsd = currency(amount).divide(EXCHANGE_RATES[fromCurrency])
-    return amountInUsd.multiply(EXCHANGE_RATES[toCurrency]).value
   }
 
   const handleEditAsset = async () => {
@@ -584,7 +495,7 @@ export default function DashboardPage() {
         throw new Error('All fields are required')
       }
 
-      await createAsset({
+      await addAsset({
         name: editForm.name,
         type: editForm.type,
         value: Number(editForm.value),
@@ -647,7 +558,7 @@ export default function DashboardPage() {
       if (!itemToDelete) return
 
       if (itemToDelete.type === 'asset') {
-        await deleteAsset(itemToDelete.id)
+        await removeAsset(itemToDelete.id)
       } else {
         await deleteLiability(itemToDelete.id)
       }
@@ -690,11 +601,10 @@ export default function DashboardPage() {
     setEditTxLoading(true)
 
     try {
-      await updateTransaction(selectedTx.id, {
+      await updateTransactionAndAssetBalance(selectedTx.id, {
         description: editTxForm.description,
         amount: Number(editTxForm.amount),
         date: new Date(editTxForm.date),
-        // category_id:  Uncomment if you add category selection
       })
 
       toast({
@@ -828,6 +738,7 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {/* Zero State */}
             {!displayCurrency && Array.from(activeCurrencies).length === 0 && (
               <div className="text-3xl font-bold">$0,0</div>
             )}
@@ -837,20 +748,22 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="space-y-1">
-                {Array.from(activeCurrencies)
-                  .sort()
-                  .map((currency) => (
-                    <div key={currency} className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">{currency}</span>
-                      <span
-                        className={`text-lg font-medium ${currencyTotals[currency].assets === 0 ? 'text-muted-foreground' : ''}`}
-                      >
-                        {formatCurrency(currencyTotals[currency].assets, currency)}
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            )}
+                {Array.from(activeCurrencies).sort().map(currency => (
+                  <div key={currency} className="flex justify-between items-center">
+                    <span className="text-sm text-muted-foreground">{currency}</span>
+                    <span
+                      className={`
+                        text-lg font-medium 
+                        ${currencyTotals[currency]?.assets === 0 ? 'text-muted-foreground' : ''}
+                        ${currencyTotals[currency]?.assets === 0 ? 'text-muted-foreground' : ''}
+                      `}>
+                      {formatCurrency(currencyTotals[currency]!.assets, currency)}
+                    </span>
+                  </div>
+                ))}
+              </div >
+            )
+            }
             <div className="mt-2 flex items-center text-sm text-green-500">
               <ArrowUp className="mr-1 h-4 w-4" />
               <span>{t('dashboard.balance-sheet.asset-explanation')}</span>
@@ -880,9 +793,9 @@ export default function DashboardPage() {
                     <div key={currency} className="flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">{currency}</span>
                       <span
-                        className={`text-lg font-medium ${currencyTotals[currency].liabilities === 0 ? 'text-muted-foreground' : ''}`}
+                        className={`text-lg font-medium ${currencyTotals[currency]?.liabilities === 0 ? 'text-muted-foreground' : ''}`}
                       >
-                        {formatCurrency(currencyTotals[currency].liabilities, currency)}
+                        {formatCurrency(currencyTotals[currency]?.liabilities || 0, currency)}
                       </span>
                     </div>
                   ))}
@@ -915,7 +828,8 @@ export default function DashboardPage() {
                   .sort()
                   .map((currency) => {
                     const netWorth =
-                      currencyTotals[currency].assets - currencyTotals[currency].liabilities
+                      (currencyTotals[currency]?.assets || 0) -
+                      (currencyTotals[currency]?.liabilities || 0)
                     return (
                       <div key={currency} className="flex justify-between items-center">
                         <span className="text-sm text-green-700">{currency}</span>
@@ -937,9 +851,9 @@ export default function DashboardPage() {
             <div className="mt-2 flex items-center text-sm text-green-700">
               <span>{t('dashboard.balance-sheet.equity-explanation')}</span>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+          </CardContent >
+        </Card >
+      </div >
 
       <div className="mt-12 grid gap-8 md:grid-cols-2">
         {/* Assets */}
@@ -947,7 +861,6 @@ export default function DashboardPage() {
           assets={assets}
           displayCurrency={displayCurrency}
           formatCurrency={formatCurrency}
-          convertCurrency={convertCurrency}
           onAdd={() => {
             setEditForm({ name: '', type: '', value: '', currency: 'USD' })
             setIsAddAssetOpen(true)
@@ -957,14 +870,12 @@ export default function DashboardPage() {
             setItemToDelete({ id, type: 'asset' })
             setIsConfirmDeleteOpen(true)
           }}
-          getAssetIcon={getAssetIcon}
         />
         {/* Liabilities */}
         <LiabilityList
           liabilities={liabilities}
           displayCurrency={displayCurrency}
           formatCurrency={formatCurrency}
-          convertCurrency={convertCurrency}
           onAdd={() => {
             setEditForm({ name: '', type: '', value: '', currency: 'COP' })
             setIsAddLiabilityOpen(true)

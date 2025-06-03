@@ -1,0 +1,5 @@
+export { addAsset, addMultipleAssets } from './add'
+export { getAssetCurrentValue, getAssets } from './get'
+export { removeAsset } from './remove'
+export { updateAsset } from './update'
+export { calculateTotalValue } from './calculateTotalValue'

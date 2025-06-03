@@ -1,6 +1,7 @@
+import { Asset } from '@/domain/entities/Asset'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import { Asset } from '@/lib/supabase/data-services/assets'
 import { Category } from '@/lib/supabase/data-services/categories'
+
 export interface Transaction {
   id: string
   amount: number

@@ -4,8 +4,8 @@ import { LayoutDashboard, CreditCard, PieChart } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-import { cn } from '@/lib/utils'
 import { useI18n } from '@/locales/client'
+import { cn } from '@/lib/utils/utils'
 
 const navItems = (t: any) => [
   {
