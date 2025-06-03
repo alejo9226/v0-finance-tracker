@@ -2,9 +2,9 @@ import { PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardDescription, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { CurrencyCode } from '@/lib/supabase/data-services/assets'
-import { Asset } from '@/lib/supabase/data-services/assets'
+import { Asset, CurrencyCode } from '@/domain/entities/Asset'
 import { Liability } from '@/lib/supabase/data-services/liabilities'
+import { convertCurrency } from '@/lib/utils/currency'
 
 export function EntityListCard({
   entityType,
@@ -12,7 +12,6 @@ export function EntityListCard({
   description,
   displayCurrency,
   formatCurrency,
-  convertCurrency,
   onAdd,
   onEdit,
   onDelete,
@@ -24,7 +23,6 @@ export function EntityListCard({
   description: string
   displayCurrency: CurrencyCode | ''
   formatCurrency: (amount: number, currency: CurrencyCode | '') => string
-  convertCurrency: (amount: number, from: CurrencyCode, to: CurrencyCode | '') => number
   onAdd: () => void
   onEdit: (entity: Asset | Liability) => void
   onDelete: (id: string) => void
@@ -77,13 +75,13 @@ export function EntityListCard({
                   <p className="text-sm sm:text-md font-medium whitespace-nowrap transition-transform sm:group-hover:-translate-x-1">
                     {displayCurrency
                       ? formatCurrency(
-                          convertCurrency(
-                            Number(entity.value),
-                            entity.currency as CurrencyCode,
-                            displayCurrency,
-                          ),
+                        convertCurrency(
+                          Number(entity.value),
+                          entity.currency as CurrencyCode,
                           displayCurrency,
-                        )
+                        ),
+                        displayCurrency,
+                      )
                       : formatCurrency(Number(entity.value), entity.currency as CurrencyCode)}
                   </p>
                   <div

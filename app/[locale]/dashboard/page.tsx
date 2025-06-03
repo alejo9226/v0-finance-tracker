@@ -31,6 +31,7 @@ import { Bar } from 'react-chartjs-2'
 
 import { addAsset, calculateTotalValue, getAssets, removeAsset, updateAsset } from '@/application/useCases/assets'
 import { calculateCurrencyTotals, CurrencyTotals } from '@/application/useCases/balanceSheet/calculateCurrencyTotals'
+import { updateTransactionAndAssetBalance } from '@/application/useCases/transactions/updateWithAsset'
 import { AssetList } from '@/components/dashboard/AssetList'
 import { LiabilityList } from '@/components/dashboard/LiabilityList'
 import {
@@ -65,7 +66,6 @@ import {
 import { useAuth } from '@/contexts/auth-context'
 import { Asset, CURRENCIES, CurrencyCode } from '@/domain/entities/Asset'
 import { useToast } from '@/hooks/use-toast'
-import { EXCHANGE_RATES } from '@/lib/constants/exchangeRates'
 import {
   createLiability,
   deleteLiability,
@@ -77,8 +77,8 @@ import {
   deleteTransaction,
   fetchTransactions,
   Transaction,
-  updateTransaction,
 } from '@/lib/supabase/data-services/transactions'
+import { convertCurrency } from '@/lib/utils/currency'
 import { useI18n } from '@/locales/client'
 
 // Register Chart.js components
@@ -405,19 +405,6 @@ export default function DashboardPage() {
     )
   }
 
-  const convertCurrency = (
-    amount: number,
-    fromCurrency: CurrencyCode,
-    toCurrency: CurrencyCode | '',
-  ): number => {
-    if (toCurrency === '') return amount
-    if (fromCurrency === toCurrency) return amount
-
-    // Convert through USD as the base currency
-    const amountInUsd = currency(amount).divide(EXCHANGE_RATES[fromCurrency])
-    return amountInUsd.multiply(EXCHANGE_RATES[toCurrency]).value
-  }
-
   const handleEditAsset = async () => {
     try {
       if (!selectedAsset || !editForm.name || !editForm.value || !editForm.currency) {
@@ -614,11 +601,10 @@ export default function DashboardPage() {
     setEditTxLoading(true)
 
     try {
-      await updateTransaction(selectedTx.id, {
+      await updateTransactionAndAssetBalance(selectedTx.id, {
         description: editTxForm.description,
         amount: Number(editTxForm.amount),
         date: new Date(editTxForm.date),
-        // category_id:  Uncomment if you add category selection
       })
 
       toast({
@@ -875,7 +861,6 @@ export default function DashboardPage() {
           assets={assets}
           displayCurrency={displayCurrency}
           formatCurrency={formatCurrency}
-          convertCurrency={convertCurrency}
           onAdd={() => {
             setEditForm({ name: '', type: '', value: '', currency: 'USD' })
             setIsAddAssetOpen(true)
@@ -891,7 +876,6 @@ export default function DashboardPage() {
           liabilities={liabilities}
           displayCurrency={displayCurrency}
           formatCurrency={formatCurrency}
-          convertCurrency={convertCurrency}
           onAdd={() => {
             setEditForm({ name: '', type: '', value: '', currency: 'COP' })
             setIsAddLiabilityOpen(true)

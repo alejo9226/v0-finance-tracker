@@ -1,15 +1,14 @@
+import { DollarSign, Landmark, Wallet } from 'lucide-react'
 import React from 'react'
 
 import { EntityListCard } from '@/components/dashboard/shared/EntityListCard'
 import { Asset, CurrencyCode } from '@/domain/entities/Asset'
 import { useI18n } from '@/locales/client'
-import { DollarSign, Landmark, Wallet } from 'lucide-react'
 
 type AssetListProps = {
   assets: Asset[]
   displayCurrency: CurrencyCode | ''
   formatCurrency: (amount: number, currency: CurrencyCode | '') => string
-  convertCurrency: (amount: number, from: CurrencyCode, to: CurrencyCode | '') => number
   onAdd: () => void
   onEdit: (asset: Asset) => void
   onDelete: (id: string) => void
@@ -19,7 +18,6 @@ export function AssetList({
   assets,
   displayCurrency,
   formatCurrency,
-  convertCurrency,
   onAdd,
   onEdit,
   onDelete,
@@ -47,7 +45,6 @@ export function AssetList({
       description={t('dashboard.balance-sheet.asset-explanation')}
       displayCurrency={displayCurrency}
       formatCurrency={formatCurrency}
-      convertCurrency={convertCurrency}
       onAdd={onAdd}
       onEdit={(entity) => {
         if ('type' in entity) {
