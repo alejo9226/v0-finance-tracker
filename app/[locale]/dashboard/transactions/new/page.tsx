@@ -8,6 +8,7 @@ import type React from 'react'
 
 import { getAssetCurrentValue, getAssets } from '@/application/useCases/assets/get'
 import { updateAsset } from '@/application/useCases/assets/update'
+import { transferBetweenAssets } from '@/application/useCases/transactions/transfer'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -42,7 +43,7 @@ export default function NewTransactionPage() {
   const { toast } = useToast()
   const { user } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
-  const [transactionType, setTransactionType] = useState<'income' | 'expense'>('expense')
+  const [transactionType, setTransactionType] = useState<'income' | 'expense' | 'transfer'>('expense')
   const [categories, setCategories] = useState<Transaction['category'][]>([])
   const [assets, setAssets] = useState<Asset[]>([])
   const [date, setDate] = useState<Date>(new Date())
@@ -51,11 +52,18 @@ export default function NewTransactionPage() {
     categoryId: '',
     assetId: '',
     description: '',
+    fromAssetId: '',
+    toAssetId: '',
+    exchangeRate: '',
+    destinationAmount: '',
+    fee: '',
   })
   const t = useI18n()
 
   useEffect(() => {
-    fetchData()
+    if (transactionType === 'income' || transactionType === 'expense') {
+      fetchData()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transactionType])
 
@@ -63,7 +71,10 @@ export default function NewTransactionPage() {
     try {
       const assetsData = await getAssets()
 
-      const categoriesData = await fetchCategories(transactionType)
+      let categoriesData: Transaction['category'][] = []
+      if (transactionType === 'income' || transactionType === 'expense') {
+        categoriesData = await fetchCategories(transactionType)
+      }
 
       setCategories(categoriesData || [])
       // Reset category selection when type changes
@@ -94,6 +105,40 @@ export default function NewTransactionPage() {
     setIsLoading(true)
 
     try {
+      if (transactionType === 'transfer') {
+        if (!formData.amount || !formData.fromAssetId || !formData.toAssetId) {
+          throw new Error('Amount, from and to accounts are required')
+        }
+        const fromAsset = assets.find(a => a.id === formData.fromAssetId)
+        const toAsset = assets.find(a => a.id === formData.toAssetId)
+        if (!fromAsset || !toAsset) throw new Error('Invalid asset selection')
+        const fromAmount = Number(formData.amount)
+        let toAmount = fromAmount
+        let exchangeRate = 1
+        if (fromAsset.currency !== toAsset.currency) {
+          exchangeRate = Number(formData.exchangeRate)
+          toAmount = Number(formData.destinationAmount)
+          if (!exchangeRate || !toAmount) throw new Error('Exchange rate and destination amount are required')
+        }
+        const fee = formData.fee ? Number(formData.fee) : 0
+        await transferBetweenAssets({
+          fromAssetId: fromAsset.id,
+          toAssetId: toAsset.id,
+          fromAmount,
+          toAmount,
+          exchangeRate,
+          fee,
+          description: formData.description,
+          date,
+          userId: user?.id || '',
+        })
+        toast({
+          title: 'Transfer added',
+          description: 'Your transfer has been recorded successfully',
+        })
+        router.push('/dashboard/transactions')
+        return
+      }
       if (!formData.amount || !formData.assetId || !formData.categoryId) {
         throw new Error('Amount, account and category are required')
       }
@@ -159,7 +204,7 @@ export default function NewTransactionPage() {
               <RadioGroup
                 defaultValue="expense"
                 value={transactionType}
-                onValueChange={(value) => setTransactionType(value as 'income' | 'expense')}
+                onValueChange={(value) => setTransactionType(value as 'income' | 'expense' | 'transfer')}
                 className="flex"
               >
                 <div className="flex items-center space-x-2 mr-6">
@@ -168,140 +213,283 @@ export default function NewTransactionPage() {
                     {t('common.transactions.add.type.expense')}
                   </Label>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 mr-6">
                   <RadioGroupItem value="income" id="income" />
                   <Label htmlFor="income" className="cursor-pointer">
                     {t('common.transactions.add.type.income')}
                   </Label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="transfer" id="transfer" />
+                  <Label htmlFor="transfer" className="cursor-pointer">
+                    {t('common.transactions.add.type.transfer')}
+                  </Label>
+                </div>
               </RadioGroup>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="amount">{t('common.amount')}</Label>
-              <Input
-                id="amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                value={formData.amount}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>{t('common.date')}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(date, 'PPP')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={(date) => date && setDate(date)}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            <div className="space-y-2">
-              <Label>{t('common.category')}</Label>
-              <Select
-                value={formData.categoryId}
-                onValueChange={(value) => handleSelectChange('categoryId', value)}
-              >
-                {categories.length === 0 ? (
-                  <div className="flex items-center space-x-2">
-                    <Input
-                      id="category"
-                      name="category"
-                      type="text"
-                      placeholder="No categories found"
-                      value={''}
-                      disabled
-                    />
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      onClick={() => router.push('/dashboard/categories')}
-                    >
-                      <PlusIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <>
+            {transactionType === 'transfer' ? (
+              <>
+                <div className="space-y-2">
+                  <Label>{t('common.transactions.add.from-asset')}</Label>
+                  <Select
+                    value={formData.fromAssetId}
+                    onValueChange={(value) => setFormData(f => ({ ...f, fromAssetId: value }))}
+                  >
                     <SelectTrigger>
-                      <SelectValue placeholder={t('common.transactions.add.category-placeholder')} />
+                      <SelectValue placeholder={t('common.transactions.add.from-asset-placeholder')} />
                     </SelectTrigger>
-                    {categories.length > 0 ? (
+                    <SelectContent>
+                      {assets.map((asset) => (
+                        <SelectItem key={asset.id} value={asset.id}>
+                          {asset.name} ({asset.currency})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('common.transactions.add.to-asset')}</Label>
+                  <Select
+                    value={formData.toAssetId}
+                    onValueChange={(value) => setFormData(f => ({ ...f, toAssetId: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('common.transactions.add.to-asset-placeholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {assets
+                        .filter(a => a.id !== formData.fromAssetId)
+                        .map((asset) => (
+                          <SelectItem key={asset.id} value={asset.id}>
+                            {asset.name} ({asset.currency})
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('common.amount')} {assets.find(a => a.id === formData.fromAssetId)?.currency || ''}</Label>
+                  <Input
+                    id="amount"
+                    name="amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={formData.amount}
+                    onChange={handleChange}
+                  />
+                </div>
+                {(() => {
+                  const fromAsset = assets.find(a => a.id === formData.fromAssetId)
+                  const toAsset = assets.find(a => a.id === formData.toAssetId)
+                  if (fromAsset && toAsset && fromAsset.currency !== toAsset.currency) {
+                    return (
+                      <>
+                        <div className="space-y-2">
+                          <Label>{t('common.transactions.add.exchange-rate')} ({fromAsset.currency} → {toAsset.currency})</Label>
+                          <Input
+                            id="exchangeRate"
+                            name="exchangeRate"
+                            type="number"
+                            step="0.0001"
+                            min="0"
+                            placeholder="e.g. 4000"
+                            value={formData.exchangeRate}
+                            onChange={e => setFormData(f => ({ ...f, exchangeRate: e.target.value }))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>{t('common.transactions.add.destination-amount')} ({toAsset.currency})</Label>
+                          <Input
+                            id="destinationAmount"
+                            name="destinationAmount"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            value={formData.destinationAmount}
+                            onChange={e => setFormData(f => ({ ...f, destinationAmount: e.target.value }))}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>{t('common.transactions.add.fee')} ({fromAsset.currency})</Label>
+                          <Input
+                            id="fee"
+                            name="fee"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            value={formData.fee}
+                            onChange={e => setFormData(f => ({ ...f, fee: e.target.value }))}
+                          />
+                        </div>
+                      </>
+                    )
+                  }
+                  return null
+                })()}
+                <div className="space-y-2">
+                  <Label>{t('common.date')}</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(date, 'PPP')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={(date) => date && setDate(date)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">{t('common.description')}</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    placeholder={t('common.transactions.add.description-placeholder')}
+                    value={formData.description}
+                    onChange={handleChange}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="amount">{t('common.amount')}</Label>
+                  <Input
+                    id="amount"
+                    name="amount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    value={formData.amount}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('common.date')}</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-start text-left font-normal">
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {format(date, 'PPP')}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={(date) => date && setDate(date)}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('common.category')}</Label>
+                  <Select
+                    value={formData.categoryId}
+                    onValueChange={(value) => handleSelectChange('categoryId', value)}
+                  >
+                    {categories.length === 0 ? (
+                      <div className="flex items-center space-x-2">
+                        <Input
+                          id="category"
+                          name="category"
+                          type="text"
+                          placeholder={t('common.transactions.add.no-categories')}
+                          value={''}
+                          disabled
+                        />
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          onClick={() => router.push('/dashboard/categories')}
+                        >
+                          <PlusIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('common.transactions.add.category-placeholder')} />
+                        </SelectTrigger>
+                        {categories.length > 0 ? (
+                          <SelectContent>
+                            {categories.map((category) => (
+                              <SelectItem key={category.id} value={category.id}>
+                                <span className="mr-2">{category.icon}</span>
+                                {category.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        ) : (
+                          <span className="text-muted-foreground">{t('common.transactions.add.no-categories')}</span>
+                        )}
+                      </>
+                    )}
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t('common.asset')}</Label>
+                  {assets.length === 0 ? (
+                    <div className="flex items-center space-x-2">
+                      <Input
+                        id="asset"
+                        name="asset"
+                        type="text"
+                        placeholder={t('common.transactions.add.no-assets-found')}
+                        value={''}
+                        disabled
+                      />
+                      <Button variant="secondary" size="icon" onClick={() => router.push('/dashboard')}>
+                        <PlusIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Select
+                      value={formData.assetId}
+                      onValueChange={(value) => handleSelectChange('assetId', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('common.transactions.add.asset-placeholder')} />
+                      </SelectTrigger>
                       <SelectContent>
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            <span className="mr-2">{category.icon}</span>
-                            {category.name}
+                        {assets.map((asset) => (
+                          <SelectItem key={asset.id} value={asset.id}>
+                            {asset.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
-                    ) : (
-                      <span className="text-muted-foreground">No categories found</span>
-                    )}
-                  </>
-                )}
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>{t('common.asset')}</Label>
-              {assets.length === 0 ? (
-                <div className="flex items-center space-x-2">
-                  <Input
-                    id="asset"
-                    name="asset"
-                    type="text"
-                    placeholder="No accounts found"
-                    value={''}
-                    disabled
-                  />
-                  <Button variant="secondary" size="icon" onClick={() => router.push('/dashboard')}>
-                    <PlusIcon className="h-4 w-4" />
-                  </Button>
+                    </Select>
+                  )}
                 </div>
-              ) : (
-                <Select
-                  value={formData.assetId}
-                  onValueChange={(value) => handleSelectChange('assetId', value)}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('common.transactions.add.asset-placeholder')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {assets.map((asset) => (
-                      <SelectItem key={asset.id} value={asset.id}>
-                        {asset.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description">{t('common.description')}</Label>
-              <Textarea
-                id="description"
-                name="description"
-                placeholder={t('common.transactions.add.description-placeholder')}
-                value={formData.description}
-                onChange={handleChange}
-              />
-            </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description">{t('common.description')}</Label>
+                  <Textarea
+                    id="description"
+                    name="description"
+                    placeholder={t('common.transactions.add.description-placeholder')}
+                    value={formData.description}
+                    onChange={handleChange}
+                  />
+                </div>
+              </>
+            )}
           </CardContent>
           <CardFooter>
             <Button type="submit" className="w-full" disabled={isLoading}>
