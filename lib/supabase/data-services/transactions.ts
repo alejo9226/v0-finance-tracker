@@ -12,6 +12,8 @@ export interface Transaction {
   asset: Pick<Asset, 'id' | 'name'>
   from_asset_id?: string
   to_asset_id?: string
+  exchange_rate?: number
+  destination_amount?: number
 }
 
 const supabase = getSupabaseBrowserClient()
@@ -117,6 +119,10 @@ export async function createTransaction(
     user_id: string
     asset_id?: string
     category_id?: string
+    from_asset_id?: string
+    to_asset_id?: string
+    exchange_rate?: number
+    destination_amount?: number
   },
 ): Promise<void> {
   const { error: transactionError } = await supabase
