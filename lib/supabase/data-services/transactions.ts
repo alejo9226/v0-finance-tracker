@@ -5,11 +5,13 @@ import { Category } from '@/lib/supabase/data-services/categories'
 export interface Transaction {
   id: string
   amount: number
-  type: 'income' | 'expense'
+  type: 'income' | 'expense' | 'transfer'
   description: string
   date: Date
   category: Omit<Category, 'type' | 'user_id'>
   asset: Pick<Asset, 'id' | 'name'>
+  from_asset_id?: string
+  to_asset_id?: string
 }
 
 const supabase = getSupabaseBrowserClient()
@@ -112,9 +114,9 @@ export async function fetchCountTransactionsByCategory(categoryId: string): Prom
 
 export async function createTransaction(
   transaction: Omit<Transaction, 'id' | 'category' | 'asset'> & {
-    category_id: string
-    asset_id: string
     user_id: string
+    asset_id?: string
+    category_id?: string
   },
 ): Promise<void> {
   const { error: transactionError } = await supabase
@@ -136,7 +138,7 @@ export async function updateTransaction(
   transaction: Pick<
     Transaction,
     'description' | 'amount' | 'date'
-    // category_id: Uncomment if you add category selection
+  // category_id: Uncomment if you add category selection
   >,
 ): Promise<void> {
   const { error } = await supabase.from('transactions').update(transaction).eq('id', id)
