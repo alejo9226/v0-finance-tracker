@@ -1,3 +1,4 @@
+import { CurrencyCode } from '@/domain/entities/Asset'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 
 export interface Liability {
@@ -5,7 +6,7 @@ export interface Liability {
   type: string
   name: string
   value: number
-  currency: string
+  currency: CurrencyCode
   user_id: string
 }
 
@@ -74,4 +75,17 @@ export async function updateLiability(
 export async function deleteLiability(id: string): Promise<void> {
   const { error } = await supabase.from('liabilities').delete().eq('id', id)
   if (error) throw error
+}
+
+/**
+ * Fetches a single liability by ID from Supabase.
+ *
+ * @param id - The ID of the liability to fetch.
+ * @returns {Promise<Liability>} The liability data.
+ * @throws Will throw an error if the Supabase query fails or no liability is found.
+ */
+export async function fetchLiabilityById(id: string): Promise<Liability> {
+  const { data, error } = await supabase.from('liabilities').select('*').eq('id', id).single()
+  if (error) throw error
+  return data as unknown as Liability
 }

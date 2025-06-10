@@ -31,6 +31,7 @@ import { Bar } from 'react-chartjs-2'
 
 import { addAsset, calculateTotalValue, getAssets, removeAsset, updateAsset } from '@/application/useCases/assets'
 import { calculateCurrencyTotals, CurrencyTotals } from '@/application/useCases/balanceSheet/calculateCurrencyTotals'
+import { deleteTransactionAndUpdateBalance } from '@/application/useCases/transactions/deleteWithAssetOrLiability'
 import { updateTransactionAndAssetBalance } from '@/application/useCases/transactions/updateWithAsset'
 import { AssetList } from '@/components/dashboard/AssetList'
 import { LiabilityList } from '@/components/dashboard/LiabilityList'
@@ -74,12 +75,12 @@ import {
   updateLiability,
 } from '@/lib/supabase/data-services/liabilities'
 import {
-  deleteTransaction,
   fetchTransactions,
   Transaction,
 } from '@/lib/supabase/data-services/transactions'
 import { convertCurrency } from '@/lib/utils/currency'
 import { useI18n } from '@/locales/client'
+
 
 // Register Chart.js components
 Chart.register(
@@ -261,7 +262,7 @@ export default function DashboardPage() {
             const currencyCode =
               assets.find(
                 (a) =>
-                  a.id === filteredExpenses.find((t) => t.category.name === category)?.asset.id,
+                  a.id === filteredExpenses.find((t) => t.category.name === category)?.asset?.id,
               )?.currency || 'USD'
             return `${formatCurrency(amount, currencyCode)}`
           },
@@ -630,7 +631,7 @@ export default function DashboardPage() {
     if (!selectedTx) return
     setDeleteTxLoading(true)
     try {
-      await deleteTransaction(selectedTx.id)
+      await deleteTransactionAndUpdateBalance(selectedTx.id)
       toast({
         title: 'Transaction deleted',
         description: 'The transaction was deleted successfully.',
@@ -954,7 +955,8 @@ export default function DashboardPage() {
               })
               filteredExpenses.forEach((t) => {
                 const assetObj = assets.find((a) => a.id === t.asset?.id)
-                const currency = assetObj?.currency || 'USD'
+                const liabilityObj = liabilities.find((l) => l.id === t.liability?.id)
+                const currency = assetObj?.currency || liabilityObj?.currency || 'USD'
                 expenseTotals[currency] = (expenseTotals[currency] || 0) + t.amount
               })
               // If displayCurrency is set, convert and sum
@@ -968,7 +970,8 @@ export default function DashboardPage() {
                 }, 0)
                 totalExpense = filteredExpenses.reduce((sum: number, t) => {
                   const assetObj = assets.find((a) => a.id === t.asset?.id)
-                  const currency = assetObj?.currency || 'USD'
+                  const liabilityObj = liabilities.find((l) => l.id === t.liability?.id)
+                  const currency = assetObj?.currency || liabilityObj?.currency || 'USD'
                   return sum + convertCurrency(t.amount, currency, displayCurrency)
                 }, 0)
               }
@@ -1091,7 +1094,7 @@ export default function DashboardPage() {
                               (transaction.type === 'income' ? 'Income' : 'Expense')}
                           </p>
                           <p className="text-sm text-muted-foreground w-3/3">
-                            {transaction.asset?.name || 'No account'} •{' '}
+                            {transaction.asset?.name || transaction.liability?.name || 'No account'} •{' '}
                             {format(new Date(transaction.date), 'MMM d, yyyy')}
                           </p>
                         </div>
