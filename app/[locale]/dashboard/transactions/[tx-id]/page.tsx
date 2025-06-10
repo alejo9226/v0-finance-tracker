@@ -187,10 +187,18 @@ export default function TransactionDetailsPage() {
             <span className="font-semibold">{t('common.category')}:</span>{' '}
             {transaction?.category?.name || 'Uncategorized'}
           </div>
-          <div>
-            <span className="font-semibold">{t('common.asset')}:</span>{' '}
-            {transaction?.asset?.name || 'No account'}
-          </div>
+          {transaction?.asset?.name && (
+            <div>
+              <span className="font-semibold">{t('common.asset')}:</span>{' '}
+              {transaction?.asset?.name}
+            </div>
+          )}
+          {transaction?.liability?.name && (
+            <div>
+              <span className="font-semibold">{t('common.liability')}:</span>{' '}
+              {transaction?.liability?.name}
+            </div>
+          )}
           <div>
             <span className="font-semibold">{t('common.type.translation')}:</span>{' '}
             {`${transaction?.type?.charAt(0).toUpperCase()}${transaction?.type?.slice(1)}`}

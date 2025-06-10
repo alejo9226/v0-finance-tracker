@@ -1,6 +1,7 @@
 import { Asset } from '@/domain/entities/Asset'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { Category } from '@/lib/supabase/data-services/categories'
+import { Liability } from '@/lib/supabase/data-services/liabilities'
 
 export interface Transaction {
   id: string
@@ -9,7 +10,8 @@ export interface Transaction {
   description: string
   date: Date
   category: Omit<Category, 'type' | 'user_id'>
-  asset: Pick<Asset, 'id' | 'name'>
+  asset?: Pick<Asset, 'id' | 'name'>
+  liability?: Pick<Liability, 'id' | 'name'>
 }
 
 const supabase = getSupabaseBrowserClient()
@@ -34,7 +36,8 @@ export async function fetchTransactions(type?: 'income' | 'expense'): Promise<Tr
       description,
       date,
       category:category_id(id, name, icon, color),
-      asset:asset_id(id, name)
+      asset:asset_id(id, name),
+      liability:liability_id(id, name)
     `,
     )
     .order('date', { ascending: false })
@@ -60,10 +63,8 @@ export async function fetchTransactions(type?: 'income' | 'expense'): Promise<Tr
       icon: t.type === 'income' ? '💰' : '💸',
       color: '#64748b',
     },
-    asset: t.asset || {
-      id: 'no-account',
-      name: 'No account',
-    },
+    asset: t.asset || null,
+    liability: t.liability || null,
   }))
 }
 
@@ -85,7 +86,8 @@ export async function fetchTransactionById(id: string): Promise<Transaction> {
       description,
       date,
       category:category_id(id, name, icon, color),
-      asset:asset_id(id, name)
+      asset:asset_id(id, name),
+      liability:liability_id(id, name)
     `,
     )
     .eq('id', id)
@@ -136,7 +138,7 @@ export async function updateTransaction(
   transaction: Pick<
     Transaction,
     'description' | 'amount' | 'date'
-    // category_id: Uncomment if you add category selection
+  // category_id: Uncomment if you add category selection
   >,
 ): Promise<void> {
   const { error } = await supabase.from('transactions').update(transaction).eq('id', id)
