@@ -32,7 +32,7 @@ import { Bar } from 'react-chartjs-2'
 import { addAsset, calculateTotalValue, getAssets, removeAsset, updateAsset } from '@/application/useCases/assets'
 import { calculateCurrencyTotals, CurrencyTotals } from '@/application/useCases/balanceSheet/calculateCurrencyTotals'
 import { deleteTransactionAndUpdateBalance } from '@/application/useCases/transactions/deleteWithAssetOrLiability'
-import { updateTransactionAndAssetBalance } from '@/application/useCases/transactions/updateWithAsset'
+import { updateTransactionAndBalance } from '@/application/useCases/transactions/updateWithBalance'
 import { AssetList } from '@/components/dashboard/AssetList'
 import { LiabilityList } from '@/components/dashboard/LiabilityList'
 import {
@@ -602,7 +602,7 @@ export default function DashboardPage() {
     setEditTxLoading(true)
 
     try {
-      await updateTransactionAndAssetBalance(selectedTx.id, {
+      await updateTransactionAndBalance(selectedTx.id, {
         description: editTxForm.description,
         amount: Number(editTxForm.amount),
         date: new Date(editTxForm.date),
