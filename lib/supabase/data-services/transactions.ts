@@ -6,12 +6,17 @@ import { Liability } from '@/lib/supabase/data-services/liabilities'
 export interface Transaction {
   id: string
   amount: number
-  type: 'income' | 'expense'
+  type: 'income' | 'expense' | 'transfer'
   description: string
   date: Date
   category: Omit<Category, 'type' | 'user_id'>
   asset?: Pick<Asset, 'id' | 'name'>
   liability?: Pick<Liability, 'id' | 'name'>
+  asset: Pick<Asset, 'id' | 'name'>
+  from_asset_id?: string
+  to_asset_id?: string
+  exchange_rate?: number
+  destination_amount?: number
 }
 
 const supabase = getSupabaseBrowserClient()
@@ -114,9 +119,13 @@ export async function fetchCountTransactionsByCategory(categoryId: string): Prom
 
 export async function createTransaction(
   transaction: Omit<Transaction, 'id' | 'category' | 'asset'> & {
-    category_id: string
-    asset_id: string
     user_id: string
+    asset_id?: string
+    category_id?: string
+    from_asset_id?: string
+    to_asset_id?: string
+    exchange_rate?: number
+    destination_amount?: number
   },
 ): Promise<void> {
   const { error: transactionError } = await supabase
