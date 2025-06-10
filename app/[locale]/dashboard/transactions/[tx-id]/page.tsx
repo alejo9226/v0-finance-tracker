@@ -5,6 +5,7 @@ import { PencilIcon, Trash2Icon, Loader2 } from 'lucide-react'
 import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
+import { deleteTransactionAndUpdateBalance } from '@/application/useCases/transactions/deleteWithAssetOrLiability'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -28,7 +29,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import {
-  deleteTransaction,
   fetchTransactionById,
   updateTransaction,
   Transaction,
@@ -116,8 +116,7 @@ export default function TransactionDetailsPage() {
     if (!transaction) return
     setDeleteLoading(true)
     try {
-      await deleteTransaction(transaction.id)
-
+      await deleteTransactionAndUpdateBalance(transaction.id)
       toast({
         title: 'Transaction deleted',
         description: 'The transaction was deleted successfully.',
