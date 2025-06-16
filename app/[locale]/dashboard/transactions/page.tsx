@@ -171,7 +171,7 @@ export default function TransactionsPage() {
                           </p>
                           <p className="text-sm text-muted-foreground">
                             {transaction.category?.name || 'Uncategorized'} •{' '}
-                            {transaction.asset?.name || 'No account'} •{' '}
+                            {transaction.asset?.name || transaction.liability?.name || 'No account'} •{' '}
                             {format(new Date(transaction.date), 'MMM d, yyyy')}
                           </p>
                         </div>

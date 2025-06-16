@@ -6,6 +6,8 @@ import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { deleteTransactionAndUpdateBalance } from '@/application/useCases/transactions/deleteWithAssetOrLiability'
+import { updateTransactionAndBalance } from '@/application/useCases/transactions/updateWithBalance'
+import { EditTransactionDialog } from '@/components/EditTransactionDialog'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -18,19 +20,9 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import {
   fetchTransactionById,
-  updateTransaction,
   Transaction,
 } from '@/lib/supabase/data-services/transactions'
 import { useI18n } from '@/locales/client'
@@ -44,13 +36,7 @@ export default function TransactionDetailsPage() {
   const [error, setError] = useState('')
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
-  const [editForm, setEditForm] = useState({
-    description: '',
-    amount: '',
-    date: '',
-    // categoryId: ""
-  })
-  const [editLoading, setEditLoading] = useState(false)
+  const [editTxId, setEditTxId] = useState<string | null>(null)
   const [deleteLoading, setDeleteLoading] = useState(false)
   const t = useI18n()
 
@@ -76,23 +62,25 @@ export default function TransactionDetailsPage() {
   }
 
   const openEdit = () => {
-    setEditForm({
-      description: transaction?.description || '',
-      amount: transaction?.amount.toString() || '',
-      date: format(transaction?.date || new Date(), 'yyyy-MM-dd') || '',
-    })
+    setEditTxId(transaction?.id || null)
     setIsEditOpen(true)
   }
 
-  const handleEdit = async () => {
+  const handleEditSubmit = async (values: {
+    description: string
+    amount: string
+    date: string
+    category_id: string
+    type: 'income' | 'expense'
+  }) => {
     if (!transaction) return
-    setEditLoading(true)
     try {
-      await updateTransaction(transaction.id, {
-        description: editForm.description,
-        amount: Number(editForm.amount),
-        date: new Date(editForm.date),
-        // category_id: editForm.categoryId,
+      await updateTransactionAndBalance(transaction.id, {
+        description: values.description,
+        amount: values.type === 'income' ? Number(values.amount) : -Number(values.amount),
+        date: new Date(values.date),
+        category_id: values.category_id,
+        type: values.type,
       })
       toast({
         title: 'Transaction updated',
@@ -107,8 +95,6 @@ export default function TransactionDetailsPage() {
         description: errorMessage || 'Failed to update transaction',
         variant: 'destructive',
       })
-    } finally {
-      setEditLoading(false)
     }
   }
 
@@ -206,58 +192,12 @@ export default function TransactionDetailsPage() {
       </Card>
 
       {/* Edit Dialog */}
-      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('common.transactions.edit.title')}</DialogTitle>
-            <DialogDescription>{t('common.transactions.edit.subtitle')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label htmlFor="tx-description" className="block text-sm font-medium">
-                {t('common.description')}
-              </label>
-              <Input
-                id="tx-description"
-                value={editForm.description}
-                onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="tx-amount" className="block text-sm font-medium">
-                {t('common.amount')}
-              </label>
-              <Input
-                id="tx-amount"
-                type="number"
-                value={editForm.amount}
-                onChange={(e) => setEditForm((f) => ({ ...f, amount: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="tx-date" className="block text-sm font-medium">
-                {t('common.date')}
-              </label>
-              <Input
-                id="tx-date"
-                type="date"
-                value={editForm.date}
-                onChange={(e) => setEditForm((f) => ({ ...f, date: e.target.value }))}
-              />
-            </div>
-            {/* Category selection can be added here if you have categories list */}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={editLoading}>
-              {t('common.cancel')}
-            </Button>
-            <Button onClick={handleEdit} disabled={editLoading}>
-              {editLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-              {t('common.save')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditTransactionDialog
+        open={isEditOpen}
+        txId={editTxId}
+        onOpenChange={setIsEditOpen}
+        onSubmit={handleEditSubmit}
+      />
 
       {/* Delete AlertDialog */}
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
