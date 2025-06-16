@@ -26,7 +26,7 @@ export async function deleteTransactionAndUpdateBalance(id: string): Promise<voi
       } else if (tx.type === 'expense') {
         newValue += tx.amount // Add back the expense
       }
-      await updateAsset(asset.id, { value: newValue })
+      await updateAsset(tx.asset.id, { value: newValue })
     }
   } else if (tx.liability && tx.liability.id) {
     const liability = await fetchLiabilityById(tx.liability.id)

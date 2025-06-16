@@ -12,7 +12,6 @@ export interface Transaction {
   category: Omit<Category, 'type' | 'user_id'>
   asset?: Pick<Asset, 'id' | 'name'>
   liability?: Pick<Liability, 'id' | 'name'>
-  asset: Pick<Asset, 'id' | 'name'>
   from_asset_id?: string
   to_asset_id?: string
   exchange_rate?: number
@@ -147,8 +146,9 @@ export async function updateTransaction(
   transaction: Pick<
     Transaction,
     'description' | 'amount' | 'date'
-  // category_id: Uncomment if you add category selection
-  >,
+  > & {
+    category_id: string
+  },
 ): Promise<void> {
   const { error } = await supabase.from('transactions').update(transaction).eq('id', id)
   if (error) throw error

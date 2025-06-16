@@ -35,6 +35,7 @@ import { deleteTransactionAndUpdateBalance } from '@/application/useCases/transa
 import { updateTransactionAndBalance } from '@/application/useCases/transactions/updateWithBalance'
 import { AssetList } from '@/components/dashboard/AssetList'
 import { LiabilityList } from '@/components/dashboard/LiabilityList'
+import { EditTransactionDialog } from '@/components/EditTransactionDialog'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -170,15 +171,9 @@ export default function DashboardPage() {
   const [isEditTxOpen, setIsEditTxOpen] = useState(false)
   const [isDeleteTxOpen, setIsDeleteTxOpen] = useState(false)
   const [selectedTx, setSelectedTx] = useState<Transaction | null>(null)
-  const [editTxForm, setEditTxForm] = useState({
-    description: '',
-    amount: '',
-    date: '',
-    categoryId: '',
-  })
-  const [editTxLoading, setEditTxLoading] = useState(false)
   const [deleteTxLoading, setDeleteTxLoading] = useState(false)
   const [selectedMonth, setSelectedMonth] = useState<Date>(startOfMonth(new Date()))
+  const [selectedTxId, setSelectedTxId] = useState<string | null>(null)
 
   const t = useI18n()
 
@@ -597,34 +592,9 @@ export default function DashboardPage() {
     )
   }
 
-  const handleEditTransaction = async () => {
-    if (!selectedTx) return
-    setEditTxLoading(true)
-
-    try {
-      await updateTransactionAndBalance(selectedTx.id, {
-        description: editTxForm.description,
-        amount: Number(editTxForm.amount),
-        date: new Date(editTxForm.date),
-      })
-
-      toast({
-        title: 'Transaction updated',
-        description: 'The transaction was updated successfully.',
-      })
-      setIsEditTxOpen(false)
-      setSelectedTx(null)
-      fetchData()
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
-      toast({
-        title: 'Error',
-        description: errorMessage || 'Failed to update transaction',
-        variant: 'destructive',
-      })
-    } finally {
-      setEditTxLoading(false)
-    }
+  const openEditTransaction = (transaction: Transaction) => {
+    setSelectedTxId(transaction.id)
+    setIsEditTxOpen(true)
   }
 
   const handleDeleteTransaction = async () => {
@@ -648,6 +618,39 @@ export default function DashboardPage() {
       })
     } finally {
       setDeleteTxLoading(false)
+    }
+  }
+
+  const handleEditTransactionSubmit = async (values: {
+    description: string
+    amount: string
+    date: string
+    category_id: string
+    type: 'income' | 'expense'
+  }) => {
+    if (!selectedTxId) return
+    try {
+      await updateTransactionAndBalance(selectedTxId, {
+        description: values.description,
+        amount: values.type === 'income' ? Number(values.amount) : -Number(values.amount),
+        date: new Date(values.date),
+        category_id: values.category_id,
+        type: values.type,
+      })
+      toast({
+        title: 'Transaction updated',
+        description: 'The transaction was updated successfully.',
+      })
+      setIsEditTxOpen(false)
+      setSelectedTxId(null)
+      fetchData()
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred'
+      toast({
+        title: 'Error',
+        description: errorMessage || 'Failed to update transaction',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -1109,16 +1112,7 @@ export default function DashboardPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => {
-                              setSelectedTx(transaction)
-                              setEditTxForm({
-                                description: transaction.description,
-                                amount: transaction.amount.toString(),
-                                date: transaction.date.toString().slice(0, 10),
-                                categoryId: transaction.category?.id || '',
-                              })
-                              setIsEditTxOpen(true)
-                            }}
+                            onClick={() => openEditTransaction(transaction)}
                           >
                             <PencilIcon className="h-1 w-1 sm:h-4 sm:w-4" />
                             <span className="sr-only">Edit</span>
@@ -1457,62 +1451,15 @@ export default function DashboardPage() {
       </Dialog>
 
       {/* Edit Transaction Dialog */}
-      <Dialog open={isEditTxOpen} onOpenChange={setIsEditTxOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('common.transactions.edit.title')}</DialogTitle>
-            <DialogDescription>{t('common.transactions.edit.subtitle')}</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label htmlFor="tx-description" className="block text-sm font-medium">
-                {t('common.description')}
-              </label>
-              <Input
-                id="tx-description"
-                value={editTxForm.description}
-                onChange={(e) => setEditTxForm((f) => ({ ...f, description: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="tx-amount" className="block text-sm font-medium">
-                {t('common.amount')}
-              </label>
-              <Input
-                id="tx-amount"
-                type="number"
-                value={editTxForm.amount}
-                onChange={(e) => setEditTxForm((f) => ({ ...f, amount: e.target.value }))}
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="tx-date" className="block text-sm font-medium">
-                {t('common.date')}
-              </label>
-              <Input
-                id="tx-date"
-                type="date"
-                value={editTxForm.date}
-                onChange={(e) => setEditTxForm((f) => ({ ...f, date: e.target.value }))}
-              />
-            </div>
-            {/* Category selection can be added here if you have categories list */}
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsEditTxOpen(false)}
-              disabled={editTxLoading}
-            >
-              {t('common.cancel')}
-            </Button>
-            <Button onClick={handleEditTransaction} disabled={editTxLoading}>
-              {editTxLoading ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : null}
-              {t('common.save')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditTransactionDialog
+        open={isEditTxOpen}
+        onOpenChange={(open) => {
+          setIsEditTxOpen(open)
+          if (!open) setSelectedTxId(null)
+        }}
+        txId={selectedTxId}
+        onSubmit={handleEditTransactionSubmit}
+      />
 
       {/* Delete Transaction AlertDialog */}
       <AlertDialog open={isDeleteTxOpen} onOpenChange={setIsDeleteTxOpen}>
