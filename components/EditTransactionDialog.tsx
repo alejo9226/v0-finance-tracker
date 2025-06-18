@@ -60,7 +60,7 @@ export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
 
         setForm({
           description: tx.description,
-          amount: tx.amount.toString(),
+          amount: Math.abs(Number(tx.amount)).toString(),
           date: tx.date.toString().slice(0, 10),
           category_id: tx.category?.id || '',
           type: (tx.type === 'income' || tx.type === 'expense') ? tx.type : 'expense',
@@ -94,7 +94,10 @@ export const EditTransactionDialog: React.FC<EditTransactionDialogProps> = ({
 
   const handleSubmit = () => {
     setError(null)
-    onSubmit(form)
+    onSubmit({
+      ...form,
+      amount: form.type === 'income' ? form.amount : `-${form.amount}`,
+    })
   }
 
   if (!open || !txId) return null
