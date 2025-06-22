@@ -9,6 +9,7 @@ import type React from 'react'
 import { getAssetCurrentValue, getAssets } from '@/application/useCases/assets/get'
 import { updateAsset } from '@/application/useCases/assets/update'
 import { transferBetweenAssets } from '@/application/useCases/transactions/transfer'
+import { DescriptionTextareaWithSuggestions } from '@/components/DescriptionTextareaWithSuggestions'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -30,7 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { useAuth } from '@/contexts/auth-context'
 import { Asset } from '@/domain/entities/Asset'
 import { useToast } from '@/hooks/use-toast'
@@ -352,7 +352,7 @@ export default function NewTransactionPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">{t('common.description')}</Label>
-                  <Textarea
+                  <DescriptionTextareaWithSuggestions
                     id="description"
                     name="description"
                     placeholder={t('common.transactions.add.description-placeholder')}
@@ -480,7 +480,7 @@ export default function NewTransactionPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="description">{t('common.description')}</Label>
-                  <Textarea
+                  <DescriptionTextareaWithSuggestions
                     id="description"
                     name="description"
                     placeholder={t('common.transactions.add.description-placeholder')}
