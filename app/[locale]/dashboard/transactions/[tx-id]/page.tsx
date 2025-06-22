@@ -77,7 +77,7 @@ export default function TransactionDetailsPage() {
     try {
       await updateTransactionAndBalance(transaction.id, {
         description: values.description,
-        amount: values.type === 'income' ? Number(values.amount) : -Number(values.amount),
+        amount: Number(values.amount),
         date: new Date(values.date),
         category_id: values.category_id,
         type: values.type,
