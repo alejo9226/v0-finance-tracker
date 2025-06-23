@@ -24,7 +24,8 @@ export async function deleteTransactionAndUpdateBalance(id: string): Promise<voi
       if (tx.type === 'income') {
         newValue -= tx.amount // Remove the income
       } else if (tx.type === 'expense') {
-        newValue += tx.amount // Add back the expense
+        // Add back the expense, it should come as negative
+        newValue += Math.abs(tx.amount)
       }
       await updateAsset(tx.asset.id, { value: newValue })
     }
