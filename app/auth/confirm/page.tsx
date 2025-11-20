@@ -64,7 +64,35 @@ function ConfirmContent() {
       }
     }
     
-    // Priority 2: Check query parameters for token (before Supabase verification)
+    // Priority 2: Check for authorization code (Supabase PKCE flow)
+    // Supabase sometimes redirects with a code that needs to be exchanged for tokens
+    const code = searchParams.get('code')
+    
+    if (code) {
+      console.log('✅ Found authorization code, redirecting to app for token exchange')
+      // Pass the code to the app - it will exchange it for tokens
+      const deepLink = `personalfinance://auth/callback?code=${encodeURIComponent(code)}`
+      
+      console.log('Redirecting to app with authorization code:', deepLink)
+      
+      // Try to open the app immediately
+      window.location.href = deepLink
+      
+      // Fallback: Show message if app doesn't open
+      setTimeout(() => {
+        const message = document.getElementById('message')
+        if (message) {
+          message.innerHTML = `
+            <h1 style="margin-bottom: 20px;">Email Confirmed! ✅</h1>
+            <p style="color: #666; margin-bottom: 20px;">If the app didn't open automatically, tap the button below:</p>
+            <a href="${deepLink}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #007AFF; color: white; text-decoration: none; border-radius: 8px;">Open Personal Finance App</a>
+          `
+        }
+      }, 2000)
+      return
+    }
+    
+    // Priority 3: Check query parameters for token (before Supabase verification)
     // This happens if the user lands here directly with the token
     let token: string | null = null
     let type: string | null = null
