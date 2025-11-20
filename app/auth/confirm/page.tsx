@@ -11,8 +11,35 @@ function ConfirmContent() {
     // 1. User clicks link: https://supabase.co/auth/v1/verify?token=xxx&type=signup&redirect_to=...
     // 2. Supabase verifies the token
     // 3. Supabase redirects to redirect_to with session tokens in hash: #access_token=xxx&token_type=bearer&...
+    // OR with errors in query params: ?error=access_denied&error_description=...
     
     if (typeof window === 'undefined') return
+    
+    // Check for errors first - Supabase redirects with error params if verification fails
+    const error = searchParams.get('error')
+    const errorDescription = searchParams.get('error_description')
+    const errorCode = searchParams.get('error_code')
+    
+    if (error) {
+      console.error('❌ Supabase error:', error, errorDescription, errorCode)
+      const message = document.getElementById('message')
+      if (message) {
+        const friendlyMessage = errorCode === 'otp_expired' 
+          ? 'The confirmation link has expired. Please request a new confirmation email.'
+          : errorDescription || 'An error occurred during email confirmation.'
+        
+        message.innerHTML = `
+          <h1 style="color: red; margin-bottom: 20px;">Email Confirmation Failed</h1>
+          <p style="color: #666; margin-bottom: 20px;">${friendlyMessage}</p>
+          <p style="font-size: 12px; color: #999; margin-top: 20px;">
+            Error: ${error}<br/>
+            ${errorCode ? `Code: ${errorCode}` : ''}
+          </p>
+          <a href="/signup" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: #007AFF; color: white; text-decoration: none; border-radius: 8px;">Go to Sign Up</a>
+        `
+      }
+      return // Don't try to redirect if there's an error
+    }
     
     // Priority 1: Check hash for access_token (Supabase already verified)
     // This is the most common case after Supabase verifies the token
