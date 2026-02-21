@@ -4,8 +4,14 @@ import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { getI18n } from '@/locales/server'
+import WaitlistForm from './components/WaitlistForm'
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: Readonly<{
+  params: Promise<{ locale: string }>
+}>) {
+  const { locale } = await params
   const t = await getI18n()
 
   return (
@@ -140,6 +146,26 @@ export default async function Home() {
 
         <div className="mt-4 rounded-2xl border border-landing-border bg-landing-surface-muted px-4 py-3 sm:px-5">
           <p className="text-center text-sm text-landing-text-muted">{t('marketing.landing.footer.trust')}</p>
+        </div>
+      </section>
+
+      <section id="waitlist" className="landing-section pt-0">
+        <div className="landing-card rounded-3xl p-5 sm:p-8">
+          <div className="mx-auto max-w-xl space-y-3 text-center">
+            <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
+              {t('marketing.landing.waitlist.title')}
+            </h2>
+            <p className="text-sm leading-relaxed text-landing-text-muted sm:text-base">
+              {t('marketing.landing.waitlist.subtitle')}
+            </p>
+          </div>
+
+          <div className="mx-auto mt-6 max-w-xl">
+            <WaitlistForm locale={locale} />
+            <p className="mt-3 text-center text-xs text-landing-text-muted">
+              {t('marketing.landing.waitlist.privacy-note')}
+            </p>
+          </div>
         </div>
       </section>
     </main>

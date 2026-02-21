@@ -179,6 +179,8 @@ export default {
         'submit': 'Quiero acceso temprano',
         'submitting': 'Uniéndote...',
         'success': 'Listo, ya quedaste en la lista. Te contactamos pronto.',
+        'invalid-email': 'Escribe un correo valido.',
+        'generic-error': 'Algo salio mal. Intentalo de nuevo.',
         'privacy-note': 'Solo te vamos a escribir para contarte avances del producto y acceso temprano.',
       },
       'footer': {

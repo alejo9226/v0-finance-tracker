@@ -179,6 +179,8 @@ export default {
         'submit': 'Get early access',
         'submitting': 'Joining...',
         'success': 'You are in. We will contact you soon.',
+        'invalid-email': 'Please enter a valid email address.',
+        'generic-error': 'Something went wrong. Please try again.',
         'privacy-note': 'We only email product updates and early access invites.',
       },
       'footer': {
