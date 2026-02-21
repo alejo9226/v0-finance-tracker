@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { ArrowRight, Sparkles } from 'lucide-react'
+import { ArrowRight, Bot, Landmark, Sparkles, Zap } from 'lucide-react'
+import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { getI18n } from '@/locales/server'
@@ -86,6 +87,38 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      <section className="landing-section pt-0 sm:pt-2">
+        <div className="space-y-3 text-center">
+          <h2 className="text-2xl font-semibold tracking-tight text-landing-text sm:text-3xl">
+            {t('marketing.landing.pillars.title')}
+          </h2>
+          <p className="mx-auto max-w-2xl text-sm leading-relaxed text-landing-text-muted sm:text-base">
+            {t('marketing.landing.pillars.subtitle')}
+          </p>
+        </div>
+
+        <div className="mt-7 grid gap-4 sm:mt-8 sm:grid-cols-2 lg:grid-cols-3">
+          <PillarCard
+            icon={<Zap className="h-5 w-5 text-landing-accent" />}
+            title={t('marketing.landing.pillars.automation.title')}
+            shortCopy={t('marketing.landing.pillars.automation.short')}
+            description={t('marketing.landing.pillars.automation.description')}
+          />
+          <PillarCard
+            icon={<Landmark className="h-5 w-5 text-landing-accent" />}
+            title={t('marketing.landing.pillars.net-worth.title')}
+            shortCopy={t('marketing.landing.pillars.net-worth.short')}
+            description={t('marketing.landing.pillars.net-worth.description')}
+          />
+          <PillarCard
+            icon={<Bot className="h-5 w-5 text-landing-accent" />}
+            title={t('marketing.landing.pillars.ai.title')}
+            shortCopy={t('marketing.landing.pillars.ai.short')}
+            description={t('marketing.landing.pillars.ai.description')}
+          />
+        </div>
+      </section>
     </main>
   )
 }
@@ -104,5 +137,28 @@ function StatLine({ label, value, width }: { label: string; value: string; width
         />
       </div>
     </div>
+  )
+}
+
+function PillarCard({
+  icon,
+  title,
+  shortCopy,
+  description,
+}: {
+  icon: ReactNode
+  title: string
+  shortCopy: string
+  description: string
+}) {
+  return (
+    <article className="landing-card rounded-3xl p-5 sm:p-6">
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-landing-surface-muted">
+        {icon}
+      </span>
+      <h3 className="mt-4 text-lg font-semibold text-landing-text">{title}</h3>
+      <p className="mt-2 text-sm font-medium text-landing-text">{shortCopy}</p>
+      <p className="mt-2 text-sm leading-relaxed text-landing-text-muted">{description}</p>
+    </article>
   )
 }
