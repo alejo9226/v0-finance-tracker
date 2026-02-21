@@ -1,11 +1,44 @@
-import Link from 'next/link'
 import { ArrowRight, Bot, Landmark, Sparkles, Zap } from 'lucide-react'
+import Link from 'next/link'
 import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { getI18n } from '@/locales/server'
+
 import LandingTracking from './components/LandingTracking'
 import WaitlistForm from './components/WaitlistForm'
+
+export async function generateMetadata({
+  params,
+}: Readonly<{
+  params: Promise<{ locale: string }>
+}>): Promise<import('next').Metadata> {
+  const { locale } = await params
+
+  const title =
+    locale === 'es'
+      ? 'Finanzen | Automatiza tus finanzas y unete a la lista'
+      : 'Finanzen | Automate your finances and join the waitlist'
+  const description =
+    locale === 'es'
+      ? 'Captura movimientos automaticamente, mira tu patrimonio neto en tiempo real y unete al acceso temprano de Finanzen.'
+      : 'Capture transactions automatically, see your real-time net worth, and join Finanzen early access.'
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  }
+}
 
 export default async function Home({
   params,
@@ -18,7 +51,7 @@ export default async function Home({
   return (
     <main className="pb-10 sm:pb-16">
       <LandingTracking />
-      <section className="landing-section pt-8 sm:pt-12">
+      <section aria-label="Hero" className="landing-section pt-8 sm:pt-12">
         <div className="landing-glass rounded-[28px] p-5 sm:p-8 lg:p-10">
           <div className="mb-8 flex items-center justify-between sm:mb-10">
             <div className="inline-flex items-center gap-3">
@@ -105,7 +138,7 @@ export default async function Home({
         </div>
       </section>
 
-      <section className="landing-section pt-0 sm:pt-2">
+      <section aria-label="Value pillars" className="landing-section pt-0 sm:pt-2">
         <div className="space-y-3 text-center">
           <h2 className="text-2xl font-semibold tracking-tight text-landing-text sm:text-3xl">
             {t('marketing.landing.pillars.title')}
@@ -137,7 +170,7 @@ export default async function Home({
         </div>
       </section>
 
-      <section className="landing-section pt-0">
+      <section aria-label="Social proof and trust" className="landing-section pt-0">
         <div className="landing-card rounded-3xl p-5 sm:p-8">
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
@@ -160,7 +193,7 @@ export default async function Home({
         </div>
       </section>
 
-      <section id="waitlist" className="landing-section pt-0">
+      <section id="waitlist" aria-label="Waitlist signup" className="landing-section pt-0">
         <div className="landing-card rounded-3xl p-5 sm:p-8">
           <div className="mx-auto max-w-xl space-y-3 text-center">
             <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
