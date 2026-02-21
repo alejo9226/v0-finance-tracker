@@ -1,179 +1,108 @@
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
+import Link from 'next/link'
+import { ArrowRight, Sparkles } from 'lucide-react'
 
-import { Button } from "@/components/ui/button"
-import Header from "./components/Header"
-import { getI18n } from "@/locales/server"
+import { Button } from '@/components/ui/button'
+import { getI18n } from '@/locales/server'
 
 export default async function Home() {
   const t = await getI18n()
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 md:px-6">
-        <Header />
-        <main className="flex-1">
-          <section className="py-24 md:py-32 lg:py-40">
-            <div className="container px-4 md:px-6">
-              <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-                <div className="flex flex-col justify-center space-y-4">
-                  <div className="space-y-2">
-                    <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
-                      {t('marketing.hero.title')}
-                    </h1>
-                    <p className="max-w-[600px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                      {t('marketing.hero.subtitle')}
-                    </p >
-                  </div >
-                  <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                    <Link href="/signup">
-                      <Button size="lg" className="gap-1.5">
-                        {t('marketing.hero.cta')}
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                </div >
-                <div className="flex items-center justify-center">
-                  <div className="relative h-[350px] w-full max-w-[500px] rounded-lg bg-gradient-to-br from-green-100 to-green-50 p-6 shadow-lg">
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-bold">{t('marketing.hero.overview')}</h3>
-                        <div className="h-2 w-24 rounded-full bg-green-200" />
-                      </div>
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium">{t('marketing.hero.assets')}</div>
-                            <div className="font-semibold">$120,000</div>
-                          </div>
-                          <div className="h-2 w-full rounded-full bg-gray-100">
-                            <div className="h-2 w-[80%] rounded-full bg-green-500" />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium">{t('marketing.hero.liabilities')}</div>
-                            <div className="font-semibold">$40,000</div>
-                          </div>
-                          <div className="h-2 w-full rounded-full bg-gray-100">
-                            <div className="h-2 w-[30%] rounded-full bg-amber-500" />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <div className="text-sm font-medium">{t('marketing.hero.equity')}</div>
-                            <div className="font-semibold">$80,000</div>
-                          </div>
-                          <div className="h-2 w-full rounded-full bg-gray-100">
-                            <div className="h-2 w-[50%] rounded-full bg-blue-500" />
-                          </div>
-                        </div>
-                      </div>
-                      <div className="rounded-lg bg-white p-4 shadow">
-                        <div className="text-sm font-medium">{t('marketing.hero.net-worth')}</div>
-                        <div className="text-2xl font-bold text-green-600">$80,000</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div >
-            </div >
-          </section >
-          <section className="bg-gray-50 py-16">
-            <div className="container px-4 md:px-6">
-              <div className="grid gap-10 md:grid-cols-3">
-                <div className="rounded-lg border bg-white p-6 shadow-sm">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6"
-                    >
-                      <path d="M20.42 4.58a5.4 5.4 0 0 0-7.65 0l-.77.78-.77-.78a5.4 5.4 0 0 0-7.65 0C1.46 6.7 1.33 10.28 4 13l8 8 8-8c2.67-2.72 2.54-6.3.42-8.42z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">{t('marketing.features.assets')}</h3>
-                  <p className="text-gray-500 mt-2">
-                    {t('marketing.features.assets-subtitle')}
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-white p-6 shadow-sm">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600 mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6"
-                    >
-                      <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
-                      <path d="M13 5v2" />
-                      <path d="M13 17v2" />
-                      <path d="M13 11v2" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">{t('marketing.features.liabilities')}</h3>
-                  <p className="text-gray-500 mt-2">
-                    {t('marketing.features.liabilities-subtitle')}
-                  </p>
-                </div>
-                <div className="rounded-lg border bg-white p-6 shadow-sm">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="24"
-                      height="24"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-6 w-6"
-                    >
-                      <path d="M12 2v20" />
-                      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold">{t('marketing.features.equity')}</h3>
-                  <p className="text-gray-500 mt-2">
-                    {t('marketing.features.equity-subtitle')}
-                  </p>
-                </div>
+    <main className="pb-10 sm:pb-16">
+      <section className="landing-section pt-8 sm:pt-12">
+        <div className="landing-glass rounded-[28px] p-5 sm:p-8 lg:p-10">
+          <div className="mb-8 flex items-center justify-between sm:mb-10">
+            <div className="inline-flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-landing-accent text-sm font-semibold text-landing-accent-foreground">
+                F
+              </span>
+              <span className="text-sm font-semibold tracking-wide sm:text-base">Finanzen</span>
+            </div>
+            <Link
+              href="#waitlist"
+              className="inline-flex items-center gap-2 text-sm font-medium text-landing-text-muted transition-colors hover:text-landing-text"
+            >
+              {t('marketing.landing.hero.secondary-cta')}
+            </Link>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
+            <div className="space-y-6">
+              <span className="inline-flex items-center gap-2 rounded-full border border-landing-border bg-landing-surface-muted px-3 py-1 text-xs font-medium text-landing-text-muted">
+                <Sparkles className="h-3.5 w-3.5 text-landing-accent" />
+                {t('marketing.landing.hero.badge')}
+              </span>
+
+              <h1 className="max-w-2xl text-3xl font-semibold leading-tight text-landing-text sm:text-4xl md:text-5xl">
+                {t('marketing.landing.hero.title')}
+              </h1>
+
+              <p className="max-w-xl text-base leading-relaxed text-landing-text-muted sm:text-lg">
+                {t('marketing.landing.hero.subtitle')}
+              </p>
+
+              <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-11 rounded-xl bg-landing-accent px-5 text-landing-accent-foreground hover:bg-landing-accent/90 sm:h-12 sm:px-6"
+                >
+                  <Link href="#waitlist" className="inline-flex items-center gap-2">
+                    {t('marketing.landing.hero.primary-cta')}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
               </div>
             </div>
-          </section>
-        </main >
-        <footer className="border-t py-6">
-          <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-sm text-gray-500">{t('marketing.footer.copyright')}</p>
-            <div className="flex gap-4">
-              <Link href="#" className="text-sm text-gray-500 hover:underline">
-                {t('marketing.footer.terms')}
-              </Link>
-              <Link href="#" className="text-sm text-gray-500 hover:underline">
-                {t('marketing.footer.privacy')}
-              </Link>
-              <Link href="#" className="text-sm text-gray-500 hover:underline">
-                {t('marketing.footer.contact')}
-              </Link>
+
+            <div className="landing-card rounded-3xl p-4 sm:p-5">
+              <div className="rounded-2xl border border-landing-border bg-landing-surface-muted p-4 sm:p-5">
+                <p className="text-xs font-medium uppercase tracking-[0.18em] text-landing-text-muted">
+                  {t('marketing.landing.hero.mock.net-balance')}
+                </p>
+                <div className="mt-2 flex items-end justify-between gap-3">
+                  <p className="text-2xl font-semibold text-landing-text sm:text-3xl">$2,840,000</p>
+                  <p className="text-sm font-medium text-emerald-500">+12.4%</p>
+                </div>
+              </div>
+
+              <div className="mt-4 space-y-3">
+                <StatLine label={t('marketing.landing.hero.mock.assets')} value="$4,100,000" width="78%" />
+                <StatLine label={t('marketing.landing.hero.mock.liabilities')} value="$1,260,000" width="38%" />
+                <StatLine
+                  label={t('marketing.landing.hero.mock.automations')}
+                  value={t('marketing.landing.hero.mock.automations-value')}
+                  width="64%"
+                />
+              </div>
+
+              <div className="mt-5 rounded-2xl border border-landing-border bg-landing-surface-muted p-4">
+                <p className="text-sm text-landing-text-muted">{t('marketing.landing.hero.mock.ai-insight')}</p>
+                <p className="mt-1 text-sm font-medium text-landing-text">
+                  {t('marketing.landing.hero.mock.ai-copy')}
+                </p>
+              </div>
             </div>
           </div>
-        </footer>
-      </div >
-    </div >
+        </div>
+      </section>
+    </main>
+  )
+}
+
+function StatLine({ label, value, width }: { label: string; value: string; width: string }) {
+  return (
+    <div className="rounded-2xl border border-landing-border bg-landing-surface-muted p-3.5">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <p className="text-sm font-medium text-landing-text">{label}</p>
+        <p className="text-sm text-landing-text-muted">{value}</p>
+      </div>
+      <div className="h-1.5 rounded-full bg-landing-border/60">
+        <div
+          className="h-1.5 rounded-full bg-gradient-to-r from-landing-gradient-start to-landing-gradient-end"
+          style={{ width }}
+        />
+      </div>
+    </div>
   )
 }

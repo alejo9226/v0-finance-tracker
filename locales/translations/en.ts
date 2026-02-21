@@ -137,6 +137,16 @@ export default {
         'subtitle': 'Finanzen captures transactions automatically, shows your net worth in real time, and lets you ask an AI assistant about your money.',
         'primary-cta': 'Join the waitlist',
         'secondary-cta': 'See how it works',
+        'badge': 'iOS-inspired experience',
+        'mock': {
+          'net-balance': 'Net balance',
+          'assets': 'Assets',
+          'liabilities': 'Liabilities',
+          'automations': 'Automations',
+          'automations-value': '18 this month',
+          'ai-insight': 'AI insight',
+          'ai-copy': 'Food spending is down 11% this week vs. last week.',
+        },
       },
       'pillars': {
         'title': 'Everything you need to stay on top of your money',

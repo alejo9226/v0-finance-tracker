@@ -137,6 +137,16 @@ export default {
         'subtitle': 'Finanzen captura tus movimientos automáticamente, te muestra tu patrimonio neto en tiempo real y te deja preguntarle a una IA sobre tu plata.',
         'primary-cta': 'Únete a la lista de espera',
         'secondary-cta': 'Ver cómo funciona',
+        'badge': 'Experiencia inspirada en iOS',
+        'mock': {
+          'net-balance': 'Balance neto',
+          'assets': 'Activos',
+          'liabilities': 'Deudas',
+          'automations': 'Automatizaciones',
+          'automations-value': '18 este mes',
+          'ai-insight': 'Insight de IA',
+          'ai-copy': 'El gasto en comida bajó 11% esta semana frente a la anterior.',
+        },
       },
       'pillars': {
         'title': 'Todo lo que necesitas para tener control de tu plata',
