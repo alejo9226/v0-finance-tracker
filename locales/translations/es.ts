@@ -131,6 +131,50 @@ export default {
       'login': 'Iniciar sesión',
       'signup': 'Registrarse',
     },
+    'landing': {
+      'hero': {
+        'title': 'Deja de llevar tus finanzas en hojas de cálculo.',
+        'subtitle': 'Finanzen captura tus movimientos automáticamente, te muestra tu patrimonio neto en tiempo real y te deja preguntarle a una IA sobre tu plata.',
+        'primary-cta': 'Únete a la lista de espera',
+        'secondary-cta': 'Ver cómo funciona',
+      },
+      'pillars': {
+        'title': 'Todo lo que necesitas para tener control de tu plata',
+        'subtitle': 'Hecho para personas que quieren menos hojas de cálculo y más claridad.',
+        'automation': {
+          'title': 'Automatiza el registro de movimientos',
+          'short': 'Sin meter datos a mano.',
+          'description': 'Captura movimientos automáticamente desde canales conectados y mantén tus registros al día.',
+        },
+        'net-worth': {
+          'title': 'Patrimonio neto en tiempo real',
+          'short': 'Activos y deudas en un solo lugar.',
+          'description': 'Mira tu balance neto en tiempo real con una vista completa de lo que tienes y lo que debes.',
+        },
+        'ai': {
+          'title': 'Asistente financiero con IA',
+          'short': 'Pregúntale a tus datos y recibe respuestas claras.',
+          'description': 'Chatea con una IA que te ayuda a entender patrones de gasto y el contexto de tus finanzas.',
+        },
+      },
+      'social-proof': {
+        'title': 'Construido con usuarios tempranos',
+        'subtitle': 'Pronto vas a ver historias de personas que ya están organizando su plata con Finanzen.',
+        'placeholder': 'Testimonios de early adopters próximamente.',
+      },
+      'waitlist': {
+        'title': 'Consigue acceso temprano',
+        'subtitle': 'Únete a la lista de espera y sé de los primeros en probar Finanzen.',
+        'input-placeholder': 'Escribe tu correo',
+        'submit': 'Quiero acceso temprano',
+        'submitting': 'Uniéndote...',
+        'success': 'Listo, ya quedaste en la lista. Te contactamos pronto.',
+        'privacy-note': 'Solo te vamos a escribir para contarte avances del producto y acceso temprano.',
+      },
+      'footer': {
+        'trust': 'Tus datos financieros son privados y están aislados por cuenta.',
+      },
+    },
     'hero': {
       'title': 'Rastrea tu Salud Financiera',
       'subtitle': 'Obtén una visión clara de tus activos, deudas y patrimonio. Toma decisiones informadas sobre tu futuro financiero.',

@@ -131,6 +131,50 @@ export default {
       'login': 'Login',
       'signup': 'Signup',
     },
+    'landing': {
+      'hero': {
+        'title': 'Stop tracking money in spreadsheets.',
+        'subtitle': 'Finanzen captures transactions automatically, shows your net worth in real time, and lets you ask an AI assistant about your money.',
+        'primary-cta': 'Join the waitlist',
+        'secondary-cta': 'See how it works',
+      },
+      'pillars': {
+        'title': 'Everything you need to stay on top of your money',
+        'subtitle': 'Built for people who want fewer spreadsheets and more clarity.',
+        'automation': {
+          'title': 'Automate transaction capture',
+          'short': 'No manual entry.',
+          'description': 'Capture transactions automatically from connected channels and keep your records up to date.',
+        },
+        'net-worth': {
+          'title': 'Real-time net worth',
+          'short': 'Assets and liabilities in one place.',
+          'description': 'See your net balance in real time with a full view of what you own and what you owe.',
+        },
+        'ai': {
+          'title': 'AI financial assistant',
+          'short': 'Ask your data, get clear answers.',
+          'description': 'Chat with an AI assistant that helps you understand spending patterns and financial context.',
+        },
+      },
+      'social-proof': {
+        'title': 'Built with early users',
+        'subtitle': 'Soon you will see stories from people already managing their money with Finanzen.',
+        'placeholder': 'Early adopter testimonials coming soon.',
+      },
+      'waitlist': {
+        'title': 'Get early access',
+        'subtitle': 'Join the waitlist and be the first to try Finanzen.',
+        'input-placeholder': 'Enter your email',
+        'submit': 'Get early access',
+        'submitting': 'Joining...',
+        'success': 'You are in. We will contact you soon.',
+        'privacy-note': 'We only email product updates and early access invites.',
+      },
+      'footer': {
+        'trust': 'Your financial data is private and scoped to your account.',
+      },
+    },
     'hero': {
       'title': 'Track Your Financial Health',
       'subtitle': 'Get a clear picture of your assets, liabilities, and equity. Make informed decisions about your financial future.',
