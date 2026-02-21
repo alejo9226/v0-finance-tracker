@@ -107,7 +107,7 @@ export default async function Home({
             </div>
 
             <div className="landing-card rounded-3xl p-4 sm:p-5">
-              <div className="rounded-2xl border border-landing-border bg-landing-surface-muted p-4 sm:p-5">
+              <div className="landing-glass rounded-2xl p-4 sm:p-5">
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-landing-text-muted">
                   {t('marketing.landing.hero.mock.net-balance')}
                 </p>
@@ -127,13 +127,39 @@ export default async function Home({
                 />
               </div>
 
-              <div className="mt-5 rounded-2xl border border-landing-border bg-landing-surface-muted p-4">
+              <div className="landing-glass mt-5 rounded-2xl p-4">
                 <p className="text-sm text-landing-text-muted">{t('marketing.landing.hero.mock.ai-insight')}</p>
                 <p className="mt-1 text-sm font-medium text-landing-text">
                   {t('marketing.landing.hero.mock.ai-copy')}
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-label="Product preview" className="landing-section pt-0">
+        <div className="landing-card rounded-3xl p-5 sm:p-8">
+          <div className="space-y-2 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-landing-text-muted">
+              {t('marketing.landing.preview.kicker')}
+            </p>
+            <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
+              {t('marketing.landing.preview.title')}
+            </h2>
+          </div>
+
+          <div className="mt-7 grid gap-4 lg:grid-cols-[0.65fr_1fr]">
+            <ProductShotPlaceholder
+              title={t('marketing.landing.preview.mobile-title')}
+              subtitle={t('marketing.landing.preview.mobile-subtitle')}
+              ratioClass="aspect-[9/16]"
+            />
+            <ProductShotPlaceholder
+              title={t('marketing.landing.preview.desktop-title')}
+              subtitle={t('marketing.landing.preview.desktop-subtitle')}
+              ratioClass="aspect-[16/10]"
+            />
           </div>
         </div>
       </section>
@@ -218,7 +244,7 @@ export default async function Home({
 
 function StatLine({ label, value, width }: { label: string; value: string; width: string }) {
   return (
-    <div className="rounded-2xl border border-landing-border bg-landing-surface-muted p-3.5">
+    <div className="landing-glass rounded-2xl p-3.5">
       <div className="mb-2 flex items-center justify-between gap-3">
         <p className="text-sm font-medium text-landing-text">{label}</p>
         <p className="text-sm text-landing-text-muted">{value}</p>
@@ -258,13 +284,42 @@ function PillarCard({
 
 function QuotePlaceholder({ placeholder }: { placeholder: string }) {
   return (
-    <article className="rounded-2xl border border-landing-border bg-landing-surface-muted p-4">
+    <article className="landing-glass rounded-2xl p-4">
       <div className="mb-3 h-4 w-20 rounded-full bg-landing-border/70" />
       <div className="space-y-2">
         <div className="h-3 w-full rounded-full bg-landing-border/60" />
         <div className="h-3 w-5/6 rounded-full bg-landing-border/50" />
       </div>
       <p className="mt-3 text-xs text-landing-text-muted">{placeholder}</p>
+    </article>
+  )
+}
+
+function ProductShotPlaceholder({
+  title,
+  subtitle,
+  ratioClass,
+}: {
+  title: string
+  subtitle: string
+  ratioClass: string
+}) {
+  return (
+    <article className="landing-glass rounded-3xl p-4 sm:p-5">
+      <div className="mb-3">
+        <p className="text-sm font-semibold text-landing-text">{title}</p>
+        <p className="text-xs text-landing-text-muted sm:text-sm">{subtitle}</p>
+      </div>
+      <div className={`${ratioClass} overflow-hidden rounded-2xl border border-landing-border/80 bg-white/40`}>
+        <div className="flex h-full flex-col gap-3 p-4">
+          <div className="h-5 w-1/3 rounded-md bg-white/70" />
+          <div className="grid flex-1 gap-3 sm:grid-cols-2">
+            <div className="rounded-xl bg-white/55" />
+            <div className="rounded-xl bg-white/45" />
+            <div className="rounded-xl bg-white/45 sm:col-span-2" />
+          </div>
+        </div>
+      </div>
     </article>
   )
 }

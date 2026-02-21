@@ -172,6 +172,14 @@ export default {
         'subtitle': 'Pronto vas a ver historias de personas que ya están organizando su plata con Finanzen.',
         'placeholder': 'Testimonios de early adopters próximamente.',
       },
+      'preview': {
+        'kicker': 'Vista del producto',
+        'title': 'Una vista clara de tu plata en segundos',
+        'mobile-title': 'Preview de app movil',
+        'mobile-subtitle': 'Placeholder para capturas del dashboard y flujo de transacciones.',
+        'desktop-title': 'Preview de dashboard web',
+        'desktop-subtitle': 'Placeholder para capturas de analitica y panel de patrimonio.',
+      },
       'waitlist': {
         'title': 'Consigue acceso temprano',
         'subtitle': 'Únete a la lista de espera y sé de los primeros en probar Finanzen.',

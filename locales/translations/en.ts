@@ -172,6 +172,14 @@ export default {
         'subtitle': 'Soon you will see stories from people already managing their money with Finanzen.',
         'placeholder': 'Early adopter testimonials coming soon.',
       },
+      'preview': {
+        'kicker': 'Product preview',
+        'title': 'A clear look at your money in seconds',
+        'mobile-title': 'Mobile app preview',
+        'mobile-subtitle': 'Placeholder for dashboard and transaction flow screenshots.',
+        'desktop-title': 'Web dashboard preview',
+        'desktop-subtitle': 'Placeholder for analytics and net-worth panel screenshots.',
+      },
       'waitlist': {
         'title': 'Get early access',
         'subtitle': 'Join the waitlist and be the first to try Finanzen.',
