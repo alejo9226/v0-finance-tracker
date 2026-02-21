@@ -5,6 +5,7 @@ import type { FormEvent } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
+import { trackEvent } from '@/lib/analytics/gtm'
 import { useI18n } from '@/locales/client'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -76,6 +77,11 @@ export default function WaitlistForm({ locale }: { locale: string }) {
         throw new Error('waitlist_submit_failed')
       }
 
+      trackEvent('email_submitted', {
+        page_path: pathname ?? '/',
+        source,
+        locale,
+      })
       setIsSuccess(true)
       setEmail('')
     } catch {
@@ -105,6 +111,9 @@ export default function WaitlistForm({ locale }: { locale: string }) {
         type="submit"
         size="lg"
         disabled={isSubmitting}
+        data-track-cta
+        data-cta-id="waitlist_submit"
+        data-cta-label={t('marketing.landing.waitlist.submit')}
         className="h-12 w-full rounded-xl bg-landing-accent text-landing-accent-foreground hover:bg-landing-accent/90"
       >
         {isSubmitting ? t('marketing.landing.waitlist.submitting') : t('marketing.landing.waitlist.submit')}

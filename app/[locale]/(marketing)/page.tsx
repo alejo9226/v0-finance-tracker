@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { getI18n } from '@/locales/server'
+import LandingTracking from './components/LandingTracking'
 import WaitlistForm from './components/WaitlistForm'
 
 export default async function Home({
@@ -16,6 +17,7 @@ export default async function Home({
 
   return (
     <main className="pb-10 sm:pb-16">
+      <LandingTracking />
       <section className="landing-section pt-8 sm:pt-12">
         <div className="landing-glass rounded-[28px] p-5 sm:p-8 lg:p-10">
           <div className="mb-8 flex items-center justify-between sm:mb-10">
@@ -27,6 +29,9 @@ export default async function Home({
             </div>
             <Link
               href="#waitlist"
+              data-track-cta
+              data-cta-id="hero_secondary"
+              data-cta-label={t('marketing.landing.hero.secondary-cta')}
               className="inline-flex items-center gap-2 text-sm font-medium text-landing-text-muted transition-colors hover:text-landing-text"
             >
               {t('marketing.landing.hero.secondary-cta')}
@@ -54,7 +59,13 @@ export default async function Home({
                   size="lg"
                   className="h-11 rounded-xl bg-landing-accent px-5 text-landing-accent-foreground hover:bg-landing-accent/90 sm:h-12 sm:px-6"
                 >
-                  <Link href="#waitlist" className="inline-flex items-center gap-2">
+                  <Link
+                    href="#waitlist"
+                    data-track-cta
+                    data-cta-id="hero_primary"
+                    data-cta-label={t('marketing.landing.hero.primary-cta')}
+                    className="inline-flex items-center gap-2"
+                  >
                     {t('marketing.landing.hero.primary-cta')}
                     <ArrowRight className="h-4 w-4" />
                   </Link>
