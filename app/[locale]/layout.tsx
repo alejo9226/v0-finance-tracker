@@ -6,6 +6,7 @@ import Script from "next/script"
 import "../../app/globals.css"
 import { AuthProvider } from "@/contexts/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import MarketingToolsConfig from "@/components/analytics/MarketingToolsConfig"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Analytics } from "@vercel/analytics/next"
 import { I18nProviderClient } from "@/locales/client"
@@ -52,6 +53,8 @@ export default async function RootLayout({
             </noscript>
           </>
         ) : null}
+
+        <MarketingToolsConfig />
 
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <AuthProvider>
