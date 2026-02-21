@@ -119,6 +119,29 @@ export default async function Home() {
           />
         </div>
       </section>
+
+      <section className="landing-section pt-0">
+        <div className="landing-card rounded-3xl p-5 sm:p-8">
+          <div className="space-y-2">
+            <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
+              {t('marketing.landing.social-proof.title')}
+            </h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-landing-text-muted sm:text-base">
+              {t('marketing.landing.social-proof.subtitle')}
+            </p>
+          </div>
+
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <QuotePlaceholder placeholder={t('marketing.landing.social-proof.placeholder')} />
+            <QuotePlaceholder placeholder={t('marketing.landing.social-proof.placeholder')} />
+            <QuotePlaceholder placeholder={t('marketing.landing.social-proof.placeholder')} />
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-2xl border border-landing-border bg-landing-surface-muted px-4 py-3 sm:px-5">
+          <p className="text-center text-sm text-landing-text-muted">{t('marketing.landing.footer.trust')}</p>
+        </div>
+      </section>
     </main>
   )
 }
@@ -159,6 +182,19 @@ function PillarCard({
       <h3 className="mt-4 text-lg font-semibold text-landing-text">{title}</h3>
       <p className="mt-2 text-sm font-medium text-landing-text">{shortCopy}</p>
       <p className="mt-2 text-sm leading-relaxed text-landing-text-muted">{description}</p>
+    </article>
+  )
+}
+
+function QuotePlaceholder({ placeholder }: { placeholder: string }) {
+  return (
+    <article className="rounded-2xl border border-landing-border bg-landing-surface-muted p-4">
+      <div className="mb-3 h-4 w-20 rounded-full bg-landing-border/70" />
+      <div className="space-y-2">
+        <div className="h-3 w-full rounded-full bg-landing-border/60" />
+        <div className="h-3 w-5/6 rounded-full bg-landing-border/50" />
+      </div>
+      <p className="mt-3 text-xs text-landing-text-muted">{placeholder}</p>
     </article>
   )
 }
