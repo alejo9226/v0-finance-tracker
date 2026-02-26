@@ -47,7 +47,7 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --landing-bg: 35 45% 95%;
+    --landing-bg: 0 0% 97%;
     --landing-surface: 36 0% 100%;
       --landing-surface-muted: 36 0% 100%;
     --landing-text: 222 47% 11%;
@@ -94,7 +94,7 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-    --landing-bg: 240 4% 7%;
+    --landing-bg: 0 0% 8%;
     --landing-surface: 240 4% 10%;
     --landing-surface-muted: 240 4% 14%;
     --landing-text: 210 40% 98%;

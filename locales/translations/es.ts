@@ -175,10 +175,10 @@ export default {
       'preview': {
         'kicker': 'Vista del producto',
         'title': 'Una vista clara de tu plata en segundos',
-        'mobile-title': 'Preview de app movil',
-        'mobile-subtitle': 'Placeholder para capturas del dashboard y flujo de transacciones.',
-        'desktop-title': 'Preview de dashboard web',
-        'desktop-subtitle': 'Placeholder para capturas de analitica y panel de patrimonio.',
+        'equity-title': 'Patrimonio',
+        'equity-subtitle': 'Rastrea tus activos, deudas y patrimonio neto en un solo lugar y ten siempre claridad sobre tu salud financiera.',
+        'ai-chat-title': 'Asistente con IA',
+        'ai-chat-subtitle': 'Haz preguntas sobre tus finanzas y obtén insights en lenguaje natural.',
       },
       'waitlist': {
         'title': 'Consigue acceso temprano',

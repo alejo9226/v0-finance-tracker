@@ -175,10 +175,10 @@ export default {
       'preview': {
         'kicker': 'Product preview',
         'title': 'A clear look at your money in seconds',
-        'mobile-title': 'Mobile app preview',
-        'mobile-subtitle': 'Placeholder for dashboard and transaction flow screenshots.',
-        'desktop-title': 'Web dashboard preview',
-        'desktop-subtitle': 'Placeholder for analytics and net-worth panel screenshots.',
+        'equity-title': 'Net worth',
+        'equity-subtitle': 'Track assets, liabilities and your equity in one place.',
+        'ai-chat-title': 'AI assistant',
+        'ai-chat-subtitle': 'Ask questions about your finances and get insights in natural language.',
       },
       'waitlist': {
         'title': 'Get early access',

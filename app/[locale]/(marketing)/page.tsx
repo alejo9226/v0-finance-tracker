@@ -1,4 +1,5 @@
 import { ArrowRight, Bot, Landmark, Sparkles, Zap } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
@@ -72,26 +73,26 @@ export default async function Home({
             </Link>
           </div>
 
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.2fr_auto] lg:items-normal">
-            <div className="order-2 space-y-8 lg:order-1">
-              <span className="inline-flex items-center gap-2 rounded-full border border-landing-border bg-landing-surface-muted px-3 py-1 text-xs font-medium text-landing-text-muted">
-                <Sparkles className="h-3.5 w-3.5 text-landing-accent" />
+          <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.2fr_auto] md:gap-8 md:items-normal lg:gap-10">
+            <div className="order-2 space-y-4 sm:space-y-6 md:order-1 md:space-y-8 lg:space-y-10">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-landing-border bg-landing-surface-muted px-2.5 py-0.5 text-[10px] font-medium text-landing-text-muted sm:gap-2 sm:px-3 sm:py-1 sm:text-xs lg:text-sm">
+                <Sparkles className="h-3 w-3 text-landing-accent sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
                 {t('marketing.landing.hero.badge')}
               </span>
 
-              <h1 className="max-w-2xl text-3xl font-semibold leading-tight md:leading-[1.1] text-landing-text sm:text-4xl md:text-[4.3rem]">
+              <h1 className="max-w-2xl text-2xl font-semibold leading-tight text-landing-text sm:text-3xl sm:leading-tight md:text-4xl md:leading-[1.1] md:text-[4.3rem] lg:text-[4.8rem]">
                 {t('marketing.landing.hero.title')}
               </h1>
 
-              <p className="max-w-2xl text-base leading-relaxed text-landing-text-muted sm:text-lg">
+              <p className="max-w-2xl text-sm leading-relaxed text-landing-text-muted sm:text-base md:text-lg lg:text-xl">
                 {t('marketing.landing.hero.subtitle')}
               </p>
 
-              <div className="!mt-[2rem] flex flex-col gap-3 pt-2 sm:flex-row sm:!mt-[4rem]">
+              <div className="!mt-[1.25rem] flex flex-col gap-3 pt-2 sm:!mt-[2rem] sm:flex-row md:!mt-[4rem] lg:!mt-[5rem]">
                 <Button
                   asChild
                   size="lg"
-                  className="h-11 w-full rounded-2xl bg-landing-accent px-5 text-landing-accent-foreground hover:bg-landing-accent/90 sm:h-12 sm:w-auto sm:px-6"
+                  className="h-10 w-full rounded-2xl bg-landing-accent px-4 text-landing-accent-foreground hover:bg-landing-accent/90 sm:h-11 sm:px-5 md:h-12 md:w-auto md:px-6 lg:h-14 lg:px-8 lg:text-base"
                 >
                   <Link
                     href="#waitlist"
@@ -110,7 +111,7 @@ export default async function Home({
             <IPhoneFrame
               src="/iphone-frame-spending.png"
               alt="Spending dashboard with donut chart and transactions"
-              className="order-1 mb-4 lg:order-2 lg:mb-0 lg:mt-0"
+              className="order-1 mb-4 md:order-2 md:mb-0 md:mt-0"
               priority
             />
           </div>
@@ -128,16 +129,26 @@ export default async function Home({
             </h2>
           </div>
 
-          <div className="mt-7 grid gap-4 lg:grid-cols-[0.65fr_1fr]">
+          <div className="mt-7 grid gap-4 md:grid-cols-2">
             <ProductShotPlaceholder
-              title={t('marketing.landing.preview.mobile-title')}
-              subtitle={t('marketing.landing.preview.mobile-subtitle')}
-              ratioClass="aspect-[9/16]"
+              title={t('marketing.landing.preview.equity-title')}
+              subtitle={t('marketing.landing.preview.equity-subtitle')}
+              ratioClass="aspect-[9/19.5]"
+              imageSrc="/equity-light-shortened.png"
+              imageAlt="Equity dashboard with assets, liabilities and net worth"
+              imageObjectFit="scale-down"
+              imageWidth={675}
+              imageHeight={400}
             />
             <ProductShotPlaceholder
-              title={t('marketing.landing.preview.desktop-title')}
-              subtitle={t('marketing.landing.preview.desktop-subtitle')}
-              ratioClass="aspect-[16/10]"
+              title={t('marketing.landing.preview.ai-chat-title')}
+              subtitle={t('marketing.landing.preview.ai-chat-subtitle')}
+              ratioClass="aspect-[9/19.5]"
+              imageSrc="/aichat-light-shortened.png"
+              imageAlt="AI chat assistant for financial insights"
+              imageObjectFit="scale-down"
+              imageWidth={654}
+              imageHeight={400}
             />
           </div>
         </div>
@@ -261,26 +272,66 @@ function ProductShotPlaceholder({
   title,
   subtitle,
   ratioClass,
+  imageSrc,
+  imageAlt,
+  imageObjectFit = 'cover',
+  imageWidth,
+  imageHeight,
 }: {
   title: string
   subtitle: string
   ratioClass: string
+    imageSrc?: string
+    imageAlt?: string
+    imageObjectFit?: 'cover' | 'scale-down'
+    imageWidth?: number
+    imageHeight?: number
 }) {
+  const objectFitClass = imageObjectFit === 'scale-down' ? 'object-scale-down' : 'object-cover object-top'
+  const hasImage = Boolean(imageSrc)
+  const sizeToImage = hasImage && imageWidth != null && imageHeight != null
+
   return (
-    <article className="landing-glass rounded-3xl p-4 sm:p-5">
-      <div className="mb-3">
+    <article
+      className={`landing-glass rounded-3xl p-4 sm:p-5 ${sizeToImage ? 'w-fit h-fit max-w-full' : ''}`}
+    >
+      <div className="mb-6">
         <p className="text-sm font-semibold text-landing-text">{title}</p>
         <p className="text-xs text-landing-text-muted sm:text-sm">{subtitle}</p>
       </div>
-      <div className={`${ratioClass} overflow-hidden rounded-2xl border border-landing-border/80 bg-white/40`}>
-        <div className="flex h-full flex-col gap-3 p-4">
-          <div className="h-5 w-1/3 rounded-md bg-gray-200/70" />
-          <div className="grid flex-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl bg-gray-200/55" />
-            <div className="rounded-2xl bg-gray-200/45" />
-            <div className="rounded-2xl bg-gray-200/45 sm:col-span-2" />
+      <div
+        className={`overflow-hidden rounded-2xl p-2 bg-white/40 ${sizeToImage ? 'relative w-fit max-w-full' : `relative ${ratioClass}`
+          }`}
+      >
+        {imageSrc ? (
+          sizeToImage ? (
+            <Image
+              src={imageSrc}
+              alt={imageAlt ?? title}
+              width={imageWidth}
+              height={imageHeight}
+              sizes="(max-width: 640px) 100vw, 50vw"
+              className={`max-w-full h-[400px] ${objectFitClass}`}
+            />
+          ) : (
+            <Image
+              src={imageSrc}
+              alt={imageAlt ?? title}
+              fill
+              sizes="(max-width: 640px) 100vw, 50vw"
+              className={objectFitClass}
+            />
+          )
+        ) : (
+          <div className="flex h-full flex-col gap-3 p-4">
+            <div className="h-5 w-1/3 rounded-md bg-gray-200/70" />
+            <div className="grid flex-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-2xl bg-gray-200/55" />
+              <div className="rounded-2xl bg-gray-200/45" />
+              <div className="rounded-2xl bg-gray-200/45 sm:col-span-2" />
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </article>
   )
