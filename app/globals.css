@@ -48,8 +48,8 @@ body {
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
     --landing-bg: 35 45% 95%;
-    --landing-surface: 36 36% 98%;
-    --landing-surface-muted: 34 28% 93%;
+    --landing-surface: 36 0% 100%;
+      --landing-surface-muted: 36 0% 100%;
     --landing-text: 222 47% 11%;
     --landing-text-muted: 215 16% 47%;
     --landing-accent: 11 100% 62%;
@@ -59,7 +59,7 @@ body {
     --landing-gradient-start: 11 100% 62%;
     --landing-gradient-end: 14 90% 56%;
     --landing-radius-card: 1.25rem;
-    --landing-shadow-soft: 0 16px 44px rgba(42, 36, 29, 0.12);
+    --landing-shadow-soft: 0 16px 44px rgba(42, 36, 29, 0.05);
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -124,12 +124,8 @@ body {
   }
 
   .landing-card {
-    background: linear-gradient(
-      150deg,
-      hsl(var(--landing-surface) / 0.84),
-      hsl(var(--landing-surface-muted) / 0.52)
-    );
-    border: 1px solid hsl(var(--landing-border) / 0.72);
+    background: white;
+      /* border: 1px solid hsl(var(--landing-border) / 0.72); */
     border-radius: var(--landing-radius-card);
     box-shadow: var(--landing-shadow-soft);
     backdrop-filter: blur(12px);
@@ -138,8 +134,10 @@ body {
   .landing-glass {
     background: linear-gradient(
       145deg,
-      hsl(var(--landing-surface) / 0.8),
-      hsl(var(--landing-surface-muted) / 0.45)
+      /* blue, */
+        hsl(var(--landing-surface) / 0.6),
+        hsl(var(--landing-surface-muted) / 0.6)
+        /* blue */
     );
     border: 1px solid hsl(var(--landing-border) / 0.68);
     backdrop-filter: blur(14px);

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
 import { getI18n } from '@/locales/server'
 
+import IPhoneFrame from './components/iPhoneFrame'
 import LandingTracking from './components/LandingTracking'
 import WaitlistForm from './components/WaitlistForm'
 
@@ -52,7 +53,7 @@ export default async function Home({
     <main className="pb-10 sm:pb-16">
       <LandingTracking />
       <section aria-label="Hero" className="landing-section pt-8 sm:pt-12">
-        <div className="landing-glass rounded-[28px] p-5 sm:p-8 lg:p-10">
+        <div className="landing-glass rounded-[40px] p-5 sm:p-8 lg:p-10">
           <div className="mb-8 flex items-center justify-between sm:mb-10">
             <div className="inline-flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-landing-accent text-sm font-semibold text-landing-accent-foreground">
@@ -71,26 +72,26 @@ export default async function Home({
             </Link>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10">
-            <div className="space-y-6">
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[1.2fr_auto] lg:items-normal">
+            <div className="order-2 space-y-8 lg:order-1">
               <span className="inline-flex items-center gap-2 rounded-full border border-landing-border bg-landing-surface-muted px-3 py-1 text-xs font-medium text-landing-text-muted">
                 <Sparkles className="h-3.5 w-3.5 text-landing-accent" />
                 {t('marketing.landing.hero.badge')}
               </span>
 
-              <h1 className="max-w-2xl text-3xl font-semibold leading-tight text-landing-text sm:text-4xl md:text-5xl">
+              <h1 className="max-w-2xl text-3xl font-semibold leading-tight md:leading-[1.1] text-landing-text sm:text-4xl md:text-[4.3rem]">
                 {t('marketing.landing.hero.title')}
               </h1>
 
-              <p className="max-w-xl text-base leading-relaxed text-landing-text-muted sm:text-lg">
+              <p className="max-w-2xl text-base leading-relaxed text-landing-text-muted sm:text-lg">
                 {t('marketing.landing.hero.subtitle')}
               </p>
 
-              <div className="flex flex-col gap-3 pt-2 sm:flex-row">
+              <div className="!mt-[2rem] flex flex-col gap-3 pt-2 sm:flex-row sm:!mt-[4rem]">
                 <Button
                   asChild
                   size="lg"
-                  className="h-11 rounded-xl bg-landing-accent px-5 text-landing-accent-foreground hover:bg-landing-accent/90 sm:h-12 sm:px-6"
+                  className="h-11 w-full rounded-2xl bg-landing-accent px-5 text-landing-accent-foreground hover:bg-landing-accent/90 sm:h-12 sm:w-auto sm:px-6"
                 >
                   <Link
                     href="#waitlist"
@@ -106,40 +107,18 @@ export default async function Home({
               </div>
             </div>
 
-            <div className="landing-card rounded-3xl p-4 sm:p-5">
-              <div className="landing-glass rounded-2xl p-4 sm:p-5">
-                <p className="text-xs font-medium uppercase tracking-[0.18em] text-landing-text-muted">
-                  {t('marketing.landing.hero.mock.net-balance')}
-                </p>
-                <div className="mt-2 flex items-end justify-between gap-3">
-                  <p className="text-2xl font-semibold text-landing-text sm:text-3xl">$2,840,000</p>
-                  <p className="text-sm font-medium text-emerald-500">+12.4%</p>
-                </div>
-              </div>
-
-              <div className="mt-4 space-y-3">
-                <StatLine label={t('marketing.landing.hero.mock.assets')} value="$4,100,000" width="78%" />
-                <StatLine label={t('marketing.landing.hero.mock.liabilities')} value="$1,260,000" width="38%" />
-                <StatLine
-                  label={t('marketing.landing.hero.mock.automations')}
-                  value={t('marketing.landing.hero.mock.automations-value')}
-                  width="64%"
-                />
-              </div>
-
-              <div className="landing-glass mt-5 rounded-2xl p-4">
-                <p className="text-sm text-landing-text-muted">{t('marketing.landing.hero.mock.ai-insight')}</p>
-                <p className="mt-1 text-sm font-medium text-landing-text">
-                  {t('marketing.landing.hero.mock.ai-copy')}
-                </p>
-              </div>
-            </div>
+            <IPhoneFrame
+              src="/iphone-frame-spending.png"
+              alt="Spending dashboard with donut chart and transactions"
+              className="order-1 mb-4 lg:order-2 lg:mb-0 lg:mt-0"
+              priority
+            />
           </div>
         </div>
       </section>
 
       <section aria-label="Product preview" className="landing-section pt-0">
-        <div className="landing-card rounded-3xl p-5 sm:p-8">
+        <div className="landing-glass rounded-[40px] p-5 sm:p-8">
           <div className="space-y-2 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-landing-text-muted">
               {t('marketing.landing.preview.kicker')}
@@ -197,7 +176,7 @@ export default async function Home({
       </section>
 
       <section aria-label="Social proof and trust" className="landing-section pt-0">
-        <div className="landing-card rounded-3xl p-5 sm:p-8">
+        <div className="landing-glass rounded-[40px] p-5 sm:p-8">
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
               {t('marketing.landing.social-proof.title')}
@@ -220,7 +199,7 @@ export default async function Home({
       </section>
 
       <section id="waitlist" aria-label="Waitlist signup" className="landing-section pt-0">
-        <div className="landing-card rounded-3xl p-5 sm:p-8">
+        <div className="landing-glass rounded-[40px] p-5 sm:p-8">
           <div className="mx-auto max-w-xl space-y-3 text-center">
             <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
               {t('marketing.landing.waitlist.title')}
@@ -239,23 +218,6 @@ export default async function Home({
         </div>
       </section>
     </main>
-  )
-}
-
-function StatLine({ label, value, width }: { label: string; value: string; width: string }) {
-  return (
-    <div className="landing-glass rounded-2xl p-3.5">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <p className="text-sm font-medium text-landing-text">{label}</p>
-        <p className="text-sm text-landing-text-muted">{value}</p>
-      </div>
-      <div className="h-1.5 rounded-full bg-landing-border/60">
-        <div
-          className="h-1.5 rounded-full bg-gradient-to-r from-landing-gradient-start to-landing-gradient-end"
-          style={{ width }}
-        />
-      </div>
-    </div>
   )
 }
 
@@ -284,7 +246,7 @@ function PillarCard({
 
 function QuotePlaceholder({ placeholder }: { placeholder: string }) {
   return (
-    <article className="landing-glass rounded-2xl p-4">
+    <article className="landing-glass rounded-3xl p-4">
       <div className="mb-3 h-4 w-20 rounded-full bg-landing-border/70" />
       <div className="space-y-2">
         <div className="h-3 w-full rounded-full bg-landing-border/60" />
@@ -312,11 +274,11 @@ function ProductShotPlaceholder({
       </div>
       <div className={`${ratioClass} overflow-hidden rounded-2xl border border-landing-border/80 bg-white/40`}>
         <div className="flex h-full flex-col gap-3 p-4">
-          <div className="h-5 w-1/3 rounded-md bg-white/70" />
+          <div className="h-5 w-1/3 rounded-md bg-gray-200/70" />
           <div className="grid flex-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-xl bg-white/55" />
-            <div className="rounded-xl bg-white/45" />
-            <div className="rounded-xl bg-white/45 sm:col-span-2" />
+            <div className="rounded-2xl bg-gray-200/55" />
+            <div className="rounded-2xl bg-gray-200/45" />
+            <div className="rounded-2xl bg-gray-200/45 sm:col-span-2" />
           </div>
         </div>
       </div>

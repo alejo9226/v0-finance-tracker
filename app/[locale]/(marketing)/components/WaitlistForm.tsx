@@ -1,8 +1,8 @@
 'use client'
 
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import { usePathname, useSearchParams } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
 import { trackEvent } from '@/lib/analytics/gtm'
@@ -102,7 +102,7 @@ export default function WaitlistForm({ locale }: { locale: string }) {
         value={email}
         onChange={(event) => setEmail(event.target.value)}
         placeholder={t('marketing.landing.waitlist.input-placeholder')}
-        className="h-12 w-full rounded-xl border border-landing-border bg-landing-surface px-4 text-sm text-landing-text outline-none transition focus:border-landing-accent focus:ring-2 focus:ring-landing-ring/35"
+        className="h-12 w-full rounded-2xl border border-landing-border bg-landing-surface px-4 text-sm text-landing-text outline-none transition focus:border-landing-accent focus:ring-2 focus:ring-landing-ring/35"
         autoComplete="email"
         required
       />
@@ -114,7 +114,7 @@ export default function WaitlistForm({ locale }: { locale: string }) {
         data-track-cta
         data-cta-id="waitlist_submit"
         data-cta-label={t('marketing.landing.waitlist.submit')}
-        className="h-12 w-full rounded-xl bg-landing-accent text-landing-accent-foreground hover:bg-landing-accent/90"
+        className="h-12 w-full rounded-2xl bg-landing-accent text-landing-accent-foreground hover:bg-landing-accent/90"
       >
         {isSubmitting ? t('marketing.landing.waitlist.submitting') : t('marketing.landing.waitlist.submit')}
       </Button>
