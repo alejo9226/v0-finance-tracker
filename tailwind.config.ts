@@ -61,6 +61,19 @@ const config: Config = {
           border: 'hsl(var(--sidebar-border))',
           ring: 'hsl(var(--sidebar-ring))',
         },
+        landing: {
+          bg: 'hsl(var(--landing-bg))',
+          surface: 'hsl(var(--landing-surface))',
+          'surface-muted': 'hsl(var(--landing-surface-muted))',
+          text: 'hsl(var(--landing-text))',
+          'text-muted': 'hsl(var(--landing-text-muted))',
+          accent: 'hsl(var(--landing-accent))',
+          'accent-foreground': 'hsl(var(--landing-accent-foreground))',
+          border: 'hsl(var(--landing-border))',
+          ring: 'hsl(var(--landing-ring))',
+          'gradient-start': 'hsl(var(--landing-gradient-start))',
+          'gradient-end': 'hsl(var(--landing-gradient-end))',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -88,6 +101,9 @@ const config: Config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+      },
+      boxShadow: {
+        'landing-soft': 'var(--landing-shadow-soft)',
       },
     },
   },

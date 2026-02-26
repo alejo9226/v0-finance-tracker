@@ -47,6 +47,19 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --landing-bg: 0 0% 97%;
+    --landing-surface: 36 0% 100%;
+      --landing-surface-muted: 36 0% 100%;
+    --landing-text: 222 47% 11%;
+    --landing-text-muted: 215 16% 47%;
+    --landing-accent: 11 100% 62%;
+    --landing-accent-foreground: 0 0% 100%;
+    --landing-border: 29 28% 84%;
+    --landing-ring: 11 100% 62%;
+    --landing-gradient-start: 11 100% 62%;
+    --landing-gradient-end: 14 90% 56%;
+    --landing-radius-card: 1.25rem;
+    --landing-shadow-soft: 0 16px 44px rgba(42, 36, 29, 0.05);
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -81,6 +94,18 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+    --landing-bg: 0 0% 8%;
+    --landing-surface: 240 4% 10%;
+    --landing-surface-muted: 240 4% 14%;
+    --landing-text: 210 40% 98%;
+    --landing-text-muted: 215 20% 69%;
+    --landing-accent: 11 100% 62%;
+    --landing-accent-foreground: 0 0% 100%;
+    --landing-border: 240 4% 18%;
+    --landing-ring: 11 100% 62%;
+    --landing-gradient-start: 11 100% 62%;
+    --landing-gradient-end: 15 92% 58%;
+    --landing-shadow-soft: 0 16px 48px rgba(0, 0, 0, 0.28);
   }
 }
 
@@ -90,5 +115,41 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .landing-section {
+    @apply mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8 lg:py-20;
+  }
+
+  .landing-card {
+    background: white;
+      /* border: 1px solid hsl(var(--landing-border) / 0.72); */
+    border-radius: var(--landing-radius-card);
+    box-shadow: var(--landing-shadow-soft);
+    backdrop-filter: blur(12px);
+  }
+
+  .landing-glass {
+    background: linear-gradient(
+      145deg,
+      /* blue, */
+        hsl(var(--landing-surface) / 0.6),
+        hsl(var(--landing-surface-muted) / 0.6)
+        /* blue */
+    );
+    border: 1px solid hsl(var(--landing-border) / 0.68);
+    backdrop-filter: blur(14px);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }

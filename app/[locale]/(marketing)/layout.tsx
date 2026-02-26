@@ -1,7 +1,12 @@
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 md:px-6">{children}</div>
+    <div className="relative min-h-screen overflow-hidden bg-landing-bg text-landing-text">
+      <div className="pointer-events-none fixed inset-0">
+        <div className="absolute -left-24 top-8 h-72 w-72 rounded-full bg-red-400/45 blur-[15px]" />
+        <div className="absolute right-[-3rem] top-32 h-80 w-80 rounded-full bg-landing-accent/45 blur-[15px]" />
+        <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[#1a4073]/45 blur-[15px]" />
+      </div>
+      <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
     </div>
   )
 }
