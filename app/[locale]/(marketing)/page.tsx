@@ -18,12 +18,12 @@ export async function generateMetadata({
 
   const title =
     locale === 'es'
-      ? 'Finanzen | Automatiza tus finanzas y unete a la lista'
-      : 'Finanzen | Automate your finances and join the waitlist'
+      ? 'Spendro | Automatiza tus finanzas y unete a la lista'
+      : 'Spendro | Automate your finances and join the waitlist'
   const description =
     locale === 'es'
-      ? 'Captura movimientos automaticamente, mira tu patrimonio neto en tiempo real y unete al acceso temprano de Finanzen.'
-      : 'Capture transactions automatically, see your real-time net worth, and join Finanzen early access.'
+      ? 'Captura movimientos automaticamente, mira tu patrimonio neto en tiempo real y unete al acceso temprano de Spendro.'
+      : 'Capture transactions automatically, see your real-time net worth, and join Spendro early access.'
 
   return {
     title,
@@ -57,9 +57,9 @@ export default async function Home({
           <div className="mb-8 flex items-center justify-between sm:mb-10">
             <div className="inline-flex items-center gap-3">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-landing-accent text-sm font-semibold text-landing-accent-foreground">
-                F
+                S
               </span>
-              <span className="text-sm font-semibold tracking-wide sm:text-base">Finanzen</span>
+              <span className="text-sm font-semibold tracking-wide sm:text-base">Spendro</span>
             </div>
             <Link
               href="#waitlist"

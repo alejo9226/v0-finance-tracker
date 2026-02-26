@@ -134,7 +134,7 @@ export default {
     'landing': {
       'hero': {
         'title': 'Stop tracking money in spreadsheets.',
-        'subtitle': 'Finanzen captures transactions automatically, shows your net worth in real time, and lets you ask an AI assistant about your money.',
+        'subtitle': 'Spendro captures transactions automatically, shows your net worth in real time, and lets you ask an AI assistant about your money.',
         'primary-cta': 'Join the waitlist',
         'secondary-cta': 'See how it works',
         'badge': 'iOS-inspired experience',
@@ -169,7 +169,7 @@ export default {
       },
       'social-proof': {
         'title': 'Built with early users',
-        'subtitle': 'Soon you will see stories from people already managing their money with Finanzen.',
+        'subtitle': 'Soon you will see stories from people already managing their money with Spendro.',
         'placeholder': 'Early adopter testimonials coming soon.',
       },
       'preview': {
@@ -182,7 +182,7 @@ export default {
       },
       'waitlist': {
         'title': 'Get early access',
-        'subtitle': 'Join the waitlist and be the first to try Finanzen.',
+        'subtitle': 'Join the waitlist and be the first to try Spendro.',
         'input-placeholder': 'Enter your email',
         'submit': 'Get early access',
         'submitting': 'Joining...',

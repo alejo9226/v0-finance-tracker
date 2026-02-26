@@ -134,7 +134,7 @@ export default {
     'landing': {
       'hero': {
         'title': 'Deja de llevar tus finanzas en hojas de cálculo.',
-        'subtitle': 'Finanzen captura tus movimientos automáticamente, te muestra tu patrimonio neto en tiempo real y te deja preguntarle a una IA sobre tu plata.',
+        'subtitle': 'Spendro captura tus movimientos automáticamente, te muestra tu patrimonio neto en tiempo real y te deja preguntarle a una IA sobre tu plata.',
         'primary-cta': 'Únete a la lista de espera',
         'secondary-cta': 'Ver cómo funciona',
         'badge': 'Experiencia inspirada en iOS',
@@ -169,7 +169,7 @@ export default {
       },
       'social-proof': {
         'title': 'Construido con usuarios tempranos',
-        'subtitle': 'Pronto vas a ver historias de personas que ya están organizando su plata con Finanzen.',
+        'subtitle': 'Pronto vas a ver historias de personas que ya están organizando su plata con Spendro.',
         'placeholder': 'Testimonios de early adopters próximamente.',
       },
       'preview': {
@@ -182,7 +182,7 @@ export default {
       },
       'waitlist': {
         'title': 'Consigue acceso temprano',
-        'subtitle': 'Únete a la lista de espera y sé de los primeros en probar Finanzen.',
+        'subtitle': 'Únete a la lista de espera y sé de los primeros en probar Spendro.',
         'input-placeholder': 'Escribe tu correo',
         'submit': 'Quiero acceso temprano',
         'submitting': 'Uniéndote...',
