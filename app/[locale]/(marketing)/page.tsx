@@ -8,7 +8,7 @@ import { getI18n } from '@/locales/server'
 
 import IPhoneFrame from './components/iPhoneFrame'
 import LandingTracking from './components/LandingTracking'
-import WaitlistForm from './components/WaitlistForm'
+import WaitlistSection from './components/WaitlistSection'
 
 export async function generateMetadata({
   params,
@@ -51,19 +51,23 @@ export default async function Home({
   const t = await getI18n()
 
   return (
-    <main className="pb-10 sm:pb-16">
+    <main className="pb-2">
       <LandingTracking />
       <section aria-label="Hero" className="landing-section pt-8 sm:pt-12">
         <div className="landing-glass rounded-[40px] p-5 sm:p-8 lg:p-10">
           <div className="mb-8 flex items-center justify-between sm:mb-10">
             <div className="inline-flex items-center gap-3">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-landing-accent text-sm font-semibold text-landing-accent-foreground">
-                S
-              </span>
+              <Image
+                src="/app-icon.png"
+                alt="Spendro"
+                width={36}
+                height={36}
+                className="h-12 w-12 rounded-full object-cover"
+              />
               <span className="text-sm font-semibold tracking-wide sm:text-base">Spendro</span>
             </div>
             <Link
-              href="#waitlist"
+              href="#preview"
               data-track-cta
               data-cta-id="hero_secondary"
               data-cta-label={t('marketing.landing.hero.secondary-cta')}
@@ -80,7 +84,7 @@ export default async function Home({
                 {t('marketing.landing.hero.badge')}
               </span>
 
-              <h1 className="max-w-2xl text-2xl font-semibold leading-tight text-landing-text sm:text-3xl sm:leading-tight md:text-4xl md:leading-[1.1] md:text-[4.3rem] lg:text-[4.8rem]">
+              <h1 className=" text-2xl font-semibold leading-tight text-landing-text sm:leading-tight md:text-4xl md:leading-[1.1] sm:text-3xl md:text-[3.5rem] lg:text-[4rem]">
                 {t('marketing.landing.hero.title')}
               </h1>
 
@@ -88,7 +92,7 @@ export default async function Home({
                 {t('marketing.landing.hero.subtitle')}
               </p>
 
-              <div className="!mt-[1.25rem] flex flex-col gap-3 pt-2 sm:!mt-[2rem] sm:flex-row md:!mt-[4rem] lg:!mt-[5rem]">
+              <div className="!mt-[1.25rem] flex flex-col gap-3 pt-2 sm:!mt-[2rem] sm:flex-row md:!mt-[4rem] lg:!mt-[3.5rem]">
                 <Button
                   asChild
                   size="lg"
@@ -118,7 +122,7 @@ export default async function Home({
         </div>
       </section>
 
-      <section aria-label="Product preview" className="landing-section pt-0">
+      <section id="preview" aria-label="Product preview" className="landing-section pt-0 scroll-mt-20">
         <div className="landing-glass rounded-[40px] p-5 sm:p-8">
           <div className="space-y-2 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-landing-text-muted">
@@ -148,6 +152,26 @@ export default async function Home({
               imageAlt="AI chat assistant for financial insights"
               imageObjectFit="scale-down"
               imageWidth={654}
+              imageHeight={400}
+            />
+            <ProductShotPlaceholder
+              title={t('marketing.landing.preview.duplicate-title')}
+              subtitle={t('marketing.landing.preview.duplicate-subtitle')}
+              ratioClass="aspect-[9/19.5]"
+              imageSrc="/duplicate-light-shortened.png"
+              imageAlt="Swipe to duplicate transactions"
+              imageObjectFit="scale-down"
+              imageWidth={674}
+              imageHeight={400}
+            />
+            <ProductShotPlaceholder
+              title={t('marketing.landing.preview.search-title')}
+              subtitle={t('marketing.landing.preview.search-subtitle')}
+              ratioClass="aspect-[9/19.5]"
+              imageSrc="/search-tx-light-shortened.png"
+              imageAlt="Smart search and filter by category emoji"
+              imageObjectFit="scale-down"
+              imageWidth={674}
               imageHeight={400}
             />
           </div>
@@ -186,7 +210,7 @@ export default async function Home({
         </div>
       </section>
 
-      <section aria-label="Social proof and trust" className="landing-section pt-0">
+      {/* <section aria-label="Social proof and trust" className="landing-section pt-0">
         <div className="landing-glass rounded-[40px] p-5 sm:p-8">
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
@@ -204,30 +228,25 @@ export default async function Home({
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-landing-border bg-landing-surface-muted px-4 py-3 sm:px-5">
+        <div className="mx-auto mt-16 mb-2 max-w-2xl rounded-2xl border border-landing-border bg-landing-surface-muted px-4 py-3 sm:px-5 sm:mb-3">
           <p className="text-center text-sm text-landing-text-muted">{t('marketing.landing.footer.trust')}</p>
         </div>
-      </section>
+      </section> */}
 
-      <section id="waitlist" aria-label="Waitlist signup" className="landing-section pt-0">
-        <div className="landing-glass rounded-[40px] p-5 sm:p-8">
-          <div className="mx-auto max-w-xl space-y-3 text-center">
-            <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
-              {t('marketing.landing.waitlist.title')}
-            </h2>
-            <p className="text-sm leading-relaxed text-landing-text-muted sm:text-base">
-              {t('marketing.landing.waitlist.subtitle')}
-            </p>
-          </div>
+      <WaitlistSection locale={locale} />
 
-          <div className="mx-auto mt-6 max-w-xl">
-            <WaitlistForm locale={locale} />
-            <p className="mt-3 text-center text-xs text-landing-text-muted">
-              {t('marketing.landing.waitlist.privacy-note')}
-            </p>
-          </div>
-        </div>
-      </section>
+      <footer className="mt-12 pb-2 text-center">
+        {/* <Button asChild variant="outline" size="sm" className="mb-6 rounded-xl border-landing-border bg-transparent text-landing-text-muted hover:bg-landing-surface-muted hover:text-landing-text">
+          <Link href="?type=tester#waitlist" data-track-cta data-cta-id="footer_become_tester" data-cta-label={t('marketing.landing.footer.become-tester')}>
+            {t('marketing.landing.footer.become-tester')}
+          </Link>
+        </Button> */}
+        <p className="text-xs text-landing-text-muted">{t('marketing.landing.footer.copyright')}</p>
+        <p className="mt-1 text-xs text-landing-text-muted/80">
+          {t('marketing.landing.footer.developed-by')}{' '}
+          <span className="inline-block align-middle text-2xl">🇨🇴</span>
+        </p>
+      </footer>
     </main>
   )
 }
@@ -278,9 +297,9 @@ function ProductShotPlaceholder({
   imageWidth,
   imageHeight,
 }: {
-  title: string
-  subtitle: string
-  ratioClass: string
+    title: string
+    subtitle: string
+    ratioClass: string
     imageSrc?: string
     imageAlt?: string
     imageObjectFit?: 'cover' | 'scale-down'

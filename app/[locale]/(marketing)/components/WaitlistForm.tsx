@@ -10,8 +10,11 @@ import { useI18n } from '@/locales/client'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+type SignupType = 'early_access' | 'tester'
+
 type WaitlistPayload = {
   email: string
+  signup_type: SignupType
   locale: string
   page_path: string
   source: string
@@ -31,6 +34,9 @@ export default function WaitlistForm({ locale }: { locale: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
+
+  const signupType: SignupType =
+    searchParams.get('type') === 'tester' ? 'tester' : 'early_access'
 
   const trackingData = useMemo(
     () => ({
@@ -59,6 +65,7 @@ export default function WaitlistForm({ locale }: { locale: string }) {
 
     const payload: WaitlistPayload = {
       email: email.trim().toLowerCase(),
+      signup_type: signupType,
       locale,
       page_path: pathname ?? '/',
       source,
@@ -81,6 +88,7 @@ export default function WaitlistForm({ locale }: { locale: string }) {
         page_path: pathname ?? '/',
         source,
         locale,
+        signup_type: signupType,
       })
       setIsSuccess(true)
       setEmail('')
@@ -113,14 +121,28 @@ export default function WaitlistForm({ locale }: { locale: string }) {
         disabled={isSubmitting}
         data-track-cta
         data-cta-id="waitlist_submit"
-        data-cta-label={t('marketing.landing.waitlist.submit')}
+        data-cta-label={
+          signupType === 'tester'
+            ? t('marketing.landing.waitlist.submit-tester')
+            : t('marketing.landing.waitlist.submit')
+        }
         className="h-12 w-full rounded-2xl bg-landing-accent text-landing-accent-foreground hover:bg-landing-accent/90"
       >
-        {isSubmitting ? t('marketing.landing.waitlist.submitting') : t('marketing.landing.waitlist.submit')}
+        {isSubmitting
+          ? signupType === 'tester'
+            ? t('marketing.landing.waitlist.submitting-tester')
+            : t('marketing.landing.waitlist.submitting')
+          : signupType === 'tester'
+            ? t('marketing.landing.waitlist.submit-tester')
+            : t('marketing.landing.waitlist.submit')}
       </Button>
 
       {isSuccess ? (
-        <p className="text-sm text-emerald-500">{t('marketing.landing.waitlist.success')}</p>
+        <p className="text-sm text-emerald-500">
+          {signupType === 'tester'
+            ? t('marketing.landing.waitlist.success-tester')
+            : t('marketing.landing.waitlist.success')}
+        </p>
       ) : null}
 
       {errorMessage ? <p className="text-sm text-red-500">{errorMessage}</p> : null}

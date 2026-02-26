@@ -13,9 +13,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid email' }, { status: 400 })
     }
 
+    const signupType =
+      body.signup_type === 'tester' ? 'tester' : 'early_access'
+
     const supabase = getSupabaseServerClient()
     const { error } = await supabase.from('landing_waitlist').insert({
       email,
+      signup_type: signupType,
       locale: typeof body.locale === 'string' ? body.locale : null,
       source: typeof body.source === 'string' ? body.source : null,
       referrer: typeof body.referrer === 'string' ? body.referrer : null,

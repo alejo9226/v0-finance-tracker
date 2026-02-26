@@ -13,7 +13,7 @@ export default function IPhoneFrame({ src, alt, className = '', priority }: iPho
       className={`relative flex justify-center md:justify-end ${className}`}
       aria-hidden
     >
-      <div className="relative w-[200px] shrink-0 aspect-[390/844] sm:w-[240px] md:w-[280px]">
+      <div className="relative w-[70%] shrink-0 aspect-[390/844] sm:w-[300px] md:w-[260px]">
         <Image
           src={src}
           alt={alt}
