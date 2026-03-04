@@ -13,6 +13,8 @@ import { I18nProviderClient } from "@/locales/client"
 
 const inter = Inter({ subsets: ["latin"] })
 
+const googleSiteVerification = process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+
 export const metadata: Metadata = {
   title: "FinanceTrack - Personal Finance Management",
   description: "Track your assets, liabilities, and equity with FinanceTrack",
@@ -20,6 +22,9 @@ export const metadata: Metadata = {
   icons: {
     icon: '/app-icon.png',
   },
+  ...(googleSiteVerification && {
+    verification: { google: googleSiteVerification },
+  }),
 }
 
 export default async function RootLayout({
