@@ -184,10 +184,10 @@ export default async function Home({
               title={t('marketing.landing.preview.search-title')}
               subtitle={t('marketing.landing.preview.search-subtitle')}
               ratioClass="aspect-[9/19.5]"
-              imageSrc="/search-tx-light-shortened.png"
+              imageSrc="/deep-search-clip-framed.mp4"
               imageAlt="Smart search and filter by category emoji"
               imageObjectFit="scale-down"
-              imageWidth={674}
+              imageWidth={450}
               imageHeight={400}
             />
           </div>
@@ -502,7 +502,7 @@ function ProductShotPlaceholder({
   const objectFitClass = imageObjectFit === 'scale-down' ? 'object-scale-down' : 'object-cover object-top'
   const hasImage = Boolean(imageSrc)
   const isVideo = hasImage && isVideoSrc(imageSrc!)
-  const sizeToImage = hasImage && !isVideo && imageWidth != null && imageHeight != null
+  const sizeToImage = hasImage && imageWidth != null && imageHeight != null
 
   return (
     <article
@@ -524,7 +524,13 @@ function ProductShotPlaceholder({
             muted
             loop
             playsInline
-            className={`absolute inset-0 h-full w-full ${objectFitClass}`}
+            width={sizeToImage ? imageWidth : undefined}
+            height={sizeToImage ? imageHeight : undefined}
+            className={
+              sizeToImage
+                ? `max-w-full h-[400px] ${objectFitClass}`
+                : `absolute inset-0 h-full w-full ${objectFitClass}`
+            }
           />
         ) : imageSrc ? (
           sizeToImage ? (
