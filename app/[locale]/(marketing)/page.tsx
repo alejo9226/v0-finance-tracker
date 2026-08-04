@@ -472,6 +472,12 @@ function BonusItem({ title, description, value }: { title: string; description: 
   )
 }
 
+const VIDEO_EXTENSIONS = ['.mp4', '.webm']
+
+function isVideoSrc(src: string) {
+  return VIDEO_EXTENSIONS.some((ext) => src.toLowerCase().endsWith(ext))
+}
+
 function ProductShotPlaceholder({
   title,
   subtitle,
@@ -481,6 +487,7 @@ function ProductShotPlaceholder({
   imageObjectFit = 'cover',
   imageWidth,
   imageHeight,
+  posterSrc,
 }: {
     title: string
     subtitle: string
@@ -490,10 +497,12 @@ function ProductShotPlaceholder({
     imageObjectFit?: 'cover' | 'scale-down'
     imageWidth?: number
     imageHeight?: number
+    posterSrc?: string
 }) {
   const objectFitClass = imageObjectFit === 'scale-down' ? 'object-scale-down' : 'object-cover object-top'
   const hasImage = Boolean(imageSrc)
-  const sizeToImage = hasImage && imageWidth != null && imageHeight != null
+  const isVideo = hasImage && isVideoSrc(imageSrc!)
+  const sizeToImage = hasImage && !isVideo && imageWidth != null && imageHeight != null
 
   return (
     <article
@@ -507,7 +516,17 @@ function ProductShotPlaceholder({
         className={`overflow-hidden rounded-2xl p-2 bg-white/40 ${sizeToImage ? 'relative w-fit max-w-full' : `relative ${ratioClass}`
           }`}
       >
-        {imageSrc ? (
+        {isVideo ? (
+          <video
+            src={imageSrc}
+            poster={posterSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className={`absolute inset-0 h-full w-full ${objectFitClass}`}
+          />
+        ) : imageSrc ? (
           sizeToImage ? (
             <Image
               src={imageSrc}
