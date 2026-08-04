@@ -84,6 +84,10 @@ export default async function Home({
                 {t('marketing.landing.hero.badge')}
               </span>
 
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-landing-text-muted">
+                {t('marketing.landing.hero.pre-headline')}
+              </p>
+
               <h1 className=" text-2xl font-semibold leading-tight text-landing-text sm:leading-tight md:text-4xl md:leading-[1.1] sm:text-3xl md:text-[3.5rem] lg:text-[4rem]">
                 {t('marketing.landing.hero.title')}
               </h1>
