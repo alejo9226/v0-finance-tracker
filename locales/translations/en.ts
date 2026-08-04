@@ -205,7 +205,7 @@ export default {
       },
       'footer': {
         'trust': 'Your financial data is private and scoped to your account.',
-        'copyright': '© 2025 Spendro. All rights reserved.',
+        'copyright': '© 2026 Spendro. All rights reserved.',
         'developed-by': 'Developed in',
         'become-tester': 'Become a tester',
       },
@@ -229,7 +229,7 @@ export default {
       'equity-subtitle': 'Understand your net worth by calculating the difference between your assets and liabilities.',
     },
     'footer': {
-      'copyright': '© 2025 FinanceTrack. All rights reserved.',
+      'copyright': '© 2026 Spendro. All rights reserved.',
       'terms': 'Terms',
       'privacy': 'Privacy',
       'contact': 'Contact',

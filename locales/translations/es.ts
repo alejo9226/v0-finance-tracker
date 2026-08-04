@@ -205,7 +205,7 @@ export default {
       },
       'footer': {
         'trust': 'Tus datos financieros son privados y están aislados por cuenta.',
-        'copyright': '© 2025 Spendro. Todos los derechos reservados.',
+        'copyright': '© 2026 Spendro. Todos los derechos reservados.',
         'developed-by': 'Desarrollado en',
         'become-tester': 'Ser tester de la app',
       },
@@ -229,7 +229,7 @@ export default {
       'equity-subtitle': 'Entiende tu patrimonio neto calculando la diferencia entre tus activos y deudas.',
     },
     'footer': {
-      'copyright': '© 2025 FinanceTrack. Todos los derechos reservados.',
+      'copyright': '© 2026 Spendro. Todos los derechos reservados.',
       'terms': 'Términos',
       'privacy': 'Privacidad',
       'contact': 'Contacto',
