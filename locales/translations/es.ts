@@ -133,9 +133,10 @@ export default {
     },
     'landing': {
       'hero': {
-        'title': 'Deja de llevar tus finanzas en hojas de cálculo.',
-        'subtitle': 'Spendro captura tus movimientos automáticamente, te muestra tu patrimonio neto en tiempo real y te deja preguntarle a una IA sobre tu plata.',
-        'primary-cta': 'Únete a la lista de espera',
+        'pre-headline': 'Para quienes ya se cansaron de digitar cada gasto a mano.',
+        'title': 'Tus finanzas, al día, con el mínimo esfuerzo posible.',
+        'subtitle': 'Spendro captura tus gastos automáticamente desde tu Wallet y tus SMS bancarios — sin conectar tu banco, sin perder tu historial.',
+        'primary-cta': 'Reserva tu Precio Fundador',
         'secondary-cta': 'Ver cómo funciona',
         'badge': 'Experiencia inspirada en iOS',
         'mock': {
@@ -185,12 +186,12 @@ export default {
         'search-subtitle': 'Busca por emoji, filtra por categoría, ingreso o gasto. Encuentra todo al instante.',
       },
       'waitlist': {
-        'title': 'Consigue acceso temprano',
+        'title': 'Reserva tu Precio Fundador',
         'title-tester': 'Sé tester de Spendro',
-        'subtitle': 'Únete a la lista de espera y sé de los primeros en probar Spendro.',
+        'subtitle': '$10/mes de por vida, cupos limitados hasta el 10 de septiembre. Deja tu correo y te confirmamos tu acceso.',
         'subtitle-tester': 'Prueba la app antes que nadie, da feedback y ayúdanos a mejorar.',
         'input-placeholder': 'Escribe tu correo',
-        'submit': 'Quiero acceso temprano',
+        'submit': 'Reservar mi lugar — $10/mes',
         'submit-tester': 'Quiero ser tester',
         'submitting': 'Uniéndote...',
         'submitting-tester': 'Enviando...',

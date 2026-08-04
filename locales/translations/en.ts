@@ -133,9 +133,10 @@ export default {
     },
     'landing': {
       'hero': {
-        'title': 'Stop tracking money in spreadsheets.',
-        'subtitle': 'Spendro captures transactions automatically, shows your net worth in real time, and lets you ask an AI assistant about your money.',
-        'primary-cta': 'Join the waitlist',
+        'pre-headline': 'For people who are done typing every expense by hand.',
+        'title': 'Your finances, up to date, with the least effort possible.',
+        'subtitle': 'Spendro captures your expenses automatically from your Wallet and bank SMS — no bank connection required, no lost history.',
+        'primary-cta': 'Claim your Founder Price',
         'secondary-cta': 'See how it works',
         'badge': 'iOS-inspired experience',
         'mock': {
@@ -185,12 +186,12 @@ export default {
         'search-subtitle': 'Search by emoji, filter by category, income or expense. Find anything instantly.',
       },
       'waitlist': {
-        'title': 'Get early access',
+        'title': 'Claim your Founder Price',
         'title-tester': 'Become a Spendro tester',
-        'subtitle': 'Join the waitlist and be the first to try Spendro.',
+        'subtitle': "$10/month for life, limited spots until September 10. Leave your email and we'll confirm your access.",
         'subtitle-tester': 'Try the app before everyone else, give feedback, and help us improve.',
         'input-placeholder': 'Enter your email',
-        'submit': 'Get early access',
+        'submit': 'Claim my spot — $10/month',
         'submit-tester': 'I want to be a tester',
         'submitting': 'Joining...',
         'submitting-tester': 'Sending...',
