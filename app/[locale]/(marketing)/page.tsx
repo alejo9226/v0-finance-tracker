@@ -1,8 +1,20 @@
-import { ArrowRight, Bot, Landmark, Sparkles, Zap } from 'lucide-react'
+import {
+  ArrowRight,
+  Bot,
+  CheckCircle2,
+  Clock,
+  Landmark,
+  MessageCircle,
+  ShieldCheck,
+  Sparkles,
+  Users,
+  Zap,
+} from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Button } from '@/components/ui/button'
 import { getI18n } from '@/locales/server'
 
@@ -214,7 +226,7 @@ export default async function Home({
         </div>
       </section>
 
-      {/* <section aria-label="Social proof and trust" className="landing-section pt-0">
+      <section aria-label="Founder credibility" className="landing-section pt-0">
         <div className="landing-glass rounded-[40px] p-5 sm:p-8">
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
@@ -226,16 +238,174 @@ export default async function Home({
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            <QuotePlaceholder placeholder={t('marketing.landing.social-proof.placeholder')} />
-            <QuotePlaceholder placeholder={t('marketing.landing.social-proof.placeholder')} />
-            <QuotePlaceholder placeholder={t('marketing.landing.social-proof.placeholder')} />
+            <EvidenceCard
+              title={t('marketing.landing.social-proof.evidence-1-title')}
+              description={t('marketing.landing.social-proof.evidence-1-description')}
+            />
+            <EvidenceCard
+              title={t('marketing.landing.social-proof.evidence-2-title')}
+              description={t('marketing.landing.social-proof.evidence-2-description')}
+            />
+            <EvidenceCard
+              title={t('marketing.landing.social-proof.evidence-3-title')}
+              description={t('marketing.landing.social-proof.evidence-3-description')}
+            />
           </div>
         </div>
 
         <div className="mx-auto mt-16 mb-2 max-w-2xl rounded-2xl border border-landing-border bg-landing-surface-muted px-4 py-3 sm:px-5 sm:mb-3">
           <p className="text-center text-sm text-landing-text-muted">{t('marketing.landing.footer.trust')}</p>
         </div>
-      </section> */}
+      </section>
+
+      <section id="pricing" aria-label="Founder pricing" className="landing-section pt-0 scroll-mt-20">
+        <div className="landing-glass rounded-[40px] p-5 sm:p-8 lg:p-10">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-landing-border bg-landing-surface-muted px-3 py-1 text-xs font-medium text-landing-text-muted">
+              <Clock className="h-3.5 w-3.5 text-landing-accent" />
+              {t('marketing.landing.pricing.urgency-badge')}
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-landing-border bg-landing-surface-muted px-3 py-1 text-xs font-medium text-landing-text-muted">
+              <Users className="h-3.5 w-3.5 text-landing-accent" />
+              {t('marketing.landing.pricing.scarcity-badge')}
+            </span>
+          </div>
+
+          <div className="mt-5 space-y-2 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-landing-text-muted">
+              {t('marketing.landing.pricing.kicker')}
+            </p>
+            <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
+              {t('marketing.landing.pricing.title')}
+            </h2>
+            <p className="mx-auto max-w-xl text-sm leading-relaxed text-landing-text-muted sm:text-base">
+              {t('marketing.landing.pricing.subtitle')}
+            </p>
+          </div>
+
+          <div className="mx-auto mt-8 max-w-3xl">
+            <div className="landing-card rounded-3xl p-6 sm:p-8">
+              <div className="flex flex-wrap items-end justify-center gap-2 text-center">
+                <span className="text-4xl font-semibold text-landing-text sm:text-5xl">
+                  {t('marketing.landing.pricing.price-current')}
+                </span>
+                <span className="pb-1.5 text-sm text-landing-text-muted sm:text-base">
+                  {t('marketing.landing.pricing.price-period')}
+                </span>
+              </div>
+              <p className="mt-2 text-center text-xs text-landing-text-muted sm:text-sm">
+                {t('marketing.landing.pricing.price-future-note')}
+              </p>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm font-semibold text-landing-text">
+                    {t('marketing.landing.pricing.includes-title')}
+                  </p>
+                  <ul className="mt-3 space-y-2">
+                    {[
+                      t('marketing.landing.pricing.include-1'),
+                      t('marketing.landing.pricing.include-2'),
+                      t('marketing.landing.pricing.include-3'),
+                      t('marketing.landing.pricing.include-4'),
+                    ].map((item) => (
+                      <li key={item} className="flex items-start gap-2 text-sm text-landing-text-muted">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-landing-accent" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 text-xs text-landing-text-muted/80">
+                    {t('marketing.landing.pricing.not-included')}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm font-semibold text-landing-text">
+                    {t('marketing.landing.pricing.bonuses-title')}
+                  </p>
+                  <div className="mt-3 space-y-3">
+                    <BonusItem
+                      title={t('marketing.landing.pricing.bonus-1-title')}
+                      description={t('marketing.landing.pricing.bonus-1-description')}
+                      value={t('marketing.landing.pricing.bonus-1-value')}
+                    />
+                    <BonusItem
+                      title={t('marketing.landing.pricing.bonus-2-title')}
+                      description={t('marketing.landing.pricing.bonus-2-description')}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-start gap-2 rounded-2xl border border-landing-border bg-landing-surface-muted px-4 py-3">
+                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-landing-accent" />
+                <div>
+                  <p className="text-sm font-semibold text-landing-text">
+                    {t('marketing.landing.pricing.guarantee-title')}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-landing-text-muted sm:text-sm">
+                    {t('marketing.landing.pricing.guarantee-copy')}
+                  </p>
+                </div>
+              </div>
+
+              <p className="mt-4 text-center text-xs font-medium text-landing-accent sm:text-sm">
+                {t('marketing.landing.pricing.incentive-copy')}
+              </p>
+
+              <div className="mt-6 flex justify-center">
+                <Button
+                  asChild
+                  size="lg"
+                  className="h-11 w-full rounded-2xl bg-landing-accent px-6 text-landing-accent-foreground hover:bg-landing-accent/90 sm:w-auto sm:h-12"
+                >
+                  <Link
+                    href="#waitlist"
+                    data-track-cta
+                    data-cta-id="pricing_primary"
+                    data-cta-label={t('marketing.landing.pricing.cta')}
+                    className="inline-flex items-center gap-2"
+                  >
+                    <span className="sm:hidden">{t('marketing.landing.pricing.cta-short')}</span>
+                    <span className="hidden sm:inline">{t('marketing.landing.pricing.cta')}</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="faq" aria-label="Frequently asked questions" className="landing-section pt-0 scroll-mt-20">
+        <div className="landing-glass rounded-[40px] p-5 sm:p-8">
+          <h2 className="text-center text-2xl font-semibold text-landing-text sm:text-3xl">
+            {t('marketing.landing.faq.title')}
+          </h2>
+
+          <div className="mx-auto mt-6 max-w-2xl">
+            <Accordion type="single" collapsible className="w-full">
+              {[
+                { q: t('marketing.landing.faq.q1'), a: t('marketing.landing.faq.a1') },
+                { q: t('marketing.landing.faq.q2'), a: t('marketing.landing.faq.a2') },
+                { q: t('marketing.landing.faq.q3'), a: t('marketing.landing.faq.a3') },
+                { q: t('marketing.landing.faq.q4'), a: t('marketing.landing.faq.a4') },
+                { q: t('marketing.landing.faq.q5'), a: t('marketing.landing.faq.a5') },
+              ].map((item, index) => (
+                <AccordionItem key={item.q} value={`faq-${index}`} className="border-landing-border">
+                  <AccordionTrigger className="text-left text-sm font-medium text-landing-text sm:text-base">
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm leading-relaxed text-landing-text-muted">
+                    {item.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+      </section>
 
       <WaitlistSection locale={locale} />
 
@@ -278,16 +448,27 @@ function PillarCard({
   )
 }
 
-function QuotePlaceholder({ placeholder }: { placeholder: string }) {
+function EvidenceCard({ title, description }: { title: string; description: string }) {
   return (
-    <article className="landing-glass rounded-3xl p-4">
-      <div className="mb-3 h-4 w-20 rounded-full bg-landing-border/70" />
-      <div className="space-y-2">
-        <div className="h-3 w-full rounded-full bg-landing-border/60" />
-        <div className="h-3 w-5/6 rounded-full bg-landing-border/50" />
-      </div>
-      <p className="mt-3 text-xs text-landing-text-muted">{placeholder}</p>
+    <article className="landing-glass rounded-3xl p-4 sm:p-5">
+      <h3 className="text-sm font-semibold text-landing-text">{title}</h3>
+      <p className="mt-2 text-xs leading-relaxed text-landing-text-muted sm:text-sm">{description}</p>
     </article>
+  )
+}
+
+function BonusItem({ title, description, value }: { title: string; description: string; value?: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <MessageCircle className="mt-0.5 h-4 w-4 shrink-0 text-landing-accent" />
+      <div>
+        <p className="text-sm text-landing-text">
+          {title}
+          {value ? <span className="ml-1 text-xs font-medium text-landing-text-muted">({value})</span> : null}
+        </p>
+        <p className="text-xs text-landing-text-muted">{description}</p>
+      </div>
+    </div>
   )
 }
 
