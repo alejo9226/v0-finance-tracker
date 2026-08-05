@@ -198,7 +198,7 @@ export default {
         'subtitle': 'Un solo plan, todo incluido, bloqueado de por vida mientras seas de los primeros.',
         'price-current': '$10',
         'price-period': '/mes',
-        'price-future-note': 'Después del 10 de septiembre de 2026: $20/mes para nuevos usuarios.',
+        'price-future-note': 'Después de esa fecha: $20/mes para nuevos usuarios.',
         'includes-title': 'Incluye',
         'include-1': 'Captura automática de gastos (Wallet + SMS bancarios)',
         'include-2': 'Categorización automática con IA',

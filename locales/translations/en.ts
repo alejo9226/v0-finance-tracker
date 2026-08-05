@@ -198,7 +198,7 @@ export default {
         'subtitle': "One plan, everything included, locked in for life if you're one of the first.",
         'price-current': '$10',
         'price-period': '/month',
-        'price-future-note': 'After September 10, 2026: $20/month for new users.',
+        'price-future-note': 'After that date: $20/month for new users.',
         'includes-title': 'Includes',
         'include-1': 'Automatic expense capture (Wallet + bank SMS)',
         'include-2': 'Automatic AI categorization',
