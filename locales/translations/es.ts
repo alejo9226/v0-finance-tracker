@@ -194,8 +194,8 @@ export default {
       },
       'pricing': {
         'kicker': 'Precio Fundador',
-        'title': 'Tus finanzas al día por $10/mes',
-        'subtitle': 'Un solo plan, todo incluido, bloqueado de por vida mientras seas de los primeros.',
+        'title': 'Tu Precio Fundador, bloqueado de por vida',
+        'subtitle': 'Un solo plan, todo incluido — sin sorpresas.',
         'price-current': '$10',
         'price-period': '/mes',
         'price-future-note': 'Después de esa fecha: $20/mes para nuevos usuarios.',

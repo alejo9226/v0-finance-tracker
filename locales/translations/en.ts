@@ -194,8 +194,8 @@ export default {
       },
       'pricing': {
         'kicker': 'Founder Price',
-        'title': 'Your finances, up to date, for $10/month',
-        'subtitle': "One plan, everything included, locked in for life if you're one of the first.",
+        'title': 'Your Founder Price, locked in for life',
+        'subtitle': 'One plan, everything included — no surprises.',
         'price-current': '$10',
         'price-period': '/month',
         'price-future-note': 'After that date: $20/month for new users.',
