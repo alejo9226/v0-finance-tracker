@@ -138,7 +138,6 @@ export default {
         'subtitle': 'Spendro captura tus gastos automáticamente desde tu Wallet y tus SMS bancarios — sin conectar tu banco, sin perder tu historial.',
         'primary-cta': 'Reserva tu Precio Fundador',
         'secondary-cta': 'Ver cómo funciona',
-        'badge': 'Experiencia inspirada en iOS',
         'mock': {
           'net-balance': 'Balance neto',
           'assets': 'Activos',

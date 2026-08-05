@@ -138,7 +138,6 @@ export default {
         'subtitle': 'Spendro captures your expenses automatically from your Wallet and bank SMS — no bank connection required, no lost history.',
         'primary-cta': 'Claim your Founder Price',
         'secondary-cta': 'See how it works',
-        'badge': 'iOS-inspired experience',
         'mock': {
           'net-balance': 'Net balance',
           'assets': 'Assets',

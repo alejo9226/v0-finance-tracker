@@ -9,7 +9,6 @@ import {
   Landmark,
   MessageCircle,
   ShieldCheck,
-  Sparkles,
   Users,
   Wrench,
   Zap,
@@ -95,11 +94,6 @@ export default async function Home({
 
           <div className="grid gap-4 sm:gap-6 md:grid-cols-[1.2fr_auto] md:gap-8 md:items-normal lg:gap-10">
             <div className="order-2 space-y-4 sm:space-y-6 md:order-1 md:space-y-8 lg:space-y-10">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-landing-border bg-landing-surface-muted px-2.5 py-0.5 text-[10px] font-medium text-landing-text-muted sm:gap-2 sm:px-3 sm:py-1 sm:text-xs lg:text-sm">
-                <Sparkles className="h-3 w-3 text-landing-accent sm:h-3.5 sm:w-3.5 lg:h-4 lg:w-4" />
-                {t('marketing.landing.hero.badge')}
-              </span>
-
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-landing-text-muted">
                 {t('marketing.landing.hero.pre-headline')}
               </p>
