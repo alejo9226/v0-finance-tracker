@@ -37,7 +37,7 @@ export default function IPhoneFrame({ src, alt, className = '', priority, poster
             alt={alt}
             fill
             sizes="(max-width: 640px) 200px, (max-width: 768px) 240px, 280px"
-            className="object-contain object-top"
+            className="object-contain object-center"
             priority={priority}
           />
         )}

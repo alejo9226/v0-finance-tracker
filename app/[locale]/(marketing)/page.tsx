@@ -1,13 +1,17 @@
 import {
+  AlertTriangle,
   ArrowRight,
   Bot,
   CheckCircle2,
   Clock,
+  CloudOff,
+  History,
   Landmark,
   MessageCircle,
   ShieldCheck,
   Sparkles,
   Users,
+  Wrench,
   Zap,
 } from 'lucide-react'
 import Image from 'next/image'
@@ -135,6 +139,49 @@ export default async function Home({
               priority
             />
           </div>
+        </div>
+      </section>
+
+      <section aria-label="Problem" className="landing-section pt-0">
+        <div className="landing-glass rounded-[40px] p-5 sm:p-8 lg:p-10">
+          <div className="mx-auto max-w-2xl space-y-2 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-500/80">
+              {t('marketing.landing.problem.kicker')}
+            </p>
+            <h2 className="text-2xl font-semibold leading-snug text-landing-text sm:text-3xl">
+              {t('marketing.landing.problem.title')}
+            </h2>
+            <p className="text-sm leading-relaxed text-landing-text-muted sm:text-base">
+              {t('marketing.landing.problem.subtitle')}
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <PainCard
+              icon={<AlertTriangle className="h-5 w-5 text-red-500" />}
+              title={t('marketing.landing.problem.pain-1-title')}
+              description={t('marketing.landing.problem.pain-1-description')}
+            />
+            <PainCard
+              icon={<Wrench className="h-5 w-5 text-red-500" />}
+              title={t('marketing.landing.problem.pain-2-title')}
+              description={t('marketing.landing.problem.pain-2-description')}
+            />
+            <PainCard
+              icon={<CloudOff className="h-5 w-5 text-red-500" />}
+              title={t('marketing.landing.problem.pain-3-title')}
+              description={t('marketing.landing.problem.pain-3-description')}
+            />
+            <PainCard
+              icon={<History className="h-5 w-5 text-red-500" />}
+              title={t('marketing.landing.problem.pain-4-title')}
+              description={t('marketing.landing.problem.pain-4-description')}
+            />
+          </div>
+
+          <p className="mx-auto mt-8 max-w-xl text-center text-sm font-medium leading-relaxed text-landing-text sm:text-base">
+            {t('marketing.landing.problem.closing')}
+          </p>
         </div>
       </section>
 
@@ -446,6 +493,26 @@ function PillarCard({
       </span>
       <h3 className="mt-4 text-lg font-semibold text-landing-text">{title}</h3>
       <p className="mt-2 text-sm font-medium text-landing-text">{shortCopy}</p>
+      <p className="mt-2 text-sm leading-relaxed text-landing-text-muted">{description}</p>
+    </article>
+  )
+}
+
+function PainCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: ReactNode
+  title: string
+  description: string
+}) {
+  return (
+    <article className="landing-card rounded-3xl p-5 sm:p-6">
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-red-50">
+        {icon}
+      </span>
+      <h3 className="mt-4 text-sm font-semibold leading-snug text-landing-text sm:text-base">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-landing-text-muted">{description}</p>
     </article>
   )
