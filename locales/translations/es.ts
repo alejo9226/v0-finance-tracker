@@ -190,6 +190,7 @@ export default {
         'evidence-2-description': 'Antes de construir, se validó el problema con entrevistas reales y un análisis a fondo de reseñas de apps de finanzas competidoras.',
         'evidence-3-title': 'Usado en la vida real desde hace más de un año',
         'evidence-3-description': 'El fundador gestiona sus propias finanzas con Spendro hace más de un año — no es una demo, es la herramienta que usa a diario.',
+        'linkedin-cta': 'Conóceme en LinkedIn',
       },
       'pricing': {
         'kicker': 'Precio Fundador',

@@ -7,6 +7,7 @@ import {
   CloudOff,
   History,
   Landmark,
+  Linkedin,
   MessageCircle,
   ShieldCheck,
   Users,
@@ -279,6 +280,18 @@ export default async function Home({
             <p className="max-w-2xl text-sm leading-relaxed text-landing-text-muted sm:text-base">
               {t('marketing.landing.social-proof.subtitle')}
             </p>
+            <Link
+              href="https://www.linkedin.com/in/alejandroalfarom/"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-track-cta
+              data-cta-id="founder_linkedin"
+              data-cta-label={t('marketing.landing.social-proof.linkedin-cta')}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-landing-accent hover:underline"
+            >
+              <Linkedin className="h-4 w-4" />
+              {t('marketing.landing.social-proof.linkedin-cta')}
+            </Link>
           </div>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
