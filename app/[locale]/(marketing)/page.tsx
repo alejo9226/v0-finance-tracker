@@ -343,6 +343,9 @@ export default async function Home({
           <div className="mx-auto mt-8 max-w-3xl">
             <div className="landing-card rounded-3xl p-6 sm:p-8">
               <div className="flex flex-wrap items-end justify-center gap-2 text-center">
+                <span className="pb-1.5 text-base text-landing-text-muted/70 line-through sm:text-lg">
+                  {t('marketing.landing.pricing.price-original')}
+                </span>
                 <span className="text-4xl font-semibold text-landing-text sm:text-5xl">
                   {t('marketing.landing.pricing.price-current')}
                 </span>
