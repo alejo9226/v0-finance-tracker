@@ -260,6 +260,8 @@ export default {
         'generic-error': 'Something went wrong. Please try again.',
         'privacy-note': 'We only email product updates and early access invites.',
         'privacy-note-tester': "We only contact you to invite you to the beta and ask for feedback.",
+        'whatsapp-cta': 'Or message me directly on WhatsApp',
+        'whatsapp-message': "Hi! I'd like to claim my spot at Spendro's Founder Price ($10 USD/month).",
       },
       'footer': {
         'trust': 'Your financial data is private and scoped to your account.',

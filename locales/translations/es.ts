@@ -260,6 +260,8 @@ export default {
         'generic-error': 'Algo salio mal. Intentalo de nuevo.',
         'privacy-note': 'Solo te vamos a escribir para contarte avances del producto y acceso temprano.',
         'privacy-note-tester': 'Solo te contactamos para invitarte al beta y pedirte feedback.',
+        'whatsapp-cta': 'O escribime directo por WhatsApp',
+        'whatsapp-message': 'Hola! Quiero reservar mi lugar con el Precio Fundador de Spendro ($10 USD/mes).',
       },
       'footer': {
         'trust': 'Tus datos financieros son privados y están aislados por cuenta.',
