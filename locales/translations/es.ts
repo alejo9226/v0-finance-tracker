@@ -260,8 +260,6 @@ export default {
         'generic-error': 'Algo salio mal. Intentalo de nuevo.',
         'privacy-note': 'Solo te vamos a escribir para contarte avances del producto y acceso temprano.',
         'privacy-note-tester': 'Solo te contactamos para invitarte al beta y pedirte feedback.',
-        'switch-to-early': 'Prefiero solo early access',
-        'switch-to-tester': 'Prefiero ser tester de la app',
       },
       'footer': {
         'trust': 'Tus datos financieros son privados y están aislados por cuenta.',

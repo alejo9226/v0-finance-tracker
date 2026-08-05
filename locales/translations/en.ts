@@ -260,8 +260,6 @@ export default {
         'generic-error': 'Something went wrong. Please try again.',
         'privacy-note': 'We only email product updates and early access invites.',
         'privacy-note-tester': "We only contact you to invite you to the beta and ask for feedback.",
-        'switch-to-early': 'I prefer early access only',
-        'switch-to-tester': "I'd rather be a tester",
       },
       'footer': {
         'trust': 'Your financial data is private and scoped to your account.',

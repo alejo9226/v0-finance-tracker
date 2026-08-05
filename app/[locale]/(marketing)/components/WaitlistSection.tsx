@@ -1,7 +1,6 @@
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 
 import { useI18n } from '@/locales/client'
 
@@ -9,7 +8,6 @@ import WaitlistForm from './WaitlistForm'
 
 export default function WaitlistSection({ locale }: { locale: string }) {
   const t = useI18n()
-  const pathname = usePathname()
   const searchParams = useSearchParams()
   const isTester = searchParams.get('type') === 'tester'
 
@@ -29,14 +27,6 @@ export default function WaitlistSection({ locale }: { locale: string }) {
           <WaitlistForm locale={locale} />
           <p className="mt-3 text-center text-xs text-landing-text-muted">
             {isTester ? t('marketing.landing.waitlist.privacy-note-tester') : t('marketing.landing.waitlist.privacy-note')}
-          </p>
-          <p className="mt-3 text-center">
-            <Link
-              href={isTester ? `${pathname}#waitlist` : `${pathname}?type=tester#waitlist`}
-              className="text-xs text-landing-accent hover:underline"
-            >
-              {isTester ? t('marketing.landing.waitlist.switch-to-early') : t('marketing.landing.waitlist.switch-to-tester')}
-            </Link>
           </p>
         </div>
       </div>
