@@ -134,7 +134,7 @@ export default {
     'landing': {
       'hero': {
         'pre-headline': 'Para quienes ya se cansaron de digitar cada gasto a mano.',
-        'title': 'Tus finanzas, al día, con el mínimo esfuerzo posible.',
+        'title': 'Tus finanzas personales, al día, con el mínimo esfuerzo posible.',
         'subtitle': 'Spendro captura tus gastos automáticamente desde tu Wallet y tus SMS bancarios — sin conectar tu banco, sin perder tu historial.',
         'primary-cta': 'Reserva tu Precio Fundador',
         'secondary-cta': 'Ver cómo funciona',

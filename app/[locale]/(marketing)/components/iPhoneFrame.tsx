@@ -20,7 +20,7 @@ export default function IPhoneFrame({ src, alt, className = '', priority, poster
       className={`relative flex justify-center md:justify-end ${className}`}
       aria-hidden
     >
-      <div className="relative w-[70%] shrink-0 aspect-[390/844] sm:w-[300px] md:w-[260px]">
+      <div className="relative w-[70%] shrink-0 aspect-[390/844] sm:w-[300px] md:w-[280px]">
         {isVideoSrc(src) ? (
           <video
             src={src}
@@ -29,7 +29,7 @@ export default function IPhoneFrame({ src, alt, className = '', priority, poster
             muted
             loop
             playsInline
-            className="absolute inset-0 h-full w-full object-contain object-top"
+            className="absolute inset-0 h-full w-full object-contain object-center"
           />
         ) : (
           <Image

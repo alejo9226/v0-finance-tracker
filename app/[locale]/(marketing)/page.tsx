@@ -154,12 +154,13 @@ export default async function Home({
               title={t('marketing.landing.preview.equity-title')}
               subtitle={t('marketing.landing.preview.equity-subtitle')}
               ratioClass="aspect-[9/19.5]"
-              imageSrc="/equity-light-shortened.png"
+              imageSrc="/equity-clip-full-demo.mp4"
               imageAlt="Equity dashboard with assets, liabilities and net worth"
               imageObjectFit="scale-down"
-              imageWidth={675}
+              imageWidth={450}
               imageHeight={400}
-            />
+              overrideHeight={420}
+              />
             <ProductShotPlaceholder
               title={t('marketing.landing.preview.ai-chat-title')}
               subtitle={t('marketing.landing.preview.ai-chat-subtitle')}
@@ -169,6 +170,7 @@ export default async function Home({
               imageObjectFit="scale-down"
               imageWidth={654}
               imageHeight={400}
+              overrideHeight={420}
             />
             <ProductShotPlaceholder
               title={t('marketing.landing.preview.duplicate-title')}
@@ -178,13 +180,14 @@ export default async function Home({
               imageAlt="Swipe to duplicate transactions"
               imageObjectFit="scale-down"
               imageWidth={674}
-              imageHeight={400}
+              imageHeight={450}
+              overrideHeight={550}
             />
             <ProductShotPlaceholder
               title={t('marketing.landing.preview.search-title')}
               subtitle={t('marketing.landing.preview.search-subtitle')}
               ratioClass="aspect-[9/19.5]"
-              imageSrc="/deep-search-clip-framed.mp4"
+              imageSrc="/deep-search-clip-framed-cropped.mp4"
               imageAlt="Smart search and filter by category emoji"
               imageObjectFit="scale-down"
               imageWidth={450}
@@ -488,6 +491,7 @@ function ProductShotPlaceholder({
   imageWidth,
   imageHeight,
   posterSrc,
+  overrideHeight,
 }: {
     title: string
     subtitle: string
@@ -498,6 +502,7 @@ function ProductShotPlaceholder({
     imageWidth?: number
     imageHeight?: number
     posterSrc?: string
+    overrideHeight?: number
 }) {
   const objectFitClass = imageObjectFit === 'scale-down' ? 'object-scale-down' : 'object-cover object-top'
   const hasImage = Boolean(imageSrc)
@@ -513,8 +518,7 @@ function ProductShotPlaceholder({
         <p className="text-xs text-landing-text-muted sm:text-sm">{subtitle}</p>
       </div>
       <div
-        className={`overflow-hidden rounded-2xl p-2 bg-white/40 ${sizeToImage ? 'relative w-fit max-w-full' : `relative ${ratioClass}`
-          }`}
+        className={`overflow-hidden rounded-2xl p-2 bg-white/40 ${sizeToImage ? 'relative w-fit max-w-full' : `relative ${ratioClass}`}`}
       >
         {isVideo ? (
           <video
@@ -528,7 +532,7 @@ function ProductShotPlaceholder({
             height={sizeToImage ? imageHeight : undefined}
             className={
               sizeToImage
-                ? `max-w-full h-[400px] ${objectFitClass}`
+                ? `max-w-full h-[${overrideHeight ?? '550'}px] ${objectFitClass}`
                 : `absolute inset-0 h-full w-full ${objectFitClass}`
             }
           />
@@ -540,7 +544,7 @@ function ProductShotPlaceholder({
               width={imageWidth}
               height={imageHeight}
               sizes="(max-width: 640px) 100vw, 50vw"
-              className={`max-w-full h-[400px] ${objectFitClass}`}
+              className={`max-w-full h-[${overrideHeight ?? '430'}px] ${objectFitClass}`}
             />
           ) : (
             <Image
