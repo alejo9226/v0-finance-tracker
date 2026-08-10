@@ -200,7 +200,7 @@ export default async function Home({
               imageAlt="Equity dashboard with assets, liabilities and net worth"
               imageObjectFit="scale-down"
               imageWidth={450}
-              imageHeight={400}
+              imageHeight={550}
               overrideHeight={420}
               />
             <ProductShotPlaceholder
@@ -210,8 +210,8 @@ export default async function Home({
               imageSrc="/aichat-light-shortened.png"
               imageAlt="AI chat assistant for financial insights"
               imageObjectFit="scale-down"
-              imageWidth={654}
-              imageHeight={400}
+              imageWidth={450}
+              imageHeight={559}
               overrideHeight={420}
             />
             <ProductShotPlaceholder
@@ -222,8 +222,8 @@ export default async function Home({
               imageAlt="Swipe to duplicate transactions"
               imageObjectFit="scale-down"
               imageWidth={674}
-              imageHeight={450}
-              overrideHeight={550}
+              imageHeight={1134}
+              overrideHeight={480}
             />
             <ProductShotPlaceholder
               title={t('marketing.landing.preview.search-title')}
@@ -233,7 +233,8 @@ export default async function Home({
               imageAlt="Smart search and filter by category emoji"
               imageObjectFit="scale-down"
               imageWidth={450}
-              imageHeight={400}
+              imageHeight={700}
+              overrideHeight={480}
             />
           </div>
         </div>
@@ -588,14 +589,14 @@ function ProductShotPlaceholder({
 
   return (
     <article
-      className={`landing-glass rounded-3xl p-4 sm:p-5 ${sizeToImage ? 'w-fit h-fit max-w-full' : ''}`}
+      className={`landing-glass rounded-3xl p-4 sm:p-5 ${sizeToImage ? 'mx-auto w-fit h-fit max-w-full' : ''}`}
     >
       <div className="mb-6">
         <p className="text-sm font-semibold text-landing-text">{title}</p>
         <p className="text-xs text-landing-text-muted sm:text-sm">{subtitle}</p>
       </div>
       <div
-        className={`overflow-hidden rounded-2xl p-2 bg-white/40 ${sizeToImage ? 'relative w-fit max-w-full' : `relative ${ratioClass}`}`}
+        className={`overflow-hidden rounded-2xl p-2 bg-white/40 ${sizeToImage ? 'relative mx-auto w-fit max-w-full' : `relative ${ratioClass}`}`}
       >
         {isVideo ? (
           <video
@@ -607,9 +608,10 @@ function ProductShotPlaceholder({
             playsInline
             width={sizeToImage ? imageWidth : undefined}
             height={sizeToImage ? imageHeight : undefined}
+            style={sizeToImage ? { height: overrideHeight ?? 550, width: 'auto' } : undefined}
             className={
               sizeToImage
-                ? `max-w-full h-[${overrideHeight ?? '550'}px] ${objectFitClass}`
+                ? `max-w-full ${objectFitClass}`
                 : `absolute inset-0 h-full w-full ${objectFitClass}`
             }
           />
@@ -621,7 +623,8 @@ function ProductShotPlaceholder({
               width={imageWidth}
               height={imageHeight}
               sizes="(max-width: 640px) 100vw, 50vw"
-              className={`max-w-full h-[${overrideHeight ?? '430'}px] ${objectFitClass}`}
+              style={{ height: overrideHeight ?? 430, width: 'auto' }}
+              className={`max-w-full ${objectFitClass}`}
             />
           ) : (
             <Image
