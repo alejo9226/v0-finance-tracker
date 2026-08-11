@@ -7,7 +7,7 @@ import {
   CloudOff,
   History,
   Landmark,
-  Linkedin,
+  LinkedinIcon,
   MessageCircle,
   ShieldCheck,
   Users,
@@ -281,19 +281,14 @@ export default async function Home({
             <p className="max-w-2xl text-sm leading-relaxed text-landing-text-muted sm:text-base">
               {t('marketing.landing.social-proof.subtitle')}
             </p>
-            <Link
-              href="https://www.linkedin.com/in/alejandroalfarom/"
-              target="_blank"
-              rel="noopener noreferrer"
-              data-track-cta
-              data-cta-id="founder_linkedin"
-              data-cta-label={t('marketing.landing.social-proof.linkedin-cta')}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-landing-accent hover:underline"
-            >
-              <Linkedin className="h-4 w-4" />
-              {t('marketing.landing.social-proof.linkedin-cta')}
-            </Link>
           </div>
+
+          <LinkedInPreviewCard
+            name={t('marketing.landing.social-proof.linkedin-name')}
+            headline={t('marketing.landing.social-proof.linkedin-headline')}
+            cta={t('marketing.landing.social-proof.linkedin-cta')}
+            verifiedLabel={t('marketing.landing.social-proof.linkedin-verified')}
+          />
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <EvidenceCard
@@ -535,6 +530,48 @@ function EvidenceCard({ title, description }: { title: string; description: stri
       <h3 className="text-sm font-semibold text-landing-text">{title}</h3>
       <p className="mt-2 text-xs leading-relaxed text-landing-text-muted sm:text-sm">{description}</p>
     </article>
+  )
+}
+
+function LinkedInPreviewCard({
+  name,
+  headline,
+  cta,
+  verifiedLabel,
+}: {
+  name: string
+  headline: string
+  cta: string
+  verifiedLabel: string
+}) {
+  return (
+    <Link
+      href="https://www.linkedin.com/in/alejandroalfarom/"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-track-cta
+      data-cta-id="founder_linkedin"
+      data-cta-label={cta}
+      className="group mt-6 inline-flex items-center gap-2.5"
+    >
+      <div className="relative shrink-0">
+        <Image
+          src="/alejandro-profile-pic.png"
+          alt={name}
+          width={40}
+          height={40}
+          className="h-10 w-10 rounded-full object-cover"
+        />
+        <ShieldCheck
+          aria-label={verifiedLabel}
+          className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-landing-surface text-landing-accent"
+        />
+      </div>
+      <p className="text-sm">
+        <span className="font-semibold text-landing-text group-hover:underline">{name}</span>
+        <span className="text-landing-text-muted"> · {headline}</span>
+      </p>
+    </Link>
   )
 }
 
