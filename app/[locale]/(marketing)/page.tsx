@@ -641,7 +641,7 @@ function ProductShotPlaceholder({
     >
       <div className="mb-6">
         <p className="text-sm font-semibold text-landing-text">{title}</p>
-        <p className="text-xs text-landing-text-muted sm:text-sm">{subtitle}</p>
+        <p className="mt-2 text-xs text-landing-text-muted sm:text-sm">{subtitle}</p>
       </div>
       <div
         className={`overflow-hidden rounded-2xl p-2 bg-white/40 ${sizeToImage ? 'relative mx-auto w-fit max-w-full' : `relative ${ratioClass}`}`}
