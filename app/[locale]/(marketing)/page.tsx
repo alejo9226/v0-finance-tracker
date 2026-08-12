@@ -236,6 +236,17 @@ export default async function Home({
               imageHeight={700}
               overrideHeight={480}
             />
+            <ProductShotPlaceholder
+              title={t('marketing.landing.preview.wallet-title')}
+              subtitle={t('marketing.landing.preview.wallet-subtitle')}
+              ratioClass="aspect-[9/19.5]"
+              imageSrc="/wallet-autocapture-demo.mp4"
+              imageAlt="Tap a card in Apple Wallet and see the transaction captured automatically"
+              imageObjectFit="scale-down"
+              imageWidth={430}
+              imageHeight={904}
+              overrideHeight={480}
+            />
           </div>
         </div>
       </section>

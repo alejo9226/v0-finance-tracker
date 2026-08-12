@@ -247,6 +247,8 @@ export default {
         'duplicate-subtitle': 'Swipe to duplicate any transaction in one tap—no retyping.',
         'search-title': 'Smart search & filter',
         'search-subtitle': 'Search by emoji, filter by category, income or expense. Find anything instantly.',
+        'wallet-title': 'Automatic capture from Wallet',
+        'wallet-subtitle': 'Tap your card and Spendro logs the transaction on its own — no app to open, nothing to type.',
       },
       'waitlist': {
         'title': 'Claim your Founder Price',

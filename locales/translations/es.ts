@@ -247,6 +247,8 @@ export default {
         'duplicate-subtitle': 'Desliza para duplicar cualquier transacción con un toque—sin volver a escribir.',
         'search-title': 'Búsqueda e filtros inteligentes',
         'search-subtitle': 'Busca por emoji, filtra por categoría, ingreso o gasto. Encuentra todo al instante.',
+        'wallet-title': 'Captura automática desde Wallet',
+        'wallet-subtitle': 'Pasa tu tarjeta y Spendro registra la transacción solo — sin abrir la app, sin digitar nada.',
       },
       'waitlist': {
         'title': 'Reserva tu Precio Fundador',
