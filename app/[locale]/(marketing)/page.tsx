@@ -571,7 +571,7 @@ function LinkedInPreviewCard({
           alt={name}
           width={40}
           height={40}
-          className="h-10 w-10 rounded-full object-cover"
+          className="h-16 w-16 rounded-full object-cover"
         />
         <ShieldCheck
           aria-label={verifiedLabel}
