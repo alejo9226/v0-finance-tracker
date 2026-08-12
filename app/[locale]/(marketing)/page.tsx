@@ -70,7 +70,7 @@ export default async function Home({
     <main className="pb-2">
       <LandingTracking />
       <section aria-label="Hero" className="landing-section pt-8 sm:pt-12">
-        <div className="landing-glass rounded-[40px] p-5 sm:p-8 lg:p-10">
+        <div className="landing-glass rounded-[40px] p-4 sm:p-8 lg:p-10">
           <div className="mb-8 flex items-center justify-between sm:mb-10">
             <div className="inline-flex items-center gap-3">
               <Image
@@ -138,7 +138,7 @@ export default async function Home({
       </section>
 
       <section aria-label="Problem" className="landing-section pt-0">
-        <div className="landing-glass rounded-[40px] p-5 sm:p-8 lg:p-10">
+        <div className="landing-glass rounded-[40px] p-4 sm:p-8 lg:p-10">
           <div className="mx-auto max-w-2xl space-y-2 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-500/80">
               {t('marketing.landing.problem.kicker')}
@@ -181,7 +181,7 @@ export default async function Home({
       </section>
 
       <section id="preview" aria-label="Product preview" className="landing-section pt-0 scroll-mt-20">
-        <div className="landing-glass rounded-[40px] p-5 sm:p-8">
+        <div className="landing-glass rounded-[40px] p-4 sm:p-8">
           <div className="space-y-2 text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-landing-text-muted">
               {t('marketing.landing.preview.kicker')}
@@ -284,7 +284,7 @@ export default async function Home({
       </section>
 
       <section aria-label="Founder credibility" className="landing-section pt-0">
-        <div className="landing-glass rounded-[40px] p-5 sm:p-8">
+        <div className="landing-glass rounded-[40px] p-4 sm:p-8">
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
               {t('marketing.landing.social-proof.title')}
@@ -323,7 +323,7 @@ export default async function Home({
       </section>
 
       <section id="pricing" aria-label="Founder pricing" className="landing-section pt-0 scroll-mt-20">
-        <div className="landing-glass rounded-[40px] p-5 sm:p-8 lg:p-10">
+        <div className="landing-glass rounded-[40px] p-4 sm:p-8 lg:p-10">
           <div className="flex flex-wrap items-center justify-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-landing-border bg-landing-surface-muted px-3 py-1 text-xs font-medium text-landing-text-muted">
               <Clock className="h-3.5 w-3.5 text-landing-accent" />
@@ -446,7 +446,7 @@ export default async function Home({
       </section>
 
       <section id="faq" aria-label="Frequently asked questions" className="landing-section pt-0 scroll-mt-20">
-        <div className="landing-glass rounded-[40px] p-5 sm:p-8">
+        <div className="landing-glass rounded-[40px] p-4 sm:p-8">
           <h2 className="text-center text-2xl font-semibold text-landing-text sm:text-3xl">
             {t('marketing.landing.faq.title')}
           </h2>
