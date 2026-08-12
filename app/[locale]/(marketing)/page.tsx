@@ -659,7 +659,7 @@ function ProductShotPlaceholder({
             style={sizeToImage ? { height: overrideHeight ?? 550, width: 'auto' } : undefined}
             className={
               sizeToImage
-                ? `max-w-full ${objectFitClass}`
+                ? `max-w-full rounded-xl ${objectFitClass}`
                 : `absolute inset-0 h-full w-full ${objectFitClass}`
             }
           />
@@ -672,7 +672,7 @@ function ProductShotPlaceholder({
               height={imageHeight}
               sizes="(max-width: 640px) 100vw, 50vw"
               style={{ height: overrideHeight ?? 430, width: 'auto' }}
-              className={`max-w-full ${objectFitClass}`}
+              className={`max-w-full rounded-xl ${objectFitClass}`}
             />
           ) : (
             <Image
