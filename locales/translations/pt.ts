@@ -150,7 +150,7 @@ export default {
       'equity-subtitle': 'Entenda seu patrimônio líquido calculando a diferença entre seus ativos e dívidas.',
     },
     'footer': {
-      'copyright': '© 2025 FinanceTrack. Todos os direitos reservados.',
+      'copyright': '© 2026 Spendro. Todos os direitos reservados.',
       'terms': 'Termos',
       'privacy': 'Privacidade',
       'contact': 'Contato',
