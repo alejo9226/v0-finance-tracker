@@ -197,7 +197,8 @@ export default {
         'evidence-3-description': 'El fundador gestiona sus propias finanzas con Spendro hace más de un año — no es una demo, es la herramienta que usa a diario.',
         'linkedin-cta': 'Conóceme en LinkedIn',
         'linkedin-name': 'Alejandro Alfaro M.',
-        'linkedin-headline': 'Web UI Developer en Globant · Ex-Davivienda · 5 años desarrollando software',
+        'linkedin-role': 'Web UI Developer en Globant · Ex‑Davivienda',
+        'linkedin-experience': '5 años desarrollando software',
         'linkedin-verified': 'Perfil verificado en LinkedIn',
       },
       'pricing': {

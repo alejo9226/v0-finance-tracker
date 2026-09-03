@@ -197,7 +197,8 @@ export default {
         'evidence-3-description': "The founder has managed his own finances with Spendro for more than a year — it's not a demo, it's the tool he uses daily.",
         'linkedin-cta': 'Connect with me on LinkedIn',
         'linkedin-name': 'Alejandro Alfaro M.',
-        'linkedin-headline': 'Founder of Spendro.io · Ex-Davivienda · 5 years building software',
+        'linkedin-role': 'Founder of Spendro.io · Ex‑Davivienda',
+        'linkedin-experience': '5 years building software',
         'linkedin-verified': 'Verified LinkedIn profile',
       },
       'pricing': {

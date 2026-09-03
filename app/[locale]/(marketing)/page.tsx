@@ -303,7 +303,8 @@ export default async function Home({
 
           <LinkedInPreviewCard
             name={t('marketing.landing.social-proof.linkedin-name')}
-            headline={t('marketing.landing.social-proof.linkedin-headline')}
+            role={t('marketing.landing.social-proof.linkedin-role')}
+            experience={t('marketing.landing.social-proof.linkedin-experience')}
             cta={t('marketing.landing.social-proof.linkedin-cta')}
             verifiedLabel={t('marketing.landing.social-proof.linkedin-verified')}
           />
@@ -553,12 +554,14 @@ function EvidenceCard({ title, description }: { title: string; description: stri
 
 function LinkedInPreviewCard({
   name,
-  headline,
+  role,
+  experience,
   cta,
   verifiedLabel,
 }: {
   name: string
-  headline: string
+  role: string
+  experience: string
   cta: string
   verifiedLabel: string
 }) {
@@ -570,25 +573,26 @@ function LinkedInPreviewCard({
       data-track-cta
       data-cta-id="founder_linkedin"
       data-cta-label={cta}
-      className="group mt-6 inline-flex items-center gap-2.5"
+      className="group mt-6 inline-flex items-center gap-3.5"
     >
       <div className="relative shrink-0">
         <Image
-          src="/alejandro-profile-pic.png"
+          src="/alejandro-profile-pic-4.jpg"
           alt={name}
-          width={40}
-          height={40}
-          className="h-16 w-16 rounded-full object-cover"
+          width={400}
+          height={400}
+          className="h-20 w-20 rounded-full border border-gray-400 object-cover transition-transform duration-200 group-hover:scale-105 group-hover:border-landing-accent sm:h-28 sm:w-28"
         />
         <ShieldCheck
           aria-label={verifiedLabel}
-          className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-landing-surface text-landing-accent"
+          className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-landing-surface text-landing-accent sm:-bottom-1 sm:-right-1 sm:h-5 sm:w-5"
         />
       </div>
-      <p className="text-sm">
-        <span className="font-semibold text-landing-text group-hover:underline">{name}</span>
-        <span className="text-landing-text-muted"> · {headline}</span>
-      </p>
+      <div>
+        <p className="text-sm font-semibold text-landing-text group-hover:underline sm:text-base">{name}</p>
+        <p className="mt-1 text-xs text-landing-text-muted sm:text-sm">{role}</p>
+        <p className="mt-1 text-xs text-landing-text-muted sm:text-sm">{experience}</p>
+      </div>
     </Link>
   )
 }
