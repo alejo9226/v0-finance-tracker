@@ -170,6 +170,11 @@ export default {
           'short': 'Sin meter datos a mano.',
           'description': 'Captura movimientos automáticamente desde canales conectados y mantén tus registros al día.',
         },
+        'voice': {
+          'title': 'Registra gastos hablándole a Siri',
+          'short': 'Dile "gasté tanto en mercado" y ya quedó.',
+          'description': 'Con Atajos de Siri registras un gasto sin abrir la app — ideal para el efectivo que nunca aparece en un extracto.',
+        },
         'net-worth': {
           'title': 'Patrimonio neto en tiempo real',
           'short': 'Activos y deudas en un solo lugar.',

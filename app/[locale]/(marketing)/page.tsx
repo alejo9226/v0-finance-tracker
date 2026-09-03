@@ -9,6 +9,7 @@ import {
   Landmark,
   LinkedinIcon,
   MessageCircle,
+  Mic,
   ShieldCheck,
   Users,
   Wrench,
@@ -261,12 +262,18 @@ export default async function Home({
           </p>
         </div>
 
-        <div className="mt-7 grid gap-4 sm:mt-8 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-7 grid gap-4 sm:mt-8 sm:grid-cols-2">
           <PillarCard
             icon={<Zap className="h-5 w-5 text-landing-accent" />}
             title={t('marketing.landing.pillars.automation.title')}
             shortCopy={t('marketing.landing.pillars.automation.short')}
             description={t('marketing.landing.pillars.automation.description')}
+          />
+          <PillarCard
+            icon={<Mic className="h-5 w-5 text-landing-accent" />}
+            title={t('marketing.landing.pillars.voice.title')}
+            shortCopy={t('marketing.landing.pillars.voice.short')}
+            description={t('marketing.landing.pillars.voice.description')}
           />
           <PillarCard
             icon={<Landmark className="h-5 w-5 text-landing-accent" />}

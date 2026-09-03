@@ -170,6 +170,11 @@ export default {
           'short': 'No manual entry.',
           'description': 'Capture transactions automatically from connected channels and keep your records up to date.',
         },
+        'voice': {
+          'title': 'Log expenses by talking to Siri',
+          'short': 'Say "I spent X on groceries" and it\'s logged.',
+          'description': 'Use a Siri Shortcut to log an expense without opening the app — perfect for the cash that never shows up on a statement.',
+        },
         'net-worth': {
           'title': 'Real-time net worth',
           'short': 'Assets and liabilities in one place.',
