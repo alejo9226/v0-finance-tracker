@@ -292,7 +292,7 @@ export default async function Home({
 
       <section aria-label="Founder credibility" className="landing-section pt-0">
         <div className="landing-glass rounded-[40px] p-4 sm:p-8">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <h2 className="text-2xl font-semibold text-landing-text sm:text-3xl">
               {t('marketing.landing.social-proof.title')}
             </h2>
