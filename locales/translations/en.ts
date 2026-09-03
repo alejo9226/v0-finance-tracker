@@ -215,7 +215,7 @@ export default {
         'include-3': 'Net worth view (assets − liabilities)',
         'include-4': 'Unlimited transaction search and AI chat',
         'not-included': 'Does not include direct bank connections (open banking) or shared accounts.',
-        'urgency-badge': 'Valid until September 10',
+        'urgency-badge': 'Valid until September 30',
         'scarcity-badge': '50 spots for the Founder group',
         'bonuses-title': 'Bonuses included',
         'bonus-1-title': '1:1 setup session',
@@ -259,7 +259,7 @@ export default {
       'waitlist': {
         'title': 'Claim your Founder Price',
         'title-tester': 'Become a Spendro tester',
-        'subtitle': "$10 USD/month for life, limited spots until September 10. Leave your email and we'll confirm your access.",
+        'subtitle': "$10 USD/month for life, limited spots until September 30. Leave your email and we'll confirm your access.",
         'subtitle-tester': 'Try the app before everyone else, give feedback, and help us improve.',
         'input-placeholder': 'Enter your email',
         'submit': 'Claim my spot — $10 USD/month',

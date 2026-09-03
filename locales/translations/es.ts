@@ -215,7 +215,7 @@ export default {
         'include-3': 'Vista de patrimonio neto (activos − pasivos)',
         'include-4': 'Búsqueda de transacciones sin límite de tiempo y chat con IA',
         'not-included': 'No incluye conexión directa a bancos (open banking) ni cuentas compartidas.',
-        'urgency-badge': 'Válido hasta el 10 de septiembre',
+        'urgency-badge': 'Válido hasta el 30 de septiembre',
         'scarcity-badge': '50 cupos para el grupo Fundador',
         'bonuses-title': 'Bonos incluidos',
         'bonus-1-title': 'Sesión de configuración 1:1',
@@ -259,7 +259,7 @@ export default {
       'waitlist': {
         'title': 'Reserva tu Precio Fundador',
         'title-tester': 'Sé tester de Spendro',
-        'subtitle': '$10 USD/mes de por vida, cupos limitados hasta el 10 de septiembre. Deja tu correo y te confirmamos tu acceso.',
+        'subtitle': '$10 USD/mes de por vida, cupos limitados hasta el 30 de septiembre. Deja tu correo y te confirmamos tu acceso.',
         'subtitle-tester': 'Prueba la app antes que nadie, da feedback y ayúdanos a mejorar.',
         'input-placeholder': 'Escribe tu correo',
         'submit': 'Reservar mi lugar — $10 USD/mes',
